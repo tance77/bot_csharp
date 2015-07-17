@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>SpotifyAPI-NET</id>
+    <version>1.2</version>
+    <title>SpotifyAPI-NET</title>
+    <authors>JohnnyCrazy</authors>
+    <owners>JohnnyCrazy</owners>
+    <projectUrl>https://github.com/JohnnyCrazy/SpotifyAPI-NET</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An API for the Spotify-Client and Spotify's Web API, written in .NET
+
+For more infos, visit https://github.com/JohnnyCrazy/SpotifyAPI-NET</description>
+    <language />
+    <tags>spotify api net music</tags>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="6.0.6" />
+    </dependencies>
+  </metadata>
+</package>
