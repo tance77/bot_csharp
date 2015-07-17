@@ -12,7 +12,7 @@ namespace twitch_irc_bot
         {
             try
             {
-                _dbConnection = new SQLiteConnection(@"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp_v1\fembot.sqlite;Version=3;");
+                _dbConnection = new SQLiteConnection(@"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;");
                 _dbConnection.Open();
             }
             catch (SQLiteException e)
@@ -170,12 +170,119 @@ namespace twitch_irc_bot
                     {
                         commands.Add(reader.GetString(2));
                     }
+
                     return commands;
                 }
                 catch (SQLiteException e)
                 {
                     Console.Write(e + "\r\n");
                     return null;
+                }
+            }
+        }
+
+        public bool AddCommand(string command, string commandDescription, bool toUser, string channel)
+        {
+            using (var cmd = new SQLiteCommand("SELECT * FROM Commands WHERE channel_name=@channel", _dbConnection))
+            {
+                cmd.Parameters.AddWithValue("@channel", channel);
+                try
+                {
+                    var reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        if (command == reader.GetString(2)) return false;
+                    }
+                    var cmmd = new SQLiteCommand("INSERT INTO Commands(channel_name, description, command, to_user)VALUES(@channel, @description, @command, @to_user)", _dbConnection);
+                    cmmd.Parameters.AddWithValue("@channel", channel);
+                    cmmd.Parameters.AddWithValue("@description", commandDescription);
+                    cmmd.Parameters.AddWithValue("@command", command);
+                    cmmd.Parameters.AddWithValue("@to_user", toUser);
+                    cmmd.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+            } 
+        }
+
+        public bool EditCommand(string command, string commandDescription, bool toUser, string channel)
+        {
+            using (var cmd = new SQLiteCommand("SELECT * FROM Commands WHERE channel_name=@channel", _dbConnection))
+            {
+                cmd.Parameters.AddWithValue("@channel", channel);
+                var okToEdit = false;
+                try
+                {
+                    var reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        if (command != reader.GetString(2)) continue;
+                        okToEdit = true;
+                        break;
+                    }
+
+                    if (!okToEdit) return false;
+                    var cmmd =
+                        new SQLiteCommand(
+                            "UPDATE Commands SET channel_name=@channel, description=@description, to_user=@to_user WHERE channel_name=@channel AND command=@command",
+                            _dbConnection);
+                    cmmd.Parameters.AddWithValue("@channel", channel);
+                    cmmd.Parameters.AddWithValue("@description", commandDescription);
+                    cmmd.Parameters.AddWithValue("@command", command);
+                    cmmd.Parameters.AddWithValue("@to_user", toUser);
+                    cmmd.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+                catch (Exception e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+            }
+        }
+
+        public bool RemoveCommand(string command, string channel)
+        {
+            using (var cmd = new SQLiteCommand("SELECT * FROM Commands WHERE channel_name=@channel", _dbConnection))
+            {
+                cmd.Parameters.AddWithValue("@channel", channel);
+                var okToDelete = false;
+                try
+                {
+                    var reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        if (command != reader.GetString(2)) continue;
+                        okToDelete = true;
+                        break;
+                    }
+                    if (!okToDelete) return false;
+                    var cmmd =
+                        new SQLiteCommand("DELETE FROM Commands WHERE channel_name=@channel and command=@command",
+                            _dbConnection);
+                    cmmd.Parameters.AddWithValue("@channel", channel);
+                    cmmd.Parameters.AddWithValue("@command", command);
+                    cmmd.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+                catch (Exception e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
                 }
             }
         }
