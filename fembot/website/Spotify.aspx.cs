@@ -18,8 +18,8 @@ namespace fembot
 
         protected void AutoRefreshTimer_Tick(object sender, EventArgs e)
         {
-            songsGrid.DataBind();
-            lastUpdated.Text = "Last Updated at " + DateTime.Now;
+// songsGrid.DataBind();
+//           lastUpdated.Text = "Last Updated at " + DateTime.Now;
 
         }
     }
