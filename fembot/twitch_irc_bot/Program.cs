@@ -15,7 +15,7 @@ namespace twitch_irc_bot
 
                 if (message != "")
                 {
-                    irc.CheckCommands(message);
+                    irc.MessageHandler(message);
                     Console.Write(message + "\r\n");
                 }
             }

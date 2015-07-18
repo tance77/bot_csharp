@@ -82,8 +82,13 @@ namespace twitch_irc_bot
                 {
                     var reader = inDb.ExecuteReader();
                     if (reader == null || reader.Read()) return false;
-                    var cmmd = new SQLiteCommand("INSERT INTO Channels(channel_name)VALUES(@channel)", _dbConnection);
+                    var cmmd = new SQLiteCommand("INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,eight_ball,gameq)VALUES(@channel,@urls,@dicksize,@gg,@eight_ball,@gameq)", _dbConnection);
                     cmmd.Parameters.AddWithValue("@channel", channel);
+                    cmmd.Parameters.AddWithValue("@urls", false);
+                    cmmd.Parameters.AddWithValue("@dicksize", false);
+                    cmmd.Parameters.AddWithValue("@gg", false);
+                    cmmd.Parameters.AddWithValue("@eight_ball", false);
+                    cmmd.Parameters.AddWithValue("@gameq", false);
                     cmmd.ExecuteNonQuery();
                     var cmd =
                         new SQLiteCommand(
@@ -287,14 +292,52 @@ namespace twitch_irc_bot
             }
         }
 
-        public string DickSize()
+        public bool DickSizeToggle(string channel, bool toggle)
+        {
+            using (var command = new SQLiteCommand("UPDATE Channels SET dicksize=@dick_size WHERE channel_name=@channel", _dbConnection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@channel", channel);
+                    command.Parameters.AddWithValue("@dick_size", toggle);
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+            } 
+        }
+
+        public string DickSize(string channel)
         {
             var randRange = new Random();
             var randOne = randRange.Next(1, 4);
             var randTwo = randRange.Next(1, 13);
-            using (
-                var command = new SQLiteCommand("select r" + randOne + " from DickSizes where rowid=" + randTwo,
-                    _dbConnection))
+            var onOff = false;
+            using (var command = new SQLiteCommand("SELECT * FROM Channels WHERE channel_name=@channel", _dbConnection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@channel", channel);
+                    var reader = command.ExecuteReader();
+                    if (reader != null)
+                    {
+                        reader.Read();
+                        onOff = reader.GetBoolean(2);
+                    }
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }                
+            }
+            if (!onOff) return null;
+            using (var command = new SQLiteCommand("select r" + randOne + " from DickSizes where rowid=" + randTwo,
+                _dbConnection))
             {
                 try
                 {
@@ -306,9 +349,6 @@ namespace twitch_irc_bot
 // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                         reader.GetValues(values);
                     }
-                    else
-                    {
-                    }
                     Console.Write("{0}\r\n", values[0]);
                     var response = values[0].ToString();
                     return response;
@@ -316,7 +356,7 @@ namespace twitch_irc_bot
                 catch (SQLiteException e)
                 {
                     Console.Write(e + "\r\n");
-                    return "DataBase Error";
+                    return null;
                 }
             }
         }
