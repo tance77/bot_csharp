@@ -311,6 +311,81 @@ namespace twitch_irc_bot
             } 
         }
 
+        public bool UrlToggle(string channel, bool toggle)
+        {
+            using (var command = new SQLiteCommand("UPDATE Channels SET allow_urls=@urls WHERE channel_name=@channel", _dbConnection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@channel", channel);
+                    command.Parameters.AddWithValue("@urls", toggle);
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+            }
+        }
+        public bool UrlStatus(string channel)
+        {
+            using (var command = new SQLiteCommand("SELECT * FROM Channels WHERE channel_name=@channel", _dbConnection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@channel", channel);
+                    var reader = command.ExecuteReader();
+                    if (reader == null) return false;
+                    reader.Read();
+                    return reader.GetBoolean(1);
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+            }
+        }
+        public bool GgStatus(string channel)
+        {
+            using (var command = new SQLiteCommand("SELECT * FROM Channels WHERE channel_name=@channel", _dbConnection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@channel", channel);
+                    var reader = command.ExecuteReader();
+                    if (reader == null) return false;
+                    reader.Read();
+                    return reader.GetBoolean(3);
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+            }
+        }
+        public bool GgToggle(string channel, bool toggle)
+        {
+            using (var command = new SQLiteCommand("UPDATE Channels SET gg=@gg WHERE channel_name=@channel", _dbConnection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@channel", channel);
+                    command.Parameters.AddWithValue("@gg", toggle);
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+            }
+        }
+
         public string DickSize(string channel)
         {
             var randRange = new Random();
