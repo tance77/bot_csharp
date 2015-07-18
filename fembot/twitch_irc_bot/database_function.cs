@@ -84,7 +84,7 @@ namespace twitch_irc_bot
                     if (reader == null || reader.Read()) return false;
                     var cmmd = new SQLiteCommand("INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,eight_ball,gameq)VALUES(@channel,@urls,@dicksize,@gg,@eight_ball,@gameq)", _dbConnection);
                     cmmd.Parameters.AddWithValue("@channel", channel);
-                    cmmd.Parameters.AddWithValue("@urls", false);
+                    cmmd.Parameters.AddWithValue("@urls", true);
                     cmmd.Parameters.AddWithValue("@dicksize", false);
                     cmmd.Parameters.AddWithValue("@gg", false);
                     cmmd.Parameters.AddWithValue("@eight_ball", false);

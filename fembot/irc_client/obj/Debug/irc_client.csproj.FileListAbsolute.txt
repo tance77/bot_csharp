@@ -1,1 +1,0 @@
-C:\Users\Lance\Documents\GitHub\bot_csharp_v1\fembot\irc_client\bin\Debug\irc_client.exe.config
