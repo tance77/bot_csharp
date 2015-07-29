@@ -36,7 +36,7 @@ namespace twitch_irc_bot
 
         }
 
-        private void JoinChannel(string channel)
+        public void JoinChannel(string channel)
         {
             _outputStream.WriteLine("JOIN #" + channel);
             _outputStream.Flush();
@@ -94,10 +94,10 @@ namespace twitch_irc_bot
         private bool CheckSpam(string message, string fromChannel, string msgSender, string userType)
         {
             if (Regex.Match(message, @".*?I just got championship riven skin from here.*?").Success ||
-                Regex.Match(message, @".*?I just got championship riven skin code.*?").Success || 
+                Regex.Match(message, @".*?I just got championship riven skin code.*?").Success ||
                 Regex.Match(message, @".*?OMG I just won an Iphone 6.*?").Success ||
                 Regex.Match(message, @".*?I am a 15 year old Rhinoceros.*?").Success ||
-                Regex.Match(message, @".*?sexually Identify as*?").Success || 
+                Regex.Match(message, @".*?sexually Identify as*?").Success ||
                 Regex.Match(message, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
                 Regex.Match(message, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success)
             {
@@ -314,7 +314,7 @@ namespace twitch_irc_bot
             if (success)
                 SendChatMessage(toggle ? "URL's are now allowed." : "URL's are no longer allowed.", channel);
             else
-                SendChatMessage("Something went wrong on my end.", channel); 
+                SendChatMessage("Something went wrong on my end.", channel);
         }
 
         public void GgToggle(string channel, bool toggle)
@@ -345,55 +345,133 @@ namespace twitch_irc_bot
 
         public string GetSummonerId(string summonerName)
         {
-            var apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
-
-            //var response2 ="; //for rank
-
-            var response = WebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/" + summonerName + "?api_key=" + apiKey);
-            var objStream = response.GetResponse().GetResponseStream();
-            if (objStream == null) return null;
-            var objReader = new StreamReader(objStream);
-
-            string line = "", jsonString = "";
-
-            while (line != null)
+            try
             {
-                line = objReader.ReadLine();
-                if (line != null)
+
+                var apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
+
+                //var response2 ="; //for rank
+
+                var response = WebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/" + summonerName + "?api_key=" + apiKey);
+                var objStream = response.GetResponse().GetResponseStream();
+                if (objStream == null) return null;
+                var objReader = new StreamReader(objStream);
+
+                string line = "", jsonString = "";
+
+                while (line != null)
                 {
-                    jsonString += line;
+                    line = objReader.ReadLine();
+                    if (line != null)
+                    {
+                        jsonString += line;
+                    }
+                }
+
+                return (JObject.Parse(jsonString).SelectToken(summonerName).SelectToken("id")).ToString();
+            }
+            catch (WebException e)
+            {
+                var errorCode = e.ToString().Split('(')[1].Split(')')[0];
+                Console.Write(errorCode + "\r\n");
+                return errorCode;
+            }
+        }
+
+        public string GetRunes(string summonerId)
+        {
+            var apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
+            var response =
+                WebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId +
+                                  "/runes?api_key=" + apiKey);
+            var objStream = response.GetResponse().GetResponseStream();
+                if (objStream == null) return null;
+                var objReader = new StreamReader(objStream);
+
+                string line = "", jsonString = "";
+
+                while (line != null)
+                {
+                    line = objReader.ReadLine();
+                    if (line != null)
+                    {
+                        jsonString += line;
+                    }
+                }
+
+            var jsonArr = JObject.Parse(jsonString).SelectToken(summonerId).SelectToken("pages");
+            var runeDictionary = new Dictionary<string, int>();
+            var runePageName = "";
+            foreach (var item in jsonArr)
+            {
+                var current = JObject.Parse(item.ToString()).SelectToken("current").ToString();
+                if (current == "True")
+                {
+                    if (true) { }
+                    runePageName = JObject.Parse(item.ToString()).SelectToken("name").ToString();
+                    var runeArr = JObject.Parse(item.ToString()).SelectToken("slots");
+                    foreach (var rune in runeArr)
+                    {
+                        var cur = JObject.Parse(rune.ToString()).SelectToken("runeId").ToString();
+                        if (runeDictionary.ContainsKey(cur))
+                        {
+                            runeDictionary[cur] += 1;
+                        }
+                        else
+                        {
+                            runeDictionary.Add(cur, 1);
+                        }
+                    }
                 }
             }
 
-            return (JObject.Parse(jsonString).SelectToken(summonerName).SelectToken("id")).ToString();
-            
-        }
+            var response2 =
+            WebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId +
+                      "/runes?api_key=" + apiKey);
 
+            return null;
+         
+        }
 
         public string GetRank(string summonerId)
         {
-            var apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
-
-        https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/26851284/entry?api_key=59b21249-afb2-4484-ad4f-842536d31437
-            var response = WebRequest.Create("https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/" + summonerId + "/entry?api_key=" + apiKey);
-            var objStream = response.GetResponse().GetResponseStream();
-            if (objStream == null) return null;
-            var objReader = new StreamReader(objStream);
-
-            string line = "", jsonString = "";
-
-            while (line != null)
+            try
             {
-                line = objReader.ReadLine();
-                if (line != null)
-                {
-                    jsonString += line;
-                }
-            }
+                var apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
 
-            var division = JObject.Parse(jsonString).SelectToken(summonerId).First.SelectToken("entries").First.SelectToken("division").ToString();
-            var tier = JObject.Parse(jsonString).SelectToken(summonerId).First.SelectToken("tier").ToString();
-            return tier + " " + division;
+                var response =
+                    WebRequest.Create("https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/" + summonerId +
+                                      "/entry?api_key=" + apiKey);
+                var objStream = response.GetResponse().GetResponseStream();
+                if (objStream == null) return null;
+                var objReader = new StreamReader(objStream);
+
+                string line = "", jsonString = "";
+
+                while (line != null)
+                {
+                    line = objReader.ReadLine();
+                    if (line != null)
+                    {
+                        jsonString += line;
+                    }
+                }
+
+                var division =
+                    JObject.Parse(jsonString)
+                        .SelectToken(summonerId)
+                        .First.SelectToken("entries")
+                        .First.SelectToken("division")
+                        .ToString();
+                var tier = JObject.Parse(jsonString).SelectToken(summonerId).First.SelectToken("tier").ToString();
+                return tier + " " + division;
+            }
+            catch (WebException e)
+            {
+                var errorCode = e.ToString().Split('(')[1].Split(')')[0];
+                Console.Write(errorCode + "\r\n");
+                return errorCode;
+            }
         }
 
         public string CheckSummonerName(string fromChannel)
@@ -401,8 +479,17 @@ namespace twitch_irc_bot
             var summonerName = _db.SummonerStatus(fromChannel);
             if (summonerName == "") return "No Summoner Name";
             var summonerId = GetSummonerId(summonerName);
+            //GetRunes(summonerId);
+            if (summonerId == "400" || summonerId == "401" || summonerId == "404" || summonerId == "429" || summonerId == "500" || summonerId == "503") // Invalid summoner name
+            {
+                return summonerId;
+            }
             if (!_db.SetSummonerId(fromChannel, summonerId)) return "ERR Summoner ID";
             var rank = GetRank(summonerId);
+            if (rank == "400" || rank == "401" || rank == "404" || rank == "429" || rank == "500" || rank == "503") // Invalid summoner name
+            {
+                return rank;
+            }
             return rank;
         }
 
@@ -411,14 +498,30 @@ namespace twitch_irc_bot
             var result = CheckSummonerName(fromChannel);
             if (result == "No Summoner Name")
                 SendChatMessage("No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]", fromChannel);
-            else if (result == "ERR Summoner ID")
-                SendChatMessage(msgSender + "Unable to reach Riot API please try again in a few minutes.", fromChannel);
+            else if (result == "400" || result == "401" || result == "404")
+                SendChatMessage("Invalid Summoner Name", fromChannel);
+            else if (result == "429")
+                SendChatMessage("To many requests at one time please try again", fromChannel);
+            else if (result == "500" || result == "503")
+                SendChatMessage("Could not reach Riot API. Please try again in a few minutes.", fromChannel);
             SendChatMessage(fromChannel + " is currently " + result, fromChannel);
 
         }
 
         public bool SetSummonerName(string fromChannel, string summonerName, string msgSender)
         {
+            if (msgSender == fromChannel)//do this so only channel admin can set the summoenr name
+            {
+                if (_db.SetSummonerName(fromChannel, summonerName))// on success
+                {
+                    SendChatMessage("Summoner name has been set to " + summonerName, fromChannel);
+                    return true;
+                }
+                SendChatMessage("Something went wrong on my end please try again", fromChannel);
+                return false;
+            }
+
+            SendChatMessage("Insufficient privileges", fromChannel);
             return false;
         }
 
@@ -717,6 +820,8 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(message, @"!setsummoner").Success)
                 {
+                    var summonerName = message.Split(' ')[1];
+                    SetSummonerName(fromChannel, summonerName, msgSender);
                 }
 
                     //else if (Regex.Match(message, @"!songrequest").Success || Regex.Match(post_message, @"!sr").Success)
@@ -745,7 +850,7 @@ namespace twitch_irc_bot
                 //}
                 else if (message == "gg")
                 {
-                    if(CheckGg(fromChannel))
+                    if (CheckGg(fromChannel))
                         SendChatMessage("GG", fromChannel);
                 }
                 else if (Regex.Match(message, @"^gg\son$").Success)

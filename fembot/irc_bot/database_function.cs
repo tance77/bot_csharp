@@ -374,6 +374,25 @@ namespace twitch_irc_bot
             }
         }
 
+        public bool SetSummonerName(string channel, string summonerName)
+        {
+            using (var command = new SQLiteCommand("UPDATE League SET summoner_name=@summoner_name WHERE channel_name=@channel", _dbConnection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@channel", channel);
+                    command.Parameters.AddWithValue("@summoner_name", summonerName);
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+            }
+        }
+
         public bool SetSummonerId(string channel, string summonerId)
         {
             using (var command = new SQLiteCommand("UPDATE League SET summoner_id=@summoner_id WHERE channel_name=@channel", _dbConnection))
