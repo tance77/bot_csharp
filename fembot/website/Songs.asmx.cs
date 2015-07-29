@@ -23,14 +23,13 @@ namespace fembot
             var connectionstring = ConfigurationManager.ConnectionStrings["dbconnect"].ConnectionString;
             using (var con = new SQLiteConnection(connectionstring) )
             {
-                var cmd = new SQLiteCommand("SELECT * FROM Songs WHERE ChannelName=@channel", con);
+                var cmd = new SQLiteCommand("SELECT * FROM Songs WHERE channel_name=@channel", con);
                 cmd.Parameters.AddWithValue("@channel", channelName);
                 con.Open();
                 var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
                     song.RequestedBy = reader["channel_name"].ToString();
-                    song.SongId = reader["song_id"].ToString();
                     song.Durration = reader["durration"].ToString();
                     song.Artist = reader["artist"].ToString();
                     song.Title = reader["title"].ToString();

@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
+using LolSharp;
+using LolSharp.Riot;
 using Newtonsoft.Json.Linq;
 
 namespace twitch_irc_bot
@@ -89,19 +93,23 @@ namespace twitch_irc_bot
 
         private bool CheckSpam(string message, string fromChannel, string msgSender, string userType)
         {
-            if (Regex.Match(message, @"I just got championship riven skin from here").Success ||
-                Regex.Match(message, @"I just got championship riven skin code").Success)
+            if (Regex.Match(message, @".*?I just got championship riven skin from here.*?").Success ||
+                Regex.Match(message, @".*?I just got championship riven skin code.*?").Success || 
+                Regex.Match(message, @".*?OMG I just won an Iphone 6.*?").Success ||
+                Regex.Match(message, @".*?I am a 15 year old Rhinoceros.*?").Success ||
+                Regex.Match(message, @".*?sexually Identify as*?").Success || 
+                Regex.Match(message, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
+                Regex.Match(message, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success)
             {
                 if (userType == "mod") return false; //your a mod no timeout
-                SendChatMessage("/ban " + msgSender, fromChannel);
+                Thread.Sleep(400);
+                SendChatMessage("/timeout " + msgSender + " 100", fromChannel);
                 SendChatMessage(msgSender + ", [Spam Detected]", fromChannel);
-                return true;
-            }
-            if (Regex.Match(message, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success)
-            {
-                if (userType == "mod") return false; //your a mod no timeout
+                Thread.Sleep(400);
+                SendChatMessage("/timeout " + msgSender + " 100", fromChannel);
+                SendChatMessage("/timeout " + msgSender + " 100", fromChannel);
+                Thread.Sleep(400);
                 SendChatMessage("/ban " + msgSender, fromChannel);
-                SendChatMessage(msgSender + ", [Spam Detected]", fromChannel);
                 return true;
             }
             return false; //no spam in message
@@ -113,8 +121,11 @@ namespace twitch_irc_bot
             if (!Regex.Match(message, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
                 .Success || userType == "mod") return false;
             //Otherwise your not a mod or you are posting a link
+            Thread.Sleep(400);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
             SendChatMessage(sender + ", no urls allowed.", fromChannel);
+            SendChatMessage("/timeout " + sender + " 10", fromChannel);
+            SendChatMessage("/timeout " + sender + " 10", fromChannel);
             return true;
         }
 
@@ -322,6 +333,7 @@ namespace twitch_irc_bot
             var playerShot = chamber.Next(1, 3);
             if (deathShot == playerShot)
             {
+                Thread.Sleep(400);
                 SendChatMessage("/timeout " + sender + " 60", channel);
                 SendChatMessage(sender + ", took a bullet to the head.", channel);
             }
@@ -329,6 +341,85 @@ namespace twitch_irc_bot
             {
                 SendChatMessage(sender + ", pulled the trigger and nothing happened.", channel);
             }
+        }
+
+        public string GetSummonerId(string summonerName)
+        {
+            var apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
+
+            //var response2 ="; //for rank
+
+            var response = WebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/" + summonerName + "?api_key=" + apiKey);
+            var objStream = response.GetResponse().GetResponseStream();
+            if (objStream == null) return null;
+            var objReader = new StreamReader(objStream);
+
+            string line = "", jsonString = "";
+
+            while (line != null)
+            {
+                line = objReader.ReadLine();
+                if (line != null)
+                {
+                    jsonString += line;
+                }
+            }
+
+            return (JObject.Parse(jsonString).SelectToken(summonerName).SelectToken("id")).ToString();
+            
+        }
+
+
+        public string GetRank(string summonerId)
+        {
+            var apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
+
+        https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/26851284/entry?api_key=59b21249-afb2-4484-ad4f-842536d31437
+            var response = WebRequest.Create("https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/" + summonerId + "/entry?api_key=" + apiKey);
+            var objStream = response.GetResponse().GetResponseStream();
+            if (objStream == null) return null;
+            var objReader = new StreamReader(objStream);
+
+            string line = "", jsonString = "";
+
+            while (line != null)
+            {
+                line = objReader.ReadLine();
+                if (line != null)
+                {
+                    jsonString += line;
+                }
+            }
+
+            var division = JObject.Parse(jsonString).SelectToken(summonerId).First.SelectToken("entries").First.SelectToken("division").ToString();
+            var tier = JObject.Parse(jsonString).SelectToken(summonerId).First.SelectToken("tier").ToString();
+            return tier + " " + division;
+        }
+
+        public string CheckSummonerName(string fromChannel)
+        {
+            var summonerName = _db.SummonerStatus(fromChannel);
+            if (summonerName == "") return "No Summoner Name";
+            var summonerId = GetSummonerId(summonerName);
+            if (!_db.SetSummonerId(fromChannel, summonerId)) return "ERR Summoner ID";
+            var rank = GetRank(summonerId);
+            return rank;
+        }
+
+        public void GetLeagueRank(string fromChannel, string msgSender)
+        {
+            var result = CheckSummonerName(fromChannel);
+            if (result == "No Summoner Name")
+                SendChatMessage("No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]", fromChannel);
+            else if (result == "ERR Summoner ID")
+                SendChatMessage(msgSender + "Unable to reach Riot API please try again in a few minutes.", fromChannel);
+            SendChatMessage(fromChannel + " is currently " + result, fromChannel);
+
+        }
+
+        public bool SetSummonerName(string fromChannel, string summonerName, string msgSender)
+        {
+            return false;
         }
 
         public bool MessageHandler(string m)
@@ -353,8 +444,21 @@ namespace twitch_irc_bot
                     return true;
                 }
             }
-            if (Regex.Match(m, @"tmi.twitch.tv JOIN").Success || Regex.Match(m, @"tmi.twitch.tv PART").Success)
+            if (Regex.Match(m, @"tmi.twitch.tv JOIN").Success)
             {
+
+                var fromChannel = m.Split('#')[1];
+                var joiner = m.Split('!')[0].Split(':')[1];
+                if (joiner == "dongerinouserino")
+                {
+                    SendChatMessage("ᕙ༼ຈل͜ຈ༽ᕗ flex your dongers ᕙ༼ຈل͜ຈ༽ᕗᕙ༼ຈل͜ຈ༽ᕗ DongerinoUserino is here ᕙ༼ຈل͜ຈ༽ᕗ ",
+                        fromChannel);
+                }
+                return true;
+            }
+            if (Regex.Match(m, @"tmi.twitch.tv PART").Success)
+            {
+
                 return true;
             }
             if (Regex.Match(m, @"tmi.twitch.tv 353").Success || Regex.Match(m, @"tmi.twitch.tv 366").Success)
@@ -413,6 +517,10 @@ namespace twitch_irc_bot
             {
                 return true;
             }
+            if (Regex.Match(m, @":twitchnotify!twitchnotify@twitchnotify.tmi.twitch.tv").Success)
+            {
+                return true;
+            }
             if (Regex.Match(m, @"tmi.twitch.tv PRIVMSG").Success)
             {
                 var msgArray = m.Split(' ');
@@ -429,7 +537,7 @@ namespace twitch_irc_bot
                 }
                 msg = msg.TrimStart(':');
                 var prefix = msgArray[0].Split(';');
-                var color = prefix[0].Split('#')[1].Split('"')[0];
+                var color = prefix[0].Split('=')[1].Split('"')[0];
                 var displayName = prefix[1].Split('=')[1].Split('"')[0];
                 try
                 {
@@ -546,6 +654,10 @@ namespace twitch_irc_bot
                 //{
                 //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
                 //}
+                else if (Regex.Match(message, @"^!rank$").Success)
+                {
+                    GetLeagueRank(fromChannel, msgSender);
+                }
                 else if (Regex.Match(message, @"^!allowurls\son$").Success)
                 {
                     if (userType == "mod")
@@ -603,6 +715,9 @@ namespace twitch_irc_bot
                 {
                     Roulette(fromChannel, msgSender);
                 }
+                else if (Regex.Match(message, @"!setsummoner").Success)
+                {
+                }
 
                     //else if (Regex.Match(message, @"!songrequest").Success || Regex.Match(post_message, @"!sr").Success)
                 //{
@@ -655,7 +770,7 @@ namespace twitch_irc_bot
                         @".*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?[Pp]+[Ll]+(([Ee]+[Aa]+[Ss]+[Ee]+)|([Zz]+)|([Ss]+)).*?")
                         .Success)
                 {
-                    SendChatMessage("https://www.youtube.com/watch?v=ODKTITUPusM", fromChannel);
+                    SendChatMessage(msgSender + " here's  your boobs NSFW https://goo.gl/BNl3Gl", fromChannel);
                 }
 
                 /*------------------------- Built In Commands ------------------------*/

@@ -5,14 +5,15 @@
         
         function buildTable() {
 
-            var song = $('#songs').val();
+            var song = $('#ello').val();
 
             $.ajax({
-                url: 'Songs.asmx/GetSongByChannelName',
-                data: {}
-            })
+                url: 'Songs.asmx?op=GetSongByChannelName',
+                data: 'jchinn',
+                dataType: "xml"
+            });
 
-            var url = "Songs.asmx/GetSongByChannelName";
+            var url = "Songs.asmx?op=GetSongByChannelName";
             $.getJSON(url, function (response) {
                 var write;
                 $.each(response, function (index, table) {
@@ -46,7 +47,7 @@
 
         <div class="col-lg-9 col-xs-push-custom">
             
-            <table class="table table-bordered table-striped table-hover">
+            <table class="table table-bordered table-striped table-hover" id ="ello">
                 <thead id ="songs">
                     <tr class="success">
                         <th>Title</th>

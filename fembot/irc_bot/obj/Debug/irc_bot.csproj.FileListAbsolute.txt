@@ -41,3 +41,7 @@ C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\SpotifyAPI.x
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\System.Data.SQLite.xml
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\twitch_irc_bot.exe
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\twitch_irc_bot.pdb
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\irc_bot.csprojResolveAssemblyReference.cache
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\LolSharp.dll
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\RestSharp.dll
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\RestSharp.xml

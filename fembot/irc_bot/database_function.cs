@@ -71,7 +71,7 @@ namespace twitch_irc_bot
                 }
             }
         }
-        
+
 
         public bool AddToChannels(string channel)
         {
@@ -82,21 +82,23 @@ namespace twitch_irc_bot
                 {
                     var reader = inDb.ExecuteReader();
                     if (reader == null || reader.Read()) return false;
-                    var cmmd = new SQLiteCommand("INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,eight_ball,gameq)VALUES(@channel,@urls,@dicksize,@gg,@eight_ball,@gameq)", _dbConnection);
-                    cmmd.Parameters.AddWithValue("@channel", channel);
-                    cmmd.Parameters.AddWithValue("@urls", true);
-                    cmmd.Parameters.AddWithValue("@dicksize", false);
-                    cmmd.Parameters.AddWithValue("@gg", false);
-                    cmmd.Parameters.AddWithValue("@eight_ball", false);
-                    cmmd.Parameters.AddWithValue("@gameq", false);
-                    cmmd.ExecuteNonQuery();
-                    var cmd =
-                        new SQLiteCommand(
-                            "INSERT INTO Spotify(channel_name,is_setup,on_off)VALUES(@channel,@isSetup,@OnOff)",
-                            _dbConnection);
+                    var cmd = new SQLiteCommand("INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,eight_ball,gameq)VALUES(@channel,@urls,@dicksize,@gg,@eight_ball,@gameq)", _dbConnection);
+                    cmd.Parameters.AddWithValue("@channel", channel);
+                    cmd.Parameters.AddWithValue("@urls", true);
+                    cmd.Parameters.AddWithValue("@dicksize", false);
+                    cmd.Parameters.AddWithValue("@gg", false);
+                    cmd.Parameters.AddWithValue("@eight_ball", false);
+                    cmd.Parameters.AddWithValue("@gameq", false);
+                    cmd.ExecuteNonQuery();
+                    cmd = new SQLiteCommand("INSERT INTO Spotify(channel_name,is_setup,on_off)VALUES(@channel,@isSetup,@OnOff)", _dbConnection);
                     cmd.Parameters.AddWithValue("@channel", channel);
                     cmd.Parameters.AddWithValue("@isSetup", false);
                     cmd.Parameters.AddWithValue("@OnOff", false);
+                    cmd.ExecuteNonQuery();
+                    cmd = new SQLiteCommand("INSERT INTO League(channel_name,summoner_name,summoner_id)VALUES(@channel,@summoner,@summoner_id)", _dbConnection);
+                    cmd.Parameters.AddWithValue("@channel", channel);
+                    cmd.Parameters.AddWithValue("@summoner", null);
+                    cmd.Parameters.AddWithValue("@summoner_id", null);
                     cmd.ExecuteNonQuery();
                     return true;
                 }
@@ -117,10 +119,13 @@ namespace twitch_irc_bot
                 {
                     var reader = inDb.ExecuteReader();
                     if (reader == null || !reader.Read()) return false;
-                    var cmmd = new SQLiteCommand("delete from Channels where channel_name=@channel", _dbConnection);
-                    cmmd.Parameters.AddWithValue("@channel", channel);
-                    cmmd.ExecuteNonQuery();
-                    var cmd = new SQLiteCommand("delete from Spotify where channel_name=@channel", _dbConnection);
+                    var cmd = new SQLiteCommand("delete from Channels where channel_name=@channel", _dbConnection);
+                    cmd.Parameters.AddWithValue("@channel", channel);
+                    cmd.ExecuteNonQuery();
+                    cmd = new SQLiteCommand("delete from Spotify where channel_name=@channel", _dbConnection);
+                    cmd.Parameters.AddWithValue("@channel", channel);
+                    cmd.ExecuteNonQuery();
+                    cmd = new SQLiteCommand("delete from League WHERE channel_name=@channel", _dbConnection);
                     cmd.Parameters.AddWithValue("@channel", channel);
                     cmd.ExecuteNonQuery();
                     return true;
@@ -133,7 +138,7 @@ namespace twitch_irc_bot
             }
         }
 
-        public Tuple<string,bool> MatchCommand(string matchCommand, string channel)
+        public Tuple<string, bool> MatchCommand(string matchCommand, string channel)
         {
             matchCommand = matchCommand.Split('!')[1];
             var toUser = false;
@@ -211,7 +216,7 @@ namespace twitch_irc_bot
                     Console.Write(e + "\r\n");
                     return false;
                 }
-            } 
+            }
         }
 
         public bool EditCommand(string command, string commandDescription, bool toUser, string channel)
@@ -308,7 +313,7 @@ namespace twitch_irc_bot
                     Console.Write(e + "\r\n");
                     return false;
                 }
-            } 
+            }
         }
 
         public bool UrlToggle(string channel, bool toggle)
@@ -348,6 +353,46 @@ namespace twitch_irc_bot
                 }
             }
         }
+
+        public string SummonerStatus(string channel)
+        {
+            using (var command = new SQLiteCommand("SELECT * FROM League WHERE channel_name=@channel", _dbConnection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@channel", channel);
+                    var reader = command.ExecuteReader();
+                    if (reader == null) return null;
+                    reader.Read();
+                    return reader.GetValue(1).ToString();
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
+            }
+        }
+
+        public bool SetSummonerId(string channel, string summonerId)
+        {
+            using (var command = new SQLiteCommand("UPDATE League SET summoner_id=@summoner_id WHERE channel_name=@channel", _dbConnection))
+            {
+                try
+                {
+                    command.Parameters.AddWithValue("@channel", channel);
+                    command.Parameters.AddWithValue("@summoner_id", summonerId);
+                    command.ExecuteNonQuery();
+                    return true;
+                }
+                catch (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
+            }
+        }
+
         public bool GgStatus(string channel)
         {
             using (var command = new SQLiteCommand("SELECT * FROM Channels WHERE channel_name=@channel", _dbConnection))
@@ -408,7 +453,7 @@ namespace twitch_irc_bot
                 {
                     Console.Write(e + "\r\n");
                     return null;
-                }                
+                }
             }
             if (!onOff) return null;
             using (var command = new SQLiteCommand("select r" + randOne + " from DickSizes where rowid=" + randTwo,
@@ -421,7 +466,7 @@ namespace twitch_irc_bot
                     if (reader != null)
                     {
                         reader.Read();
-// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                        // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                         reader.GetValues(values);
                     }
                     Console.Write("{0}\r\n", values[0]);
