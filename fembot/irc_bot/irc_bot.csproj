@@ -95,11 +95,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="database_function.cs" />
-    <Compile Include="irc_client.cs" />
+    <Compile Include="DatabaseFunctions.cs" />
+    <Compile Include="IrcClient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="spotify.cs" />
+    <Compile Include="RiotApi.cs" />
+    <Compile Include="Spotify.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

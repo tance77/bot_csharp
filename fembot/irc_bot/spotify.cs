@@ -11,7 +11,7 @@ using SpotifyAPI.SpotifyWebAPI.Models;
 
 namespace twitch_irc_bot
 {
-    class spotify
+    class Spotify
     {
         
     }
