@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace twitch_irc_bot
@@ -15,39 +14,69 @@ namespace twitch_irc_bot
         private readonly DatabaseFunctions _db = new DatabaseFunctions();
         public RiotApi(DatabaseFunctions db)
         {
-           _apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
-           _db = db;
+            _apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
+            _db = db;
         }
-        public string GetMasteries(string fromChannel)
+        public Dictionary<string,int> GetMasteries(string fromChannel)
         {
             var summonerId = _db.GetSummonerId(fromChannel);
-            var response = WebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId + "masteries?api_key=" + _apiKey);
-            var objStream = response.GetResponse().GetResponseStream();
-            if (objStream == null) return null;
-            var objReader = new StreamReader(objStream);
+            var masteriesList = new Dictionary<string, int>();
 
-            string line = "", jsonString = "";
-
-            while (line != null)
+            var request = WebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId + "/masteries?api_key=" + _apiKey);
+            //check for reponse status
+            using (var response = request.GetResponse())
             {
-                line = objReader.ReadLine();
-                if (line != null)
+                using (var responseStream = response.GetResponseStream())
                 {
-                    jsonString += line;
+                    if (responseStream == null) return null;
+                    using (var objReader = new StreamReader(responseStream))
+                    {
+                        var jsonString = objReader.ReadToEnd();
+                        var jsonArr = JObject.Parse(jsonString).SelectToken(summonerId).SelectToken("pages");
+
+                        foreach (var page in jsonArr)
+                        {
+                            var current = JObject.Parse(page.ToString()).SelectToken("current").ToString();
+                            if (current == "True")
+                            {
+                                var masteriesArr = JObject.Parse(page.ToString()).SelectToken("masteries");
+                                foreach (var mastery in masteriesArr)
+                                {
+                                    var cur = JObject.Parse(mastery.ToString()).SelectToken("id").ToString();
+                                    var rank = JObject.Parse(mastery.ToString()).SelectToken("rank").ToString();
+                                    int tmp;
+                                    if (int.TryParse(rank, out tmp))
+                                        masteriesList.Add(cur, tmp);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            var jsonArr = JObject.Parse(jsonString).SelectToken(summonerId).SelectToken("pages");
-            foreach (var page in jsonArr)
+            var masterDictionary = new Dictionary<string, int> { { "Offense", 0 }, { "Defense", 0 }, { "Utility", 0 } };
+
+            foreach (var masteryId in masteriesList)
             {
-                var current = JObject.Parse(page.ToString()).SelectToken("current").ToString();
-                if (current == "True")
+                var request2 =
+                    WebRequest.Create("https://global.api.pvp.net/api/lol/static-data/na/v1.2/mastery/" + masteryId.Key +
+                                      "?masteryData=masteryTree&api_key=" + _apiKey);
+                //check for reponse status
+                using (var response = request2.GetResponse())
                 {
-                    var masteriesArr = JObject.Parse(page.ToString()).SelectToken("masteries");
+                    using (var responseStream = response.GetResponseStream())
+                    {
+                        if (responseStream == null) return null;
+                        using (var objReader2 = new StreamReader(responseStream))
+                        {
+                            var masteryJson = objReader2.ReadToEnd();
+                            var masteryTree = JObject.Parse(masteryJson).SelectToken("masteryTree").ToString();
+                            masterDictionary[masteryTree] += masteryId.Value;
+                        }
+                    }
                 }
             }
-
-            return null;
+            return masterDictionary;
         }
 
         public string GetSummonerId(string summonerName)
@@ -111,7 +140,6 @@ namespace twitch_irc_bot
                 var current = JObject.Parse(item.ToString()).SelectToken("current").ToString();
                 if (current == "True")
                 {
-                    if (true) { }
                     runePageName = JObject.Parse(item.ToString()).SelectToken("name").ToString();
                     var runeArr = JObject.Parse(item.ToString()).SelectToken("slots");
                     foreach (var rune in runeArr)
@@ -191,23 +219,6 @@ namespace twitch_irc_bot
                 return errorCode;
             }
         }
-        public string CheckSummonerName(string fromChannel)
-        {
-            var summonerName = _db.SummonerStatus(fromChannel);
-            if (summonerName == "") return "No Summoner Name";
-            var summonerId = GetSummonerId(summonerName);
-            //GetRunes(summonerId);
-            if (summonerId == "400" || summonerId == "401" || summonerId == "404" || summonerId == "429" || summonerId == "500" || summonerId == "503") // Invalid summoner name
-            {
-                return summonerId;
-            }
-            if (!_db.SetSummonerId(fromChannel, summonerId)) return "ERR Summoner ID";
-            var rank = GetRank(summonerId);
-            if (rank == "400" || rank == "401" || rank == "404" || rank == "429" || rank == "500" || rank == "503") // Invalid summoner name
-            {
-                return rank;
-            }
-            return rank;
-        }
+
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Newtonsoft.Json.Linq;
@@ -134,6 +135,25 @@ namespace twitch_irc_bot
             return _db.GgStatus(fromChannel);
         }
 
+        public string CheckSummonerName(string fromChannel)
+        {
+            var summonerName = _db.SummonerStatus(fromChannel);
+            if (summonerName == "") return "No Summoner Name";
+            var summonerId = _riotApi.GetSummonerId(summonerName);
+            //GetRunes(summonerId);
+            if (summonerId == "400" || summonerId == "401" || summonerId == "404" || summonerId == "429" || summonerId == "500" || summonerId == "503") // Invalid summoner name
+            {
+                return summonerId;
+            }
+            if (!_db.SetSummonerId(fromChannel, summonerId)) return "ERR Summoner ID";
+            var rank = _riotApi.GetRank(summonerId);
+            if (rank == "400" || rank == "401" || rank == "404" || rank == "429" || rank == "500" || rank == "503") // Invalid summoner name
+            {
+                return rank;
+            }
+            return rank;
+        }
+
         private static List<string> GetListOfMods(string fromChannel) //via chatters json deprecated
         {
             var modList = new List<string>();
@@ -190,16 +210,20 @@ namespace twitch_irc_bot
             for (var i = 0; i < commands.Count(); i++)
             {
                 if (i == commands.Count() - 1)
+                {
                     sendString += " !" + commands[i];
+                }
                 else
+                {
                     sendString += " !" + commands[i] + ",";
+                }
             }
             SendChatMessage("Commands are" + sendString, channel);
         }
 
         public void AddCommand(string channel, string message)
         {
-            if (!message.StartsWith("!")) return;
+            if (!message.StartsWith("!")) {return;}
             try
             {
                 var messageArray = message.Split(' ');
@@ -211,14 +235,22 @@ namespace twitch_irc_bot
                     {
                         commandDescription += messageArray[i];
                     }
-                    else commandDescription += messageArray[i] + " ";
+                    else
+                    {
+                        commandDescription += messageArray[i] + " ";
+                    }
                 }
                 var success = _db.AddCommand(command, commandDescription, false, channel);
                 command = "!" + command;
                 if (success)
+                {
                     SendChatMessage(command + " was add successfully.", channel);
+                }
                 else
-                    SendChatMessage(command + " command already exists use !editcom if you would like to change it.", channel);
+                {
+                    SendChatMessage(command + " command already exists use !editcom if you would like to change it.",
+                        channel);
+                }
             }
             catch (IndexOutOfRangeException)
             {
@@ -241,9 +273,14 @@ namespace twitch_irc_bot
                 var succes = _db.RemoveCommand(command, channel);
                 command = "!" + command;
                 if (succes)
+                {
                     SendChatMessage(command + " was deleted successfully.", channel);
+                }
                 else
+                {
                     SendChatMessage(command + " there is no such command.", channel);
+                }
+
             }
             catch (IndexOutOfRangeException)
             {
@@ -259,7 +296,7 @@ namespace twitch_irc_bot
         public void EditCommand(string channel, string message)
         {
 
-            if (!message.StartsWith("!")) return;
+            if (!message.StartsWith("!")) {return;}
             try
             {
                 var splitMessage = message.Split(' ');
@@ -276,9 +313,15 @@ namespace twitch_irc_bot
                 var success = _db.EditCommand(command, commandDescription, false, channel);
                 command = "!" + command;
                 if (success)
+                {
                     SendChatMessage(command + " was updated successfully.", channel);
+                }
                 else
-                    SendChatMessage(command + " there is no such command. Use !addcom if you wish to add a command.", channel);
+                {
+                    SendChatMessage(command + " there is no such command. Use !addcom if you wish to add a command.",
+                        channel);
+                }
+
             }
             catch (IndexOutOfRangeException)
             {
@@ -295,7 +338,7 @@ namespace twitch_irc_bot
         public void DickSize(string channel, string sender)
         {
             var response = _db.DickSize(channel);
-            if (response == null) return;
+            if (response == null){ return;}
             SendChatMessage(sender + ", " + response, channel);
         }
 
@@ -303,27 +346,39 @@ namespace twitch_irc_bot
         {
             var success = _db.DickSizeToggle(channel, toggle);
             if (success)
+            {
                 SendChatMessage(toggle ? "Dicksize is now on." : "Dicksize is now off.", channel);
+            }
             else
+            {
                 SendChatMessage("Something went wrong on my end.", channel);
+            }
         }
 
         public void UrlToggle(string channel, bool toggle)
         {
             var success = _db.UrlToggle(channel, toggle);
             if (success)
+            {
                 SendChatMessage(toggle ? "URL's are now allowed." : "URL's are no longer allowed.", channel);
+            }
             else
+            {
                 SendChatMessage("Something went wrong on my end.", channel);
+            }
         }
 
         public void GgToggle(string channel, bool toggle)
         {
             var success = _db.GgToggle(channel, toggle);
             if (success)
+            {
                 SendChatMessage(toggle ? "GG is now on." : "GG is now off.", channel);
+            }
             else
+            {
                 SendChatMessage("Something went wrong on my end.", channel);
+            }
         }
 
         public void Roulette(string channel, string sender)
@@ -357,23 +412,55 @@ namespace twitch_irc_bot
                 message += name.Key + " x" + name.Value + " ";
             }
             SendChatMessage(message, fromChannel);
-            }
+        }
 
 
         public void GetLeagueRank(string fromChannel, string msgSender)
         {
-            var result = _riotApi.CheckSummonerName(fromChannel);
+            var result = CheckSummonerName(fromChannel);
             if (result == "No Summoner Name")
-                SendChatMessage("No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]", fromChannel);
+            {
+                SendChatMessage(
+                    "No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]",
+                    fromChannel);
+            }
             else if (result == "400" || result == "401" || result == "404")
+            {
                 SendChatMessage("Invalid Summoner Name", fromChannel);
+            }
             else if (result == "429")
+            {
                 SendChatMessage("To many requests at one time please try again", fromChannel);
+            }
             else if (result == "500" || result == "503")
+            {
                 SendChatMessage("Could not reach Riot API. Please try again in a few minutes.", fromChannel);
-            SendChatMessage(fromChannel + " is currently " + result, fromChannel);
+            }
+            else
+            {
+                SendChatMessage(fromChannel + " is currently " + result, fromChannel);
+            }
 
         }
+
+        public void GetMasteries(string fromChannel)
+        {
+            var masteriesDictionary = _riotApi.GetMasteries(fromChannel);
+            if (masteriesDictionary == null)
+            {
+                SendChatMessage(
+                    "No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]",
+                    fromChannel);
+            }
+            else
+            {
+                var message = new StringBuilder();
+                foreach (var tree in masteriesDictionary)
+                    message.AppendFormat("{0}: {1} ", tree.Key, tree.Value);
+                SendChatMessage(message.ToString(), fromChannel);
+            }
+        }
+
 
 
         public bool SetSummonerName(string fromChannel, string summonerName, string msgSender)
@@ -408,9 +495,13 @@ namespace twitch_irc_bot
                     for (var i = 3; i < messageArray.Length; i++)
                     {
                         if (i == messageArray.Length - 1)
+                        {
                             message += messageArray[i];
+                        }
                         else
+                        {
                             message += messageArray[i] + " ";
+                        }
                     }
                     return true;
                 }
@@ -429,7 +520,6 @@ namespace twitch_irc_bot
             }
             if (Regex.Match(m, @"tmi.twitch.tv PART").Success)
             {
-
                 return true;
             }
             if (Regex.Match(m, @"tmi.twitch.tv 353").Success || Regex.Match(m, @"tmi.twitch.tv 366").Success)
@@ -521,7 +611,10 @@ namespace twitch_irc_bot
                 var subscriber = prefix[3].Split('=')[1].Split('"')[0];
                 var turbo = prefix[4].Split('=')[1].Split('"')[0];
                 var userType = prefix[5].Split('=')[1].Split('"')[0].Split(' ')[0];
-
+                if (fromChannel == msgSender)
+                {
+                    userType = "mod";
+                }
                 if (CheckSpam(msg, fromChannel, msgSender, userType)) return true;
                 if (CheckUrls(msg, fromChannel, msgSender, userType)) return true;
                 CheckCommands(msg, userType, fromChannel, msgCommand, msgSender);
@@ -625,6 +718,10 @@ namespace twitch_irc_bot
                 //{
                 //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
                 //}
+                else if (Regex.Match(message, @"^!masteries$").Success)
+                {
+                   GetMasteries(fromChannel); 
+                }
                 else if (Regex.Match(message, @"^!rank$").Success)
                 {
                     GetLeagueRank(fromChannel, msgSender);
@@ -632,24 +729,38 @@ namespace twitch_irc_bot
                 else if (Regex.Match(message, @"^!runes$").Success)
                 {
                     var runeDictionary = _riotApi.GetRunes(fromChannel);
-                    if (runeDictionary == null) 
-                        SendChatMessage("Please set up your summoner name by typing !setsummoner [summonername]", fromChannel);
-                    ParseRuneDictionary(runeDictionary, fromChannel);
+                    if (runeDictionary != null)
+                    {
+                        ParseRuneDictionary(runeDictionary, fromChannel);
+                    }
+                    else
+                    {
+                        SendChatMessage("Please set up your summoner name by typing !setsummoner [summonername]",
+                            fromChannel);
+                    }
 
                 }
                 else if (Regex.Match(message, @"^!allowurls\son$").Success)
                 {
                     if (userType == "mod")
+                    {
                         UrlToggle(fromChannel, true);
+                    }
                     else
+                    {
                         SendChatMessage("Insufficient privileges", fromChannel);
+                    }
                 }
                 else if (Regex.Match(message, @"^!allowurls\soff$").Success)
                 {
                     if (userType == "mod")
+                    {
                         UrlToggle(fromChannel, false);
+                    }
                     else
+                    {
                         SendChatMessage("Insufficient privileges", fromChannel);
+                    }
                 }
                 else if (Regex.Match(message, @"^!dicksize$").Success)
                 {
@@ -658,37 +769,57 @@ namespace twitch_irc_bot
                 else if (Regex.Match(message, @"^!dicksize\son$").Success)
                 {
                     if (userType == "mod")
+                    {
                         DickSizeToggle(fromChannel, true);
+                    }
                     else
+                    {
                         SendChatMessage("Insufficient privileges", fromChannel);
+                    }
                 }
                 else if (Regex.Match(message, @"^!dicksize\soff$").Success)
                 {
                     if (userType == "mod")
+                    {
                         DickSizeToggle(fromChannel, false);
+                    }
                     else
+                    {
                         SendChatMessage("Insufficient privileges", fromChannel);
+                    }
                 }
                 else if (Regex.Match(message, @"!addcom").Success)
                 {
                     if (userType == "mod")
+                    {
                         AddCommand(fromChannel, message);
+                    }
                     else
+                    {
                         SendChatMessage("Insufficient privileges", fromChannel);
+                    }
                 }
                 else if (Regex.Match(message, @"!editcom").Success)
                 {
                     if (userType == "mod")
+                    {
                         EditCommand(fromChannel, message);
+                    }
                     else
+                    {
                         SendChatMessage("Insufficient privileges", fromChannel);
+                    }
                 }
                 else if (Regex.Match(message, @"!removecom").Success)
                 {
                     if (userType == "mod")
+                    {
                         RemoveCommand(fromChannel, message);
+                    }
                     else
+                    {
                         SendChatMessage("Insufficient privileges", fromChannel);
+                    }
                 }
                 else if (Regex.Match(message, @"^!roulette$").Success)
                 {
@@ -727,21 +858,31 @@ namespace twitch_irc_bot
                 else if (message == "gg")
                 {
                     if (CheckGg(fromChannel))
+                    {
                         SendChatMessage("GG", fromChannel);
+                    }
                 }
                 else if (Regex.Match(message, @"^gg\son$").Success)
                 {
                     if (userType == "mod")
+                    {
                         GgToggle(fromChannel, true);
+                    }
                     else
+                    {
                         SendChatMessage("Insufficient privileges", fromChannel);
+                    }
                 }
                 else if (Regex.Match(message, @"^gg\soff$").Success)
                 {
                     if (userType == "mod")
+                    {
                         GgToggle(fromChannel, false);
+                    }
                     else
+                    {
                         SendChatMessage("Insufficient privileges", fromChannel);
+                    }
                 }
                 else if (
                     Regex.Match(message,
