@@ -364,7 +364,7 @@ namespace twitch_irc_bot
                     var reader = command.ExecuteReader();
                     if (reader == null) return null;
                     reader.Read();
-                    return reader.GetValue(1).ToString();
+                    return reader.GetValue(2).ToString();
                 }
                 catch (SQLiteException e)
                 {
@@ -376,6 +376,7 @@ namespace twitch_irc_bot
 
         public bool SetSummonerName(string channel, string summonerName)
         {
+            summonerName = summonerName.Trim(' ');
             using (var command = new SQLiteCommand("UPDATE League SET summoner_name=@summoner_name WHERE channel_name=@channel", _dbConnection))
             {
                 try

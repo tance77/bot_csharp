@@ -158,33 +158,27 @@ namespace twitch_irc_bot
         {
             var modList = new List<string>();
             var url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
-            var response = WebRequest.Create(url);
-            var objStream = response.GetResponse().GetResponseStream();
-            if (objStream == null) return modList;
-            var objReader = new StreamReader(objStream);
-
-            string line = "", jsonString = "";
-
-            while (line != null)
+            var request = WebRequest.Create(url);
+            using (var response = request.GetResponse())
             {
-                line = objReader.ReadLine();
-                if (line != null)
+                using (var responseStream = response.GetResponseStream())
                 {
-                    jsonString += line;
+                    if (responseStream == null) return modList;
+                    using (var objReader = new StreamReader(responseStream))
+                    {
+                        var jsonString = objReader.ReadToEnd();
+                        var mods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("moderators");
+                        var staff = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("staff");
+                        var admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
+                        var globalMods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("global_mods");
+                        modList.AddRange(mods.Select(mod => (string) mod));
+                        modList.AddRange(staff.Select(user => (string) user));
+                        modList.AddRange(admins.Select(admin => (string) admin));
+                        modList.AddRange(globalMods.Select(globalMod => (string) globalMod));
+                        return modList;
+                    }
                 }
             }
-
-            var mods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("moderators");
-            var staff = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("staff");
-            var admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
-            var globalMods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("global_mods");
-
-            modList.AddRange(mods.Select(mod => (string)mod));
-            modList.AddRange(staff.Select(user => (string)user));
-            modList.AddRange(admins.Select(admin => (string)admin));
-            modList.AddRange(globalMods.Select(globalMod => (string)globalMod));
-
-            return modList;
         }
 
         public void MatchCommand(string message, string fromChannel, string sender)
@@ -223,7 +217,7 @@ namespace twitch_irc_bot
 
         public void AddCommand(string channel, string message)
         {
-            if (!message.StartsWith("!")) {return;}
+            if (!message.StartsWith("!")) { return; }
             try
             {
                 var messageArray = message.Split(' ');
@@ -296,7 +290,7 @@ namespace twitch_irc_bot
         public void EditCommand(string channel, string message)
         {
 
-            if (!message.StartsWith("!")) {return;}
+            if (!message.StartsWith("!")) { return; }
             try
             {
                 var splitMessage = message.Split(' ');
@@ -338,7 +332,7 @@ namespace twitch_irc_bot
         public void DickSize(string channel, string sender)
         {
             var response = _db.DickSize(channel);
-            if (response == null){ return;}
+            if (response == null) { return; }
             SendChatMessage(sender + ", " + response, channel);
         }
 
@@ -424,13 +418,17 @@ namespace twitch_irc_bot
                     "No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]",
                     fromChannel);
             }
-            else if (result == "400" || result == "401" || result == "404")
+            else if (result == "400" || result == "401")
             {
                 SendChatMessage("Invalid Summoner Name", fromChannel);
             }
+            else if (result == "404")
+            {
+                SendChatMessage(fromChannel + " is not yet ranked.", fromChannel);
+            }
             else if (result == "429")
             {
-                SendChatMessage("To many requests at one time please try again", fromChannel);
+                SendChatMessage("To many requests at one time please try again.", fromChannel);
             }
             else if (result == "500" || result == "503")
             {
@@ -478,6 +476,24 @@ namespace twitch_irc_bot
 
             SendChatMessage("Insufficient privileges", fromChannel);
             return false;
+        }
+
+        public string SplitSummonerName(string message)
+        {
+            var msgParts = message.Split(' ');
+            var summonerName = new StringBuilder();
+            for (int i = 1; i < msgParts.Length ; i++)
+            {
+                if (i == msgParts.Length)
+                {
+                    summonerName.Append(msgParts[i]);
+                }
+                else
+                {
+                    summonerName.Append(msgParts[i] + " ");
+                }
+            }
+            return summonerName.ToString();
         }
 
         public bool MessageHandler(string m)
@@ -657,6 +673,9 @@ namespace twitch_irc_bot
                 }
                 /*---------------------END JOIN/PART FOR CHINNBOT ONLY ------------------------*/
             }
+            else if (msgSender == "nightbot" || msgSender == "moobot" || msgSender == "xanbot")
+            {
+            }
             else
             {
                 MatchCommand(message, fromChannel, msgSender);
@@ -665,62 +684,9 @@ namespace twitch_irc_bot
                 {
                     GetChannelCommands(fromChannel);
                 }
-
-                    //if (Regex.Match(message, @"!sron").Success)
-                //{
-
-                    //    var listOfMods = get_list_of_mods(fromChannel);
-                //    if (listOfMods.Contains(msgSender))
-                //    {
-                //        //sr turned on
-                //        SendChatMessage("Song requests are now on.", fromChannel);
-                //    }
-                //    else
-                //    {
-                //        SendChatMessage("Only moderators can turn song requests on.", fromChannel);
-                //    }
-                //}
-                //else if (Regex.Match(message, @"!sroff").Success)
-                //{
-                //    var listOfMods = get_list_of_mods(fromChannel);
-                //    if (listOfMods.Contains(msgSender))
-                //    {
-                //        //sr turned on
-                //        SendChatMessage("Song requests are now off.", fromChannel);
-                //    }
-                //    else
-                //    {
-                //        SendChatMessage("Only moderators can turn song requests off.", fromChannel);
-                //    }
-                //}
-                //}
-                //else if (Regex.Match(message, @"!gameqon").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!gameqoff").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!clearq").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!players").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!leave").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!position").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
                 else if (Regex.Match(message, @"^!masteries$").Success)
                 {
-                   GetMasteries(fromChannel); 
+                    GetMasteries(fromChannel);
                 }
                 else if (Regex.Match(message, @"^!rank$").Success)
                 {
@@ -738,7 +704,6 @@ namespace twitch_irc_bot
                         SendChatMessage("Please set up your summoner name by typing !setsummoner [summonername]",
                             fromChannel);
                     }
-
                 }
                 else if (Regex.Match(message, @"^!allowurls\son$").Success)
                 {
@@ -810,7 +775,7 @@ namespace twitch_irc_bot
                         SendChatMessage("Insufficient privileges", fromChannel);
                     }
                 }
-                else if (Regex.Match(message, @"!removecom").Success)
+                else if (Regex.Match(message, @"!removecom").Success || Regex.Match(message, @"!delcom").Success)
                 {
                     if (userType == "mod")
                     {
@@ -827,34 +792,10 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(message, @"!setsummoner").Success)
                 {
-                    var summonerName = message.Split(' ')[1];
+                    var summonerName = SplitSummonerName(message);
                     SetSummonerName(fromChannel, summonerName, msgSender);
                 }
 
-                    //else if (Regex.Match(message, @"!songrequest").Success || Regex.Match(post_message, @"!sr").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!songlist").Success || Regex.Match(post_message, @"!sl").Success || Regex.Match(post_message, @"!playlist").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!uptime").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!addquote").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!quote").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
-                //else if (Regex.Match(message, @"!m8b").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
                 else if (message == "gg")
                 {
                     if (CheckGg(fromChannel))
@@ -896,8 +837,85 @@ namespace twitch_irc_bot
                 }
 
                 /*------------------------- Built In Commands ------------------------*/
+                //if (Regex.Match(message, @"!sron").Success)
+                //{
 
+                //    var listOfMods = get_list_of_mods(fromChannel);
+                //    if (listOfMods.Contains(msgSender))
+                //    {
+                //        //sr turned on
+                //        SendChatMessage("Song requests are now on.", fromChannel);
+                //    }
+                //    else
+                //    {
+                //        SendChatMessage("Only moderators can turn song requests on.", fromChannel);
+                //    }
+                //}
+                //else if (Regex.Match(message, @"!sroff").Success)
+                //{
+                //    var listOfMods = get_list_of_mods(fromChannel);
+                //    if (listOfMods.Contains(msgSender))
+                //    {
+                //        //sr turned on
+                //        SendChatMessage("Song requests are now off.", fromChannel);
+                //    }
+                //    else
+                //    {
+                //        SendChatMessage("Only moderators can turn song requests off.", fromChannel);
+                //    }
+                //}
+                //}
+                //else if (Regex.Match(message, @"!gameqon").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!gameqoff").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!clearq").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!players").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!leave").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!position").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+
+                //else if (Regex.Match(message, @"!songrequest").Success || Regex.Match(post_message, @"!sr").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!songlist").Success || Regex.Match(post_message, @"!sl").Success || Regex.Match(post_message, @"!playlist").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!uptime").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!addquote").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!quote").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
+                //else if (Regex.Match(message, @"!m8b").Success)
+                //{
+                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
+                //}
             }
+
         }
     }
 }
