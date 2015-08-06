@@ -778,7 +778,7 @@ namespace twitch_irc_bot
             }
         }
 
-        public bool CheckPermitStatus(string fromChannel, string user)
+        public bool CheckPermitStatus(string fromChannel, string user) //Checks to see if the permit is still valid in the given time period
         {
             user = user.ToLower();
             user = user.Trim(' ');
@@ -792,21 +792,21 @@ namespace twitch_irc_bot
                             @"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;"))
                 {
                     dbConnection.Open();
-                        using (var command = new SQLiteCommand("SELECT * FROM ChannelUsers WHERE channel_name=@channel and user=@msg_sender", dbConnection))
+                    using (var command = new SQLiteCommand("SELECT * FROM ChannelUsers WHERE channel_name=@channel and user=@msg_sender", dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@channel", fromChannel);
+                        command.Parameters.AddWithValue("@msg_sender", user);
+                        using (var reader = command.ExecuteReader())
                         {
-                            command.Parameters.AddWithValue("@channel", fromChannel);
-                            command.Parameters.AddWithValue("@msg_sender", user);
-                            using (var reader = command.ExecuteReader())
+                            if (reader != null)
                             {
-                                if (reader != null)
-                                {
-                                    reader.Read();
-                                    startTime = reader.GetString(2);
-                                    endTime = reader.GetString(3);
-                                }
+                                reader.Read();
+                                startTime = reader.GetString(2);
+                                endTime = reader.GetString(3);
                             }
-                            GC.Collect();
                         }
+                        GC.Collect();
+                    }
                 }
             }
             catch (SQLiteException e)
@@ -966,6 +966,119 @@ namespace twitch_irc_bot
             {
                 Console.Write(e + "\r\n");
             }
+        }
+
+        public List<string> ParseRecentFollowers(string fromChannel, TwitchApi twitchApi)
+        {
+            var exists = true;
+            var followersList = new List<string>();
+            var followersDictionary = twitchApi.GetRecentFollowers(fromChannel);
+            if (followersDictionary != null)
+            {
+                try
+                {
+                    using (
+                        var dbConnection =
+                            new SQLiteConnection(
+                                @"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;"))
+                    {
+                        dbConnection.Open();
+                        foreach (var follower in followersDictionary)
+                        {
+                            exists = true;
+                            using (
+                                var command =
+                                    new SQLiteCommand(
+                                        "SELECT * FROM Followers WHERE follower_name=@follower and channel_name=@channel",
+                                        dbConnection))
+                            {
+                                command.Parameters.AddWithValue("@channel", fromChannel);
+                                command.Parameters.AddWithValue("@follower", follower.Key);
+                                using (var reader = command.ExecuteReader())
+                                {
+                                    if (reader != null)
+                                    {
+                                        reader.Read();
+                                        if (reader.StepCount == 1)
+                                        {
+                                            exists = false;
+                                        }
+                                    }
+                                }
+                            }
+                            GC.Collect();
+                            if (exists) //if it doesnt exists add it
+                            {
+                                using (
+                                    var command =
+                                        new SQLiteCommand(
+                                            "INSERT INTO Followers(channel_name,follower_name,follow_date)VALUES(@channel,@follower,@date)", dbConnection)
+                                    )
+                                {
+                                    command.Parameters.AddWithValue("@channel", fromChannel);
+                                    command.Parameters.AddWithValue("@follower", follower.Key);
+                                    command.Parameters.AddWithValue("@date", follower.Value.ToUniversalTime());
+                                    command.ExecuteNonQuery();
+                                    followersList.Add(follower.Key);
+                                }
+                            }
+                        }
+                        return followersList;
+                    }
+                }
+                catch
+            (SQLiteException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        public List<string> GetListOfChannels()
+        {
+            var channelsList = new List<string>();
+            try
+            {
+                using (
+                    var dbConnection =
+                        new SQLiteConnection(
+                            @"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;"))
+                {
+                    dbConnection.Open();
+                    using (var command = new SQLiteCommand("SELECT * FROM Channels", dbConnection))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader != null)
+                            {
+                                while (reader.Read())
+                                {
+                                    if (reader.StepCount == 0)
+                                    {
+                                        return null;
+                                    }
+                                    var channel = reader.GetString(0);
+                                    if (channel != "chinnbot")
+                                    {
+                                        channelsList.Add(channel);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    GC.Collect();
+                    return channelsList;
+                }
+            }
+            catch
+            (SQLiteException e)
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
+            return null;
         }
     }
 }

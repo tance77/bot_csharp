@@ -9,36 +9,13 @@ namespace twitch_irc_bot
     internal class CommandFunctions : WebFunctions
     {
 
-        public string GetStreamUptime(string fromChannel)
-        {
-            var url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
-            var jsonString = RequestJson(url);
-            if (!JObject.Parse(jsonString).SelectToken("stream").HasValues)
-            {
-                return "Stream is offline.";
-            }
-            var createdAt = JObject.Parse(jsonString).SelectToken("stream").SelectToken("created_at").ToString();
-            DateTime startedAt;
-            if (!DateTime.TryParse(createdAt, out startedAt))
-            {
-                return "Could not reach Twitch API";
-            }
-            var nowTime = DateTime.Now;
-            nowTime = nowTime.ToUniversalTime();
-            var onlineForHours = (nowTime - startedAt).Hours;
-            var onlineForMinutes = (nowTime - startedAt).Minutes;
-            var onlineForSeconds = (nowTime - startedAt).Seconds;
 
-            return fromChannel + " has been online for " + onlineForHours + " hours " + onlineForMinutes + " minutes " +
-                   onlineForSeconds + " seconds";
 
-        }
-
-        public Timer AddTimer(string fromChannel, string message, int seconds, IrcClient irc)
-        {
-            var miliseconds = seconds*1000;
-            return new Timer(miliseconds, message, fromChannel, irc);
-        }
+        //public Timer AddTimer(string fromChannel, string message, int seconds, IrcClient irc)
+        //{
+        //    var miliseconds = seconds*1000;
+        //    return new Timer(miliseconds, message, fromChannel, irc);
+        //}
 
         public bool Roulette(string channel)
         {
@@ -338,6 +315,26 @@ namespace twitch_irc_bot
                 return msgSender + " -> " + userToPermit + " can post 1 link anytime in the next 3 minutes and will not get timed out.";
             }
             return null;
+        }
+
+        public string AssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
+        {
+            var followersList = db.ParseRecentFollowers(fromChannel,twitchApi);
+            if (followersList == null) return null;
+            var message = new StringBuilder();
+            message.Append("/me ");
+            foreach (var item in followersList)
+            {
+                if (item == followersList.Last())
+                {
+                    message.Append(item + ", thank you for following!");
+                }
+                else
+                {
+                    message.Append(item + ", ");
+                }
+            }
+            return message.ToString();
         }
     }
 }

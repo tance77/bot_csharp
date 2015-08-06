@@ -17,8 +17,9 @@ namespace twitch_irc_bot
         private readonly StreamWriter _outputStream;
         private readonly DatabaseFunctions _db = new DatabaseFunctions();
         private readonly RiotApi _riotApi;
+        private readonly TwitchApi _twitchApi = new TwitchApi();
         private readonly CommandFunctions _commandFunctions = new CommandFunctions();
-   
+
 
 
         public IrcClient(string ip, int port, string userName, string oAuth)
@@ -38,9 +39,18 @@ namespace twitch_irc_bot
 
 
         }
-        public void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e, string fromChanel, string message)
+        public void AnnounceFollowers(Object source, System.Timers.ElapsedEventArgs e)
         {
-           SendChatMessage(message, fromChanel);
+            var channelList = _db.GetListOfChannels();
+            foreach (var channel in channelList)
+            {
+                var message = _commandFunctions.AssembleFollowerList(channel, _db, _twitchApi);
+                if (message != null)
+                {
+                    SendChatMessage(message, channel);
+                    Thread.Sleep(1000);
+                }
+            }
         }
 
         public void JoinChannel(string channel)
@@ -139,8 +149,8 @@ namespace twitch_irc_bot
             if (_db.UrlStatus(fromChannel)) return false;
             if (!Regex.Match(message, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
                 .Success || userType == "mod") return false;
-            if (_db.PermitExist(fromChannel, sender) &&_db.CheckPermitStatus(fromChannel, sender)) //if they exist in permit and if permit has not expired
-                //if it got here that means it was a url and they were permitted
+            if (_db.PermitExist(fromChannel, sender) && _db.CheckPermitStatus(fromChannel, sender)) //if they exist in permit and if permit has not expired
+            //if it got here that means it was a url and they were permitted
             {
                 _db.RemovePermit(fromChannel, sender);
                 return false;
@@ -154,7 +164,7 @@ namespace twitch_irc_bot
             return true;
         }
 
-    
+
         private static List<string> GetListOfMods(string fromChannel) //via chatters json deprecated
         {
             var modList = new List<string>();
@@ -384,7 +394,7 @@ namespace twitch_irc_bot
 
                 if (Regex.Match(message, @"!commands").Success)
                 {
-                    SendChatMessage(_commandFunctions.GetChannelCommands(fromChannel, _db),fromChannel);
+                    SendChatMessage(_commandFunctions.GetChannelCommands(fromChannel, _db), fromChannel);
                 }
                 else if (Regex.Match(message, @"^!masteries$").Success)
                 {
@@ -393,7 +403,7 @@ namespace twitch_irc_bot
                 else if (Regex.Match(message, @"^!rank$").Success)
                 {
                     var resoponse = _commandFunctions.GetLeagueRank(fromChannel, msgSender, _db, _riotApi);
-                    SendChatMessage(resoponse,fromChannel);
+                    SendChatMessage(resoponse, fromChannel);
                 }
                 else if (Regex.Match(message, @"^!runes$").Success)
                 {
@@ -412,7 +422,7 @@ namespace twitch_irc_bot
                 {
                     if (userType == "mod")
                     {
-                        SendChatMessage(_commandFunctions.UrlToggle(fromChannel, true,_db),fromChannel);
+                        SendChatMessage(_commandFunctions.UrlToggle(fromChannel, true, _db), fromChannel);
                     }
                     else
                     {
@@ -423,7 +433,7 @@ namespace twitch_irc_bot
                 {
                     if (userType == "mod")
                     {
-                        SendChatMessage(_commandFunctions.UrlToggle(fromChannel, false,_db),fromChannel);
+                        SendChatMessage(_commandFunctions.UrlToggle(fromChannel, false, _db), fromChannel);
                     }
                     else
                     {
@@ -439,7 +449,7 @@ namespace twitch_irc_bot
                 {
                     if (userType == "mod")
                     {
-                        SendChatMessage(_commandFunctions.DickSizeToggle(fromChannel, true, _db),fromChannel);
+                        SendChatMessage(_commandFunctions.DickSizeToggle(fromChannel, true, _db), fromChannel);
                     }
                     else
                     {
@@ -450,7 +460,7 @@ namespace twitch_irc_bot
                 {
                     if (userType == "mod")
                     {
-                        SendChatMessage(_commandFunctions.DickSizeToggle(fromChannel, false, _db),fromChannel);
+                        SendChatMessage(_commandFunctions.DickSizeToggle(fromChannel, false, _db), fromChannel);
                     }
                     else
                     {
@@ -569,7 +579,7 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(message, @"^!uptime$").Success)
                 {
-                    SendChatMessage(_commandFunctions.GetStreamUptime(fromChannel), fromChannel);
+                    SendChatMessage(_twitchApi.GetStreamUptime(fromChannel), fromChannel);
                 }
                 else if (Regex.Match(message, @"!permit").Success)
                 {

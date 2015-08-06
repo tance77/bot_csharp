@@ -103,6 +103,7 @@
     <Compile Include="RiotApi.cs" />
     <Compile Include="Spotify.cs" />
     <Compile Include="Timer.cs" />
+    <Compile Include="TwitchApi.cs" />
     <Compile Include="WebFunctions.cs" />
   </ItemGroup>
   <ItemGroup>
