@@ -18,6 +18,7 @@ namespace twitch_irc_bot
         private readonly DatabaseFunctions _db = new DatabaseFunctions();
         private readonly RiotApi _riotApi;
         private readonly CommandFunctions _commandFunctions = new CommandFunctions();
+   
 
 
         public IrcClient(string ip, int port, string userName, string oAuth)
@@ -34,6 +35,12 @@ namespace twitch_irc_bot
             _outputStream.WriteLine("CAP REQ :twitch.tv/tags");
             _outputStream.Flush();
 
+
+
+        }
+        public void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e, string fromChanel, string message)
+        {
+           SendChatMessage(message, fromChanel);
         }
 
         public void JoinChannel(string channel)
@@ -132,7 +139,7 @@ namespace twitch_irc_bot
             if (_db.UrlStatus(fromChannel)) return false;
             if (!Regex.Match(message, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
                 .Success || userType == "mod") return false;
-            if (_db.CheckPermitStatus(fromChannel, sender))
+            if (_db.PermitExist(fromChannel, sender) &&_db.CheckPermitStatus(fromChannel, sender)) //if they exist in permit and if permit has not expired
                 //if it got here that means it was a url and they were permitted
             {
                 _db.RemovePermit(fromChannel, sender);
@@ -140,8 +147,8 @@ namespace twitch_irc_bot
             }
             //Otherwise your not a mod or you are posting a link
             Thread.Sleep(400);
+            SendChatMessage(sender + ", you need permission before posting a link. [Warning]", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
-            SendChatMessage(sender + ", no urls allowed.", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
             return true;
@@ -217,25 +224,20 @@ namespace twitch_irc_bot
 
                 var fromChannel = m.Split('#')[1];
                 var joiner = m.Split('!')[0].Split(':')[1];
-                if (joiner != "chinnbot")
-                {
-                    _db.AddUserToPermitList(fromChannel, joiner);
-                }
+                joiner.ToLower();
                 if (joiner == "dongerinouserino")
                 {
                     SendChatMessage("ᕙ༼ຈل͜ຈ༽ᕗ flex your dongers ᕙ༼ຈل͜ຈ༽ᕗᕙ༼ຈل͜ຈ༽ᕗ DongerinoUserino is here ᕙ༼ຈل͜ຈ༽ᕗ ",
                         fromChannel);
                 }
+                if (joiner == "luminexi")
+                {
+                    SendChatMessage("Luminexi... you mean Lumisexi DatSheffy", fromChannel);
+                }
                 return true;
             }
             if (Regex.Match(m, @"tmi.twitch.tv PART").Success)
             {
-                var fromChannel = m.Split('#')[1];
-                var parter = m.Split('!')[0].Split(':')[1];
-                if (parter != "chinnbot")
-                {
-                    _db.RemoveUserToPermitList(fromChannel, parter);
-                }
                 return true;
             }
             if (Regex.Match(m, @"tmi.twitch.tv 353").Success || Regex.Match(m, @"tmi.twitch.tv 366").Success)
@@ -565,7 +567,7 @@ namespace twitch_irc_bot
                 {
                     SendChatMessage(msgSender + " here's  your boobs NSFW https://goo.gl/BNl3Gl", fromChannel);
                 }
-                else if (Regex.Match(message, @"!uptime").Success)
+                else if (Regex.Match(message, @"^!uptime$").Success)
                 {
                     SendChatMessage(_commandFunctions.GetStreamUptime(fromChannel), fromChannel);
                 }
@@ -577,6 +579,12 @@ namespace twitch_irc_bot
                         SendChatMessage(response, fromChannel);
                     }
                 }
+                //else if (Regex.Match(message, @"!addtimer").Success)
+                //{
+                //    var mytimer = _commandFunctions.AddTimer(fromChannel, message, 3, this);
+                //    SendChatMessage("Timer added", fromChannel);
+                //    GC.KeepAlive(mytimer);
+                //}
 
                 /*------------------------- Built In Commands ------------------------*/
                 //if (Regex.Match(message, @"!sron").Success)

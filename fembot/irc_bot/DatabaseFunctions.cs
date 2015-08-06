@@ -792,37 +792,6 @@ namespace twitch_irc_bot
                             @"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;"))
                 {
                     dbConnection.Open();
-                    var okToUpdate = true;
-                    using (
-                        var command =
-                            new SQLiteCommand(
-                                "SELECT * FROM ChannelUsers WHERE channel_name=@channel and user=@msg_sender",
-                                dbConnection))
-                    {
-                        command.Parameters.AddWithValue("@channel", fromChannel);
-                        command.Parameters.AddWithValue("@msg_sender", user);
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader != null)
-                            {
-                                reader.Read();
-                                if (reader.StepCount == 0)
-                                {
-                                    okToUpdate = false;
-                                }
-                                else
-                                {
-                                    startTime = reader.GetString(2);
-                                    endTime = reader.GetString(3);
-                                }
-                            }
-                        }
-                        GC.Collect();
-                    }
-
-                    if (okToUpdate == false)
-                    {
-                        AddUserToPermitList(fromChannel, user);
                         using (var command = new SQLiteCommand("SELECT * FROM ChannelUsers WHERE channel_name=@channel and user=@msg_sender", dbConnection))
                         {
                             command.Parameters.AddWithValue("@channel", fromChannel);
@@ -838,9 +807,6 @@ namespace twitch_irc_bot
                             }
                             GC.Collect();
                         }
-                    }
-
-
                 }
             }
             catch (SQLiteException e)
@@ -923,7 +889,7 @@ namespace twitch_irc_bot
                     using (
                         var command =
                             new SQLiteCommand(
-                                "UPDATE ChannelUsers SET permitted_at=@permit, permit_expires_at=@expires WHERE channel_name=@channel AND user=@user",
+                                "INSERT INTO ChannelUsers(channel_name, user, permitted_at, permit_expires_at)VALUES(@channel, @user, @permit, @expires)",
                                 dbConnection))
                     {
                         var permit = DateTimeSqLite(DateTime.Now);
@@ -943,37 +909,6 @@ namespace twitch_irc_bot
                 return false;
             }
         }
-
-        public void RemovePermit(string fromChannel, string user)
-        {
-                       try
-            {
-                using (
-                    var dbConnection =
-                        new SQLiteConnection(
-                            @"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;"))
-                {
-                    dbConnection.Open();
-                    using (
-                        var command =
-                            new SQLiteCommand(
-                                "UPDATE ChannelUsers SET permitted_at=@permit, permit_expires_at=@expires WHERE channel_name=@channel AND user=@user",
-                                dbConnection))
-                    {
-                        var expires = DateTimeSqLite((DateTime.Now));
-                        command.Parameters.AddWithValue("@channel", fromChannel);
-                        command.Parameters.AddWithValue("@user", user);
-                        command.Parameters.AddWithValue("@permit", expires);
-                        command.Parameters.AddWithValue("@expires", expires);
-                        command.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (SQLiteException e)
-            {
-                Console.Write(e + "\r\n");
-            }
-        } 
 
         public void AddUserToPermitList(string fromChannel, string user)
         {
@@ -1005,7 +940,7 @@ namespace twitch_irc_bot
                 Console.Write(e + "\r\n");
             }
         }
-        public void RemoveUserToPermitList(string fromChannel, string user)
+        public void RemovePermit(string fromChannel, string user)
         {
             try
             {
@@ -1018,7 +953,7 @@ namespace twitch_irc_bot
                     using (
                         var command =
                             new SQLiteCommand(
-                                "delete from ChannelUsers where channel_name=@channl AND user=@user", dbConnection))
+                                "delete from ChannelUsers where channel_name=@channel AND user=@user", dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", fromChannel);
                         command.Parameters.AddWithValue("@user", user);

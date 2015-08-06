@@ -25,9 +25,11 @@ C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\twitch_irc_b
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\twitch_irc_bot.pdb
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\EntityFramework.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\LolSharp.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\Moq.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\Newtonsoft.Json.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\nunit.framework.dll
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\RestSharp.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\SpotifyAPI.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\System.Data.SQLite.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\System.Data.SQLite.EF6.dll
@@ -37,11 +39,9 @@ C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\EntityFramew
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\Moq.xml
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\Newtonsoft.Json.xml
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\nunit.framework.xml
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\RestSharp.xml
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\SpotifyAPI.xml
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\System.Data.SQLite.xml
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\irc_bot.csprojResolveAssemblyReference.cache
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\twitch_irc_bot.exe
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\twitch_irc_bot.pdb
-C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\irc_bot.csprojResolveAssemblyReference.cache
-C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\LolSharp.dll
-C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\RestSharp.dll
-C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\RestSharp.xml

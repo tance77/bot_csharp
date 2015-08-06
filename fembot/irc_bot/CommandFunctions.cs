@@ -34,6 +34,12 @@ namespace twitch_irc_bot
 
         }
 
+        public Timer AddTimer(string fromChannel, string message, int seconds, IrcClient irc)
+        {
+            var miliseconds = seconds*1000;
+            return new Timer(miliseconds, message, fromChannel, irc);
+        }
+
         public bool Roulette(string channel)
         {
             var chamber = new Random();
@@ -312,7 +318,7 @@ namespace twitch_irc_bot
 
         public string PermitUser(string fromChannel, string msgSender, string message, string userType, DatabaseFunctions db)
         {
-            if (userType != "mod") return null;
+            if(db.UrlStatus(fromChannel) || userType != "mod") return null;
             var msgArr = message.Split(' ');
             var userToPermit = new StringBuilder();
             for (var i = 1; i < msgArr.Length; i++)
@@ -326,12 +332,10 @@ namespace twitch_irc_bot
                     userToPermit.Append(msgArr[i] + " ");
                 }
             }
-            var okToPermit = db.PermitExist(fromChannel, userToPermit.ToString());
-            if (!okToPermit) return null;
             var success = db.PermitUser(fromChannel.ToLower().Trim(' '), userToPermit.ToString().ToLower().Trim(' '));
             if (success)
             {
-                return userToPermit + " you can post 1 link anytime in the next 3 minutes and will not get timed out.";
+                return msgSender + " -> " + userToPermit + " can post 1 link anytime in the next 3 minutes and will not get timed out.";
             }
             return null;
         }

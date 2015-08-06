@@ -1,80 +1,34 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Spotify.aspx.cs" Inherits="fembot.Spotify" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <script>
-        
-        function buildTable() {
-
-            var song = $('#ello').val();
-
-            $.ajax({
-                url: 'Songs.asmx?op=GetSongByChannelName',
-                data: 'jchinn',
-                dataType: "xml"
-            });
-
-            var url = "Songs.asmx?op=GetSongByChannelName";
-            $.getJSON(url, function (response) {
-                var write;
-                $.each(response, function (index, table) {
-                    write += "<tr><td>" + item.Title + "</td><td>" + item.Artist + "</td><td>" + item.Durration + "</td><td>" + item.RequestedBy + "</td><td>" + item.Url + "</td></tr>";
-                    if (table.status === true) {
-                        write += '<td class="ap">Aprovado</td>';
-                    } else {
-                        write += '<td class="ng">Negado</td>';
-                    }
-                    write += '<td>' + table.id + '</td><td><button class="bt_delete">Deletar</button></td></tr>';
-                }); //end each
-                $('#songs').html(write);
-            }); //end getJSON
-
-        }
-
-        $(document).ready(function () {
-            var refresh = setInterval(function () {
-                buildTable();
-            }, 10000);
-        });
-
-
-    </script>
-    
     <br />
     <div class="row">
         <div class="col-md-3">
             <iframe src="https://embed.spotify.com/?uri=spotify:track:4th1RQAelzqgY7wL53UGQt" width="300" height="380" frameborder="0" allowtransparency="true"></iframe>
+
         </div>
 
         <div class="col-lg-9 col-xs-push-custom">
-            
-            <table class="table table-bordered table-striped table-hover" id ="ello">
-                <thead id ="songs">
-                    <tr class="success">
-                        <th>Title</th>
-                        <th>Artist</th>
-                        <th>Durration</th>
-                        <th>Requested by</th>
-                        <th>URL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>The Nights</td>
-                        <td>Avicii</td>
-                        <td>2:56</td>
-                        <td>BlackMarmalade</td>
-                        <td>BlackMarmalade</td>
-                    </tr>
-                    <tr>
-                        <td>Test</td>
-                        <td>Test2</td>
-                        <td>Test3</td>
-                        <td>Test4</td>
-                        <td>BlackMarmalade</td>
-                    </tr>
-                </tbody>
-            </table>
-
+            <asp:Timer runat="server" ID="Timer1" Interval="10000" OnTick="SongUpdateTimer"></asp:Timer>
+            <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+                <Triggers>
+                    <asp:AsyncPostBackTrigger ControlID="Timer1"/>
+                </Triggers>
+                <ContentTemplate>
+                    <asp:GridView ID="GridView1" runat="server" DataSourceID="fembot" AllowPaging="True" AutoGenerateColumns="False" CssClass="table table-bordered table-striped table-hover" DataKeyNames="rowid">
+                        <Columns>
+                            <asp:BoundField DataField="rowid" HeaderText="ID" ReadOnly="True" SortExpression="rowid" />
+                            <asp:BoundField DataField="title" HeaderText="Title" SortExpression="title" />
+                            <asp:BoundField DataField="artist" HeaderText="Artist" SortExpression="artist" />
+                            <asp:BoundField DataField="durration" HeaderText="Durration" SortExpression="durration" />
+                            <asp:BoundField DataField="requested_by" HeaderText="Requested By" SortExpression="requested_by" />
+                            <asp:HyperLinkField DataNavigateUrlFields="url" DataTextField="url" HeaderText="URL" />
+                        </Columns>
+                        <HeaderStyle CssClass="success" />
+                    </asp:GridView>
+                    <asp:SqlDataSource ID="fembot" runat="server" ConnectionString="<%$ ConnectionStrings:ConnectionString %>" ProviderName="<%$ ConnectionStrings:ConnectionString.ProviderName %>" SelectCommand="SELECT rowid, requested_by, durration, artist, title, url FROM Songs WHERE (channel_name = &quot;jchinn&quot;)"></asp:SqlDataSource>
+                </ContentTemplate>
+            </asp:UpdatePanel>
         </div>
     </div>
 
