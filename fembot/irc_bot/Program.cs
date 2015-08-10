@@ -15,6 +15,14 @@ namespace twitch_irc_bot
             followerTimer.AutoReset = true;
             followerTimer.Enabled = true;
 
+            var pointsTenTimer = new System.Timers.Timer { Interval = 600000 }; //1 coin every 10 minutes
+            pointsTenTimer.Elapsed += irc.AddPointsTen;
+            pointsTenTimer.AutoReset = true;
+            pointsTenTimer.Enabled = true;
+
+            GC.KeepAlive(pointsTenTimer);
+            GC.KeepAlive(followerTimer);
+
             while (true)
             {
                 var message = irc.ReadMessage();

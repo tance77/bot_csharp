@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
+using System.Security.Policy;
 using Newtonsoft.Json.Linq;
-using RestSharp;
 
 namespace twitch_irc_bot
 {
     class TwitchApi : WebFunctions
     {
-        public TwitchApi() { }
         public string GetStreamUptime(string fromChannel)
         {
             var url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
@@ -36,12 +35,13 @@ namespace twitch_irc_bot
 
         }
 
-        public Dictionary<string,DateTime> GetRecentFollowers(string fromChannel)
+        public Dictionary<string, DateTime> GetRecentFollowers(string fromChannel)
         {
             var url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=25";
             var jsonString = RequestJson(url);
             var followsDictionary = new Dictionary<string, DateTime>();
-            if (!JObject.Parse(jsonString).SelectToken("follows").HasValues)
+            if (jsonString == "" || jsonString == "502") return null;
+            if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
             {
                 return null;
             }
@@ -54,11 +54,31 @@ namespace twitch_irc_bot
                 {
                     return null;
                 }
-                var displayName = JObject.Parse(item.ToString()).SelectToken("user").SelectToken("display_name").ToString();
+                var displayName =
+                    JObject.Parse(item.ToString()).SelectToken("user").SelectToken("display_name").ToString();
                 followsDictionary.Add(displayName, followDate);
             }
             return followsDictionary;
+        }
 
+
+        public List<string> GetActiveUsers(string fromChannel) //via chatters json deprecated
+        {
+            var userList = new List<string>();
+            var url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
+            var jsonString = RequestJson(url);
+            if (jsonString == "" || jsonString == "502") return null;
+            var mods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("moderators");
+            var staff = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("staff");
+            var admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
+            var globalMods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("global_mods");
+            var viewers = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("viewers");
+            userList.AddRange(mods.Select(mod => (string) mod));
+            userList.AddRange(staff.Select(user => (string) user));
+            userList.AddRange(admins.Select(admin => (string) admin));
+            userList.AddRange(globalMods.Select(globalMod => (string) globalMod));
+            userList.AddRange(viewers.Select(viewer => (string) viewer));
+            return userList;
         }
     }
 }

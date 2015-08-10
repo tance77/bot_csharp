@@ -52,6 +52,15 @@ namespace twitch_irc_bot
                 }
             }
         }
+        public void AddPointsTen(Object source, System.Timers.ElapsedEventArgs e)
+        {
+            var channelList = _db.GetListOfChannels();
+            foreach (var channel in channelList)
+            {
+                var userList = _twitchApi.GetActiveUsers(channel);
+                _db.AddCoins(1 ,channel,userList);
+            }
+        } 
 
         public void JoinChannel(string channel)
         {
@@ -128,7 +137,8 @@ namespace twitch_irc_bot
                 Regex.Match(message, @".*?sexually Identify as*?").Success ||
                 Regex.Match(message, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
                 Regex.Match(message, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success ||
-                Regex.Match(message, @".*?[Gg][Rr][Ee][Yy].*?[Ww][Aa][Rr][Ww][Ii][Cc][Kk].*?[Mm][Ee][Dd][Ii][Ee][Vv][Aa][Ll].*?[Tt][Ww][Ii][Tt][Cc][Hh].*?[Aa][Nn][Dd].*?\d*.*?\d*.*?[Ii][]Pp].*?").Success)
+                Regex.Match(message, @".*?[Gg][Rr][Ee][Yy].*?[Ww][Aa][Rr][Ww][Ii][Cc][Kk].*?[Mm][Ee][Dd][Ii][Ee][Vv][Aa][Ll].*?[Tt][Ww][Ii][Tt][Cc][Hh].*?[Aa][Nn][Dd].*?\d*.*?\d*.*?[Ii][]Pp].*?").Success ||
+                Regex.Match(message, @"\$50 prepaid riot points from here").Success)
             {
                 if (userType == "mod") return false; //your a mod no timeout
                 Thread.Sleep(400);
@@ -203,7 +213,7 @@ namespace twitch_irc_bot
                 SendChatMessage(sender + ", " + commandFound.Item1, fromChannel);
         }
 
-        public bool MessageHandler(string m)
+        public void MessageHandler(string m)
         {
             /*------- Successfull Twitch Connection -----------*/
             if (Regex.Match(m, @":tmi.twitch.tv").Success)
@@ -226,7 +236,7 @@ namespace twitch_irc_bot
                             message += messageArray[i] + " ";
                         }
                     }
-                    return true;
+                return;
                 }
             }
             if (Regex.Match(m, @"tmi.twitch.tv JOIN").Success)
@@ -244,16 +254,16 @@ namespace twitch_irc_bot
                 {
                     SendChatMessage("Luminexi... you mean Lumisexi DatSheffy", fromChannel);
                 }
-                return true;
+                return;
             }
             if (Regex.Match(m, @"tmi.twitch.tv PART").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @"tmi.twitch.tv 353").Success || Regex.Match(m, @"tmi.twitch.tv 366").Success)
             {
-                return true;
 
+                return;
             }
             if (Regex.Match(m, @":jtv MODE").Success)
             {
@@ -261,54 +271,54 @@ namespace twitch_irc_bot
                 var fromChanel = messageParts[2].Split('#')[1];
                 var privlages = messageParts[3];
                 var user = messageParts[4];
-                return true;
+                return;
 
             }
             if (Regex.Match(m, @"msg-id=subs_on :tmi.twitch.tv NOTICE").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @"msg-id=subs_off :tmi.twitch.tv NOTICE").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @"msg-id=slow_on :tmi.twitch.tv NOTICE").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @"msg-id=slow_off :tmi.twitch.tv NOTICE").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @"msg-id=r9k_on :tmi.twitch.tv NOTICE").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @"msg-id=r9k_off :tmi.twitch.tv NOTICE").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @"msg-id=host_on :tmi.twitch.tv NOTICE").Success)
             {
                 //:tmi.twitch.tv HOSTTARGET #hosting_channel :target_channel [number]
-                return true;
+                return;
             }
             if (Regex.Match(m, @"msg-id=host_off :tmi.twitch.tv NOTICE").Success)
             {
                 //> :tmi.twitch.tv HOSTTARGET #hosting_channel :- [number]
-                return true;
+                return;
             }
             if (Regex.Match(m, @":tmi.twitch.tv CLEARCHAT").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @":tmi.twitch.tv USERSTATE").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @":twitchnotify!twitchnotify@twitchnotify.tmi.twitch.tv").Success)
             {
-                return true;
+                return;
             }
             if (Regex.Match(m, @"tmi.twitch.tv PRIVMSG").Success)
             {
@@ -343,12 +353,11 @@ namespace twitch_irc_bot
                 {
                     userType = "mod";
                 }
-                if (CheckSpam(msg, fromChannel, msgSender, userType)) return true;
-                if (CheckUrls(msg, fromChannel, msgSender, userType)) return true;
+                if (CheckSpam(msg, fromChannel, msgSender, userType)) return;
+                if (CheckUrls(msg, fromChannel, msgSender, userType)) return;
                 CheckCommands(msg, userType, fromChannel, msgCommand, msgSender);
-                return true;
+                return;
             }
-            return false;
         }
 
         public void CheckCommands(string message, string userType, string fromChannel, string msgCommand, string msgSender)
@@ -360,6 +369,7 @@ namespace twitch_irc_bot
                 {
                     if (_db.AddToChannels(msgSender))
                     {
+                        _commandFunctions.JoinAssembleFollowerList(fromChannel, _db, _twitchApi);
                         SendChatMessageLobby("Joining channel, " + msgSender +
                                              ", please remember to mod me in your channel. Type /mod chinnbot into the chat to mod me.");
                         JoinChannel(msgSender);

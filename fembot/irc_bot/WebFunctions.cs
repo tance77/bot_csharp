@@ -18,8 +18,7 @@ namespace twitch_irc_bot
                         if (responseStream == null) return null;
                         using (var objReader = new StreamReader(responseStream))
                         {
-                            //returns json string
-                            return objReader.ReadToEnd();
+                            return objReader.ReadToEnd(); //returns json string
                         }
                     }
                 }

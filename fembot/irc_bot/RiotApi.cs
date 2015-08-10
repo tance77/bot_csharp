@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
 namespace twitch_irc_bot

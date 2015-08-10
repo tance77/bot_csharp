@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using NUnit.Framework;
+
 
 namespace twitch_irc_bot
 {
@@ -377,7 +379,7 @@ namespace twitch_irc_bot
                                 break;
                             }
                         }
-                        GC.Collect(); //garbage collector bug with sqlite
+                        GC.Collect();
                         if (!okToDelete)
                         {
                             return false;
@@ -970,7 +972,6 @@ namespace twitch_irc_bot
 
         public List<string> ParseRecentFollowers(string fromChannel, TwitchApi twitchApi)
         {
-            var exists = true;
             var followersList = new List<string>();
             var followersDictionary = twitchApi.GetRecentFollowers(fromChannel);
             if (followersDictionary != null)
@@ -985,7 +986,7 @@ namespace twitch_irc_bot
                         dbConnection.Open();
                         foreach (var follower in followersDictionary)
                         {
-                            exists = true;
+                            var exists = true;
                             using (
                                 var command =
                                     new SQLiteCommand(
@@ -1007,7 +1008,7 @@ namespace twitch_irc_bot
                                 }
                             }
                             GC.Collect();
-                            if (exists) //if it doesnt exists add it
+                            if (exists) //if it exists
                             {
                                 using (
                                     var command =
@@ -1078,7 +1079,76 @@ namespace twitch_irc_bot
                 Console.Write(e + "\r\n");
                 return null;
             }
-            return null;
+        }
+
+        public void AddCoins(int numberOfCoins, string channel, List<string> userList)
+        {
+            var updateList = new List<string>();
+            var insertList = new List<string>();
+            foreach (var per in userList)
+            {
+                insertList.Add(per);
+            }
+            
+            try
+            {
+                using (
+                    var dbConnection =
+                        new SQLiteConnection(
+                            @"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;"))
+                {
+                    dbConnection.Open();
+                        using (
+                            var command = new SQLiteCommand("SELECT * FROM ChinnCoins WHERE channel_name=@channel",dbConnection))
+                        {
+                            command.Parameters.AddWithValue("@channel", channel);
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader != null)
+                                {
+                                    while (reader.Read())
+                                    {
+                                        updateList.Add(reader.GetString(1));
+                                    }
+                                }
+                            }
+                    }
+                    GC.Collect();
+                    foreach (var person in userList)
+                    {
+                        if (updateList.Contains(person))
+                        {
+                            insertList.Remove(person);
+                        }
+                    }
+                    foreach (var person in insertList)
+                    {
+                        using(var command = new SQLiteCommand("INSERT INTO ChinnCoins(channel_name,user,chinn_coins)VALUES(@channel,@user,@chinn_coins)", dbConnection))
+                        {
+                           command.Parameters.AddWithValue("@channel", channel); 
+                           command.Parameters.AddWithValue("@user", person); 
+                           command.Parameters.AddWithValue("@chinn_coins", numberOfCoins);
+                           command.ExecuteNonQuery();
+                        }
+                        GC.Collect();
+                    }
+                    foreach (var person in updateList)
+                    {
+                        using(var command = new SQLiteCommand("UPDATE ChinnCoins SET channel_name=@channel, user=@user, chinn_coins = chinn_coins + @chinn_coins WHERE channel_name=@channel AND user=@user", dbConnection))
+                        {
+                           command.Parameters.AddWithValue("@channel", channel); 
+                           command.Parameters.AddWithValue("@user", person); 
+                           command.Parameters.AddWithValue("@chinn_coins", numberOfCoins);
+                           command.ExecuteNonQuery();
+                        }
+                        GC.Collect();
+                    }
+                }
+            }
+            catch (SQLiteException e)
+            {
+                Console.Write(e + "\r\n");
+            }
         }
     }
 }

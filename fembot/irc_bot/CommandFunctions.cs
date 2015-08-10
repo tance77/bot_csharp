@@ -309,6 +309,7 @@ namespace twitch_irc_bot
                     userToPermit.Append(msgArr[i] + " ");
                 }
             }
+            if (userToPermit.ToString() == "") return null;
             var success = db.PermitUser(fromChannel.ToLower().Trim(' '), userToPermit.ToString().ToLower().Trim(' '));
             if (success)
             {
@@ -323,18 +324,30 @@ namespace twitch_irc_bot
             if (followersList == null) return null;
             var message = new StringBuilder();
             message.Append("/me ");
-            foreach (var item in followersList)
+            if (followersList.Count == 1)
             {
-                if (item == followersList.Last())
+                message.Append(followersList.First() + " thanks for following!");
+            }
+            else
+            {
+                foreach (var item in followersList)
                 {
-                    message.Append(item + ", thank you for following!");
-                }
-                else
-                {
-                    message.Append(item + ", ");
+                    if (item == followersList.Last())
+                    {
+                        message.Append("and " + item + ", thank you for following!");
+                    }
+                    else
+                    {
+                        message.Append(item + ", ");
+                    }
                 }
             }
             return message.ToString();
         }
+        public void JoinAssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
+        {
+            db.ParseRecentFollowers(fromChannel, twitchApi);
+        }
+
     }
 }
