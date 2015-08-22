@@ -19,6 +19,7 @@ namespace twitch_irc_bot
         private readonly RiotApi _riotApi;
         private readonly TwitchApi _twitchApi = new TwitchApi();
         private readonly CommandFunctions _commandFunctions = new CommandFunctions();
+        private List<Messages> _channelHistory; 
 
 
 
@@ -26,6 +27,7 @@ namespace twitch_irc_bot
         {
             _riotApi = new RiotApi(_db);
             _botUserName = userName;
+            _channelHistory = new List<Messages>();
             var tcpClient = new TcpClient(ip, port);
             _inputStream = new StreamReader(tcpClient.GetStream());
             _outputStream = new StreamWriter(tcpClient.GetStream());
@@ -34,7 +36,18 @@ namespace twitch_irc_bot
             _outputStream.WriteLine("NICK " + userName);
             _outputStream.WriteLine("CAP REQ :twitch.tv/membership");
             _outputStream.WriteLine("CAP REQ :twitch.tv/tags");
+            _outputStream.WriteLine("CAP REQ :twitch.tv/commands");
             _outputStream.Flush();
+
+            var followerTimer = new System.Timers.Timer { Interval = 30000 };
+            followerTimer.Elapsed += AnnounceFollowers;
+            followerTimer.AutoReset = true;
+            followerTimer.Enabled = true;
+
+            var pointsTenTimer = new System.Timers.Timer { Interval = 600000 }; //1 coin every 10 minutes
+            pointsTenTimer.Elapsed += AddPointsTen;
+            pointsTenTimer.AutoReset = true;
+            pointsTenTimer.Enabled = true;
 
 
 
@@ -57,8 +70,10 @@ namespace twitch_irc_bot
             var channelList = _db.GetListOfChannels();
             foreach (var channel in channelList)
             {
+                var response = _twitchApi.GetStreamUptime(channel);
+                if (response == "Stream is offline." || response == "Could not reach Twitch API") continue; //continue the loop
                 var userList = _twitchApi.GetActiveUsers(channel);
-                _db.AddCoins(1 ,channel,userList);
+                _db.AddCoins(1, channel, userList);
             }
         } 
 
@@ -107,13 +122,13 @@ namespace twitch_irc_bot
 
         public string ReadMessage()
         {
-            var buf = _inputStream.ReadLine();
-            if (buf == null) return "";
-            if (!buf.StartsWith("PING ")) return buf;
-            _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
-            Console.Write(buf.Replace("PING", "PONG") + "\r\n");
-            _outputStream.Flush();
-            return buf;
+                var buf = _inputStream.ReadLine();
+                if (buf == null) return "";
+                if (!buf.StartsWith("PING ")) return buf;
+                _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
+                Console.Write(buf.Replace("PING", "PONG") + "\r\n");
+                _outputStream.Flush();
+                return buf;
         }
 
         private void kill_user(string fromChannel, string msgSender, string userType)
@@ -138,7 +153,8 @@ namespace twitch_irc_bot
                 Regex.Match(message, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
                 Regex.Match(message, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success ||
                 Regex.Match(message, @".*?[Gg][Rr][Ee][Yy].*?[Ww][Aa][Rr][Ww][Ii][Cc][Kk].*?[Mm][Ee][Dd][Ii][Ee][Vv][Aa][Ll].*?[Tt][Ww][Ii][Tt][Cc][Hh].*?[Aa][Nn][Dd].*?\d*.*?\d*.*?[Ii][]Pp].*?").Success ||
-                Regex.Match(message, @"\$50 prepaid riot points from here").Success)
+                Regex.Match(message, @"\$50 prepaid riot points from here").Success ||
+                Regex.Match(message, @"I just got \$50 prepaid riot points from here its legit xD!!! http:\/\/getriotpointscodes\.com\/").Success)
             {
                 if (userType == "mod") return false; //your a mod no timeout
                 Thread.Sleep(400);
@@ -172,6 +188,43 @@ namespace twitch_irc_bot
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
             return true;
+        }
+
+
+        public void AddUserMessageHistory(string fromChannel, string msgSender, string msg)
+        {
+
+            var toBeDeleted = new List<Messages>();
+            var empty = true;
+
+            foreach (var msgContainer in _channelHistory)
+            {
+                if (msgContainer.GetChannel() == fromChannel && msgContainer.GetSender() == msgSender && msgContainer.Count() < 20)
+                {
+                    msgContainer.AddMessage(msg);
+                    empty = false;
+                }
+                else if (msgContainer.GetChannel() == fromChannel && msgContainer.GetSender() == msgSender && msgContainer.Count() >= 20)
+                {
+                    msgContainer.RemoveFirst();
+                    msgContainer.AddMessage(msg);
+                    empty = false;
+                }
+                if (msgContainer.LastMessageTime())
+                {
+                    toBeDeleted.Add(msgContainer);
+                }
+            }
+
+            if (empty)
+            {
+                _channelHistory.Add(new Messages(fromChannel, msgSender, msg));
+            }
+
+            foreach (var item in toBeDeleted)
+            {
+                _channelHistory.Remove(item);
+            }
         }
 
 
@@ -236,15 +289,14 @@ namespace twitch_irc_bot
                             message += messageArray[i] + " ";
                         }
                     }
-                return;
                 }
             }
-            if (Regex.Match(m, @"tmi.twitch.tv JOIN").Success)
+            else if (Regex.Match(m, @"tmi.twitch.tv JOIN").Success)
             {
 
                 var fromChannel = m.Split('#')[1];
                 var joiner = m.Split('!')[0].Split(':')[1];
-                joiner.ToLower();
+                joiner = joiner.ToLower();
                 if (joiner == "dongerinouserino")
                 {
                     SendChatMessage("ᕙ༼ຈل͜ຈ༽ᕗ flex your dongers ᕙ༼ຈل͜ຈ༽ᕗᕙ༼ຈل͜ຈ༽ᕗ DongerinoUserino is here ᕙ༼ຈل͜ຈ༽ᕗ ",
@@ -254,73 +306,56 @@ namespace twitch_irc_bot
                 {
                     SendChatMessage("Luminexi... you mean Lumisexi DatSheffy", fromChannel);
                 }
-                return;
             }
-            if (Regex.Match(m, @"tmi.twitch.tv PART").Success)
+            else if (Regex.Match(m, @"tmi.twitch.tv PART").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @"tmi.twitch.tv 353").Success || Regex.Match(m, @"tmi.twitch.tv 366").Success)
+            else if (Regex.Match(m, @"tmi.twitch.tv 353").Success || Regex.Match(m, @"tmi.twitch.tv 366").Success)
             {
-
-                return;
             }
-            if (Regex.Match(m, @":jtv MODE").Success)
+            else if (Regex.Match(m, @":jtv MODE").Success)
             {
                 var messageParts = m.Split(' ');
                 var fromChanel = messageParts[2].Split('#')[1];
                 var privlages = messageParts[3];
                 var user = messageParts[4];
-                return;
-
             }
-            if (Regex.Match(m, @"msg-id=subs_on :tmi.twitch.tv NOTICE").Success)
+            else if (Regex.Match(m, @"msg-id=subs_on :tmi.twitch.tv NOTICE").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @"msg-id=subs_off :tmi.twitch.tv NOTICE").Success)
+            else if (Regex.Match(m, @"msg-id=subs_off :tmi.twitch.tv NOTICE").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @"msg-id=slow_on :tmi.twitch.tv NOTICE").Success)
+            else if (Regex.Match(m, @"msg-id=slow_on :tmi.twitch.tv NOTICE").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @"msg-id=slow_off :tmi.twitch.tv NOTICE").Success)
+            else if (Regex.Match(m, @"msg-id=slow_off :tmi.twitch.tv NOTICE").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @"msg-id=r9k_on :tmi.twitch.tv NOTICE").Success)
+            else if (Regex.Match(m, @"msg-id=r9k_on :tmi.twitch.tv NOTICE").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @"msg-id=r9k_off :tmi.twitch.tv NOTICE").Success)
+            else if (Regex.Match(m, @"msg-id=r9k_off :tmi.twitch.tv NOTICE").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @"msg-id=host_on :tmi.twitch.tv NOTICE").Success)
+            else if (Regex.Match(m, @"msg-id=host_on :tmi.twitch.tv NOTICE").Success)
             {
                 //:tmi.twitch.tv HOSTTARGET #hosting_channel :target_channel [number]
-                return;
             }
-            if (Regex.Match(m, @"msg-id=host_off :tmi.twitch.tv NOTICE").Success)
+            else if (Regex.Match(m, @"msg-id=host_off :tmi.twitch.tv NOTICE").Success)
             {
                 //> :tmi.twitch.tv HOSTTARGET #hosting_channel :- [number]
-                return;
             }
-            if (Regex.Match(m, @":tmi.twitch.tv CLEARCHAT").Success)
+            else if (Regex.Match(m, @":tmi.twitch.tv CLEARCHAT").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @":tmi.twitch.tv USERSTATE").Success)
+            else if (Regex.Match(m, @":tmi.twitch.tv USERSTATE").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @":twitchnotify!twitchnotify@twitchnotify.tmi.twitch.tv").Success)
+            else if (Regex.Match(m, @":twitchnotify!twitchnotify@twitchnotify.tmi.twitch.tv").Success)
             {
-                return;
             }
-            if (Regex.Match(m, @"tmi.twitch.tv PRIVMSG").Success)
+            else if (Regex.Match(m, @"tmi.twitch.tv PRIVMSG").Success)
             {
                 var msgArray = m.Split(' ');
                 var msg = "";
@@ -353,10 +388,13 @@ namespace twitch_irc_bot
                 {
                     userType = "mod";
                 }
+
+                //Adds message to user message history
+                AddUserMessageHistory(fromChannel,msgSender, msg);
+
                 if (CheckSpam(msg, fromChannel, msgSender, userType)) return;
                 if (CheckUrls(msg, fromChannel, msgSender, userType)) return;
                 CheckCommands(msg, userType, fromChannel, msgCommand, msgSender);
-                return;
             }
         }
 

@@ -25,7 +25,6 @@ C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\twitch_irc_b
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\twitch_irc_bot.pdb
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\EntityFramework.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\EntityFramework.SqlServer.dll
-C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\LolSharp.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\Moq.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\Newtonsoft.Json.dll
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\nunit.framework.dll

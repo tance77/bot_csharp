@@ -40,7 +40,7 @@ namespace twitch_irc_bot
             var url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=25";
             var jsonString = RequestJson(url);
             var followsDictionary = new Dictionary<string, DateTime>();
-            if (jsonString == "" || jsonString == "502") return null;
+            if (jsonString == "" || jsonString == "502" || jsonString=="404") return null;
             if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
             {
                 return null;

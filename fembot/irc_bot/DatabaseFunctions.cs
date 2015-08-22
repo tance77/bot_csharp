@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Linq;
 using NUnit.Framework;
 
 
@@ -1083,13 +1084,13 @@ namespace twitch_irc_bot
 
         public void AddCoins(int numberOfCoins, string channel, List<string> userList)
         {
-            var updateList = new List<string>();
-            var insertList = new List<string>();
-            foreach (var per in userList)
+            if (userList.Contains("chinnbot"))
             {
-                insertList.Add(per);
+                userList.Remove("chinnbot"); //gets rid of the bot from the list
             }
-            
+            var updateList = new List<string>();
+            var insertList = userList.ToList();
+
             try
             {
                 using (
