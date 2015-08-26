@@ -114,6 +114,12 @@ namespace twitch_irc_bot
                 + _botUserName + ".tim.twitch.tv PRIVMSG #chinnbot :" + message);
         }
 
+        private void SendWhisper(string message, string channelName)
+        {
+            SendIrcMessage(":" + _botUserName + "!" + _botUserName + "@"
+                + _botUserName + ".tim.twitch.tv WHISPER #" + _botUserName + " :" + message);
+        }
+
         public void SendChatMessage(string message, string channelName)
         {
             SendIrcMessage(":" + _botUserName + "!" + _botUserName + "@"
@@ -141,6 +147,8 @@ namespace twitch_irc_bot
             SendChatMessage("/timeout " + msgSender + " 3", fromChannel);
             SendChatMessage("/timeout " + msgSender + " 2", fromChannel);
             SendChatMessage("/timeout " + msgSender + " 1", fromChannel);
+            SendWhisper("/w " + msgSender + " Your chat has been purged in " + fromChannel + "'s channel. Please keep your dirty secrets to yourself.", fromChannel);
+
         }
 
         private bool CheckSpam(string message, string fromChannel, string msgSender, string userType)
@@ -158,11 +166,12 @@ namespace twitch_irc_bot
             {
                 if (userType == "mod") return false; //your a mod no timeout
                 Thread.Sleep(400);
-                SendChatMessage("/timeout " + msgSender + " 100", fromChannel);
+                SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
                 SendChatMessage(msgSender + ", [Spam Detected]", fromChannel);
+                SendWhisper("/w " + msgSender + "You have been banned from chatting in " + fromChannel + "'s channel. If you think you have been wrongly banned whisper a mod or message the channel owner.", fromChannel);
                 Thread.Sleep(400);
-                SendChatMessage("/timeout " + msgSender + " 100", fromChannel);
-                SendChatMessage("/timeout " + msgSender + " 100", fromChannel);
+                SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
+                SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
                 Thread.Sleep(400);
                 SendChatMessage("/ban " + msgSender, fromChannel);
                 return true;
@@ -184,6 +193,7 @@ namespace twitch_irc_bot
             //Otherwise your not a mod or you are posting a link
             Thread.Sleep(400);
             SendChatMessage(sender + ", you need permission before posting a link. [Warning]", fromChannel);
+            SendWhisper("/w " + sender + "You can't post links in " + fromChannel + "'s channel. You have been timed out for 10 seconds.", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
@@ -567,6 +577,7 @@ namespace twitch_irc_bot
 
                         Thread.Sleep(400);
                         SendChatMessage("/timeout " + msgSender + " 60", fromChannel);
+                        SendWhisper("/w " + msgSender + " You have been killed. You can not speka for 1 minute.", fromChannel);
                         SendChatMessage(msgSender + ", took a bullet to the head.", fromChannel);
                     }
                     else

@@ -37,10 +37,12 @@ namespace twitch_irc_bot
 
         public Dictionary<string, DateTime> GetRecentFollowers(string fromChannel)
         {
-            var url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=25";
+            var r = new Random();
+            var limit = r.Next(25, 100);
+            var url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit="+ limit;
             var jsonString = RequestJson(url);
             var followsDictionary = new Dictionary<string, DateTime>();
-            if (jsonString == "" || jsonString == "502" || jsonString=="404") return null;
+            if (jsonString == "" || jsonString == "502" || jsonString=="404" || jsonString =="503") return null;
             if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
             {
                 return null;
