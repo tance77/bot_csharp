@@ -19,12 +19,14 @@ namespace twitch_irc_bot
         private readonly RiotApi _riotApi;
         private readonly TwitchApi _twitchApi = new TwitchApi();
         private readonly CommandFunctions _commandFunctions = new CommandFunctions();
-        private List<Messages> _channelHistory; 
+        private List<Messages> _channelHistory;
+        private int _rateLimit;
 
 
 
         public IrcClient(string ip, int port, string userName, string oAuth)
         {
+            _rateLimit = 0;
             _riotApi = new RiotApi(_db);
             _botUserName = userName;
             _channelHistory = new List<Messages>();
@@ -37,6 +39,7 @@ namespace twitch_irc_bot
             _outputStream.WriteLine("CAP REQ :twitch.tv/membership");
             _outputStream.WriteLine("CAP REQ :twitch.tv/tags");
             _outputStream.WriteLine("CAP REQ :twitch.tv/commands");
+            _rateLimit = 5;
             _outputStream.Flush();
 
             var followerTimer = new System.Timers.Timer { Interval = 30000 };
@@ -49,8 +52,17 @@ namespace twitch_irc_bot
             pointsTenTimer.AutoReset = true;
             pointsTenTimer.Enabled = true;
 
+            var rateLimitTimer = new System.Timers.Timer {Interval = 20000}; //20 seconds for mod
+            rateLimitTimer.Elapsed += ResetRateLimit;
+            rateLimitTimer.AutoReset = true;
+            rateLimitTimer.Enabled = true;
 
 
+        }
+
+        private void ResetRateLimit(Object source, System.Timers.ElapsedEventArgs e)
+        {
+            _rateLimit = 2;
         }
         public void AnnounceFollowers(Object source, System.Timers.ElapsedEventArgs e)
         {
