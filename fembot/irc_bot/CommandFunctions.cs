@@ -17,7 +17,7 @@ namespace twitch_irc_bot
         //    return new Timer(miliseconds, message, fromChannel, irc);
         //}
 
-        public bool AddTimer(string msg, string channel)
+        public bool AddTimer(DatabaseFunctions db,string msg, string channel)
         {
             msg = msg.Split(' ')[1];
             var msgArray = msg.Split(' ');
@@ -27,9 +27,24 @@ namespace twitch_irc_bot
             {
                 if (msgArray.Length > 1)
                 {
-                    if(i == )
+                    if (i == msgArray.Length)
+                    {
+                        actualMessage.Append(msgArray[i]);
+                    }
+                    else
+                    {
+                        actualMessage.Append(msgArray[i] + " ");
+                    }
+                }
+                else{
+                    actualMessage.Append(msgArray[i]);
                 }
             }
+            if (db.AddTimer(channel, msg))
+            {
+                return true;
+            }
+            else { return false; }
 
         }
 

@@ -1198,5 +1198,37 @@ namespace twitch_irc_bot
                 Console.Write(e + "\r\n");
             }
         }
+
+        public bool AddTimer(string fromChannel, string message)
+        {
+            try
+            {
+                using (
+                    var dbConnection =
+                        new SQLiteConnection(
+                            @"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;"))
+                {
+                    dbConnection.Open();
+                    using (
+                        var command =
+                            new SQLiteCommand(
+                                "INSERT INTO TimedMessages(channel_name,message)VALUES(@channel, @msg)",
+                                dbConnection))
+                    {
+                        var permit = DateTimeSqLite(DateTime.Now);
+                        var expires = DateTimeSqLite((DateTime.Now.AddMinutes(3)));
+                        command.Parameters.AddWithValue("@channel", fromChannel);
+                        command.Parameters.AddWithValue("@msg", message);
+                        command.ExecuteNonQuery();
+                    }
+                }
+                return true;
+            }
+            catch (SQLiteException e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+            }
+        }
     }
 }

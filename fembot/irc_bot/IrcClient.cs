@@ -700,13 +700,14 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(message, @"!timer").Success)
                 {
-                    if (_commandFunctions.AddTimer(message, fromChannel)) //Everything worked
+                    if (_commandFunctions.AddTimer(_db, message, fromChannel)) //Everything worked
                     {
-
+                        SendChatMessage("Timer was addedd succesffully", fromChannel);
                     }
                     else //faild to add timer
                     {
                         
+                        SendChatMessage("Failed to add timer", fromChannel);
                     }
                 }
                 //else if (Regex.Match(message, @"!addtimer").Success)
