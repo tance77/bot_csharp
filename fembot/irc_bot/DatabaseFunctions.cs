@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
+using System.Linq.Expressions;
 using NUnit.Framework;
 
 
@@ -971,6 +972,51 @@ namespace twitch_irc_bot
             }
         }
 
+        public Dictionary<string, List<string>> GetTimmedMessages()
+        {
+            var timedMessages = new Dictionary<string, List<string>>();
+            try
+            {
+                using (
+                    var dbConnection =
+                        new SQLiteConnection(
+                            @"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;")
+                    )
+                {
+                    dbConnection.Open();
+                    using (
+                        var command =
+                            new SQLiteCommand(
+                                "SELECT * FROM TimedMessages",
+                                dbConnection))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                if (timedMessages.ContainsKey(reader.GetString(0)))
+                                {
+                                    timedMessages[reader.GetString(0)].Add(reader.GetString(1));
+                                }
+                                else
+                                {
+                                    timedMessages.Add(reader.GetString(0), new List<string>());
+                                    timedMessages[reader.GetString(0)].Add(reader.GetString(1));
+                                }
+                            }
+                        }
+                    }
+                }
+                GC.Collect();
+                return timedMessages;
+            }
+            catch (Exception e)
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
+        }
+
         public List<string> ParseRecentFollowers(string fromChannel, TwitchApi twitchApi)
         {
             var followersList = new List<string>();
@@ -1084,6 +1130,7 @@ namespace twitch_irc_bot
 
         public void AddCoins(int numberOfCoins, string channel, List<string> userList)
         {
+            if(userList == null) return;
             if (userList.Contains("chinnbot"))
             {
                 userList.Remove("chinnbot"); //gets rid of the bot from the list

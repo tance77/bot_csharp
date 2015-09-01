@@ -17,6 +17,29 @@ namespace twitch_irc_bot
         //    return new Timer(miliseconds, message, fromChannel, irc);
         //}
 
+        public bool AddTimer(string msg, string channel)
+        {
+            msg = msg.Split(' ')[1];
+            var msgArray = msg.Split(' ');
+            msg = "";
+            var actualMessage = new StringBuilder();
+            for (int i = 0; i < msgArray.Length; i++)
+            {
+                if (msgArray.Length > 1)
+                {
+                    if(i == )
+                }
+            }
+
+        }
+
+        public int DiceRoll()
+        {
+            var r = new Random();
+            var diceRoll = r.Next(1, 100);
+            return diceRoll;
+        }
+
         public bool Roulette(string channel)
         {
             var chamber = new Random();

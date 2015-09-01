@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Timers;
 using Newtonsoft.Json.Linq;
 
 namespace twitch_irc_bot
@@ -21,6 +23,7 @@ namespace twitch_irc_bot
         private readonly CommandFunctions _commandFunctions = new CommandFunctions();
         private List<Messages> _channelHistory;
         private int _rateLimit;
+        private bool _debug = true;
 
 
 
@@ -42,29 +45,52 @@ namespace twitch_irc_bot
             _rateLimit = 5;
             _outputStream.Flush();
 
-            var followerTimer = new System.Timers.Timer { Interval = 30000 };
-            followerTimer.Elapsed += AnnounceFollowers;
-            followerTimer.AutoReset = true;
-            followerTimer.Enabled = true;
+            /*---------------------------Timers------------------------*/
 
-            var pointsTenTimer = new System.Timers.Timer { Interval = 600000 }; //1 coin every 10 minutes
-            pointsTenTimer.Elapsed += AddPointsTen;
-            pointsTenTimer.AutoReset = true;
-            pointsTenTimer.Enabled = true;
+            if (_debug == true)
+            {
+            }
+            else
+            {
+                var followerTimer = new System.Timers.Timer {Interval = 30000};
+                followerTimer.Elapsed += AnnounceFollowers;
+                followerTimer.AutoReset = true;
+                followerTimer.Enabled = true;
 
-            var rateLimitTimer = new System.Timers.Timer {Interval = 20000}; //20 seconds for mod
-            rateLimitTimer.Elapsed += ResetRateLimit;
-            rateLimitTimer.AutoReset = true;
-            rateLimitTimer.Enabled = true;
+                var pointsTenTimer = new System.Timers.Timer {Interval = 600000}; //1 coin every 10 minutes
+                pointsTenTimer.Elapsed += AddPointsTen;
+                pointsTenTimer.AutoReset = true;
+                pointsTenTimer.Enabled = true;
 
+                var rateLimitTimer = new System.Timers.Timer {Interval = 20000}; //20 seconds for mod
+                rateLimitTimer.Elapsed += ResetRateLimit;
+                rateLimitTimer.AutoReset = false;
+                rateLimitTimer.Enabled = false;
+            }
+            var advertiseTimer = new System.Timers.Timer { Interval = 15000 };  //900000 advertise timers in channels every 15 minutes
+            advertiseTimer.Elapsed += Advertise;
+            advertiseTimer.AutoReset = true;
+            advertiseTimer.Enabled = true;
 
         }
 
-        private void ResetRateLimit(Object source, System.Timers.ElapsedEventArgs e)
+        private void Advertise(Object source, ElapsedEventArgs e)
+        {
+            var timmedMessagesDict = _db.GetTimmedMessages();
+            if (timmedMessagesDict == null) return;
+            foreach (var item in timmedMessagesDict)
+            {
+                var r = new Random();
+                var randomMsg = r.Next(0, item.Value.Count);
+                SendChatMessage(item.Value[randomMsg], item.Key);
+            }
+        }
+
+        private void ResetRateLimit(Object source, ElapsedEventArgs e)
         {
             _rateLimit = 2;
         }
-        public void AnnounceFollowers(Object source, System.Timers.ElapsedEventArgs e)
+        public void AnnounceFollowers(Object source, ElapsedEventArgs e)
         {
             var channelList = _db.GetListOfChannels();
             foreach (var channel in channelList)
@@ -174,7 +200,8 @@ namespace twitch_irc_bot
                 Regex.Match(message, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success ||
                 Regex.Match(message, @".*?[Gg][Rr][Ee][Yy].*?[Ww][Aa][Rr][Ww][Ii][Cc][Kk].*?[Mm][Ee][Dd][Ii][Ee][Vv][Aa][Ll].*?[Tt][Ww][Ii][Tt][Cc][Hh].*?[Aa][Nn][Dd].*?\d*.*?\d*.*?[Ii][]Pp].*?").Success ||
                 Regex.Match(message, @"\$50 prepaid riot points from here").Success ||
-                Regex.Match(message, @"I just got \$50 prepaid riot points from here its legit xD!!! http:\/\/getriotpointscodes\.com\/").Success)
+                Regex.Match(message, @"I just got \$50 prepaid riot points from here its legit xD!!! http:\/\/getriotpointscodes\.com\/").Success ||
+                Regex.Match(message, @"http:\/\/bit\.ly\/").Success)
             {
                 if (userType == "mod") return false; //your a mod no timeout
                 Thread.Sleep(400);
@@ -414,8 +441,14 @@ namespace twitch_irc_bot
                 //Adds message to user message history
                 AddUserMessageHistory(fromChannel,msgSender, msg);
 
-                if (CheckSpam(msg, fromChannel, msgSender, userType)) return;
-                if (CheckUrls(msg, fromChannel, msgSender, userType)) return;
+                if (_debug == true)
+                {
+                }
+                else
+                {
+                    if (CheckSpam(msg, fromChannel, msgSender, userType)) return;
+                    if (CheckUrls(msg, fromChannel, msgSender, userType)) return;
+                }
                 CheckCommands(msg, userType, fromChannel, msgCommand, msgSender);
             }
         }
@@ -658,6 +691,22 @@ namespace twitch_irc_bot
                     if (response != null)
                     {
                         SendChatMessage(response, fromChannel);
+                    }
+                }
+                else if (Regex.Match(message, @"^!roll$").Success)
+                {
+                    var diceRoll = _commandFunctions.DiceRoll();
+                    SendChatMessage(msgSender + " rolled a " + diceRoll, fromChannel);
+                }
+                else if (Regex.Match(message, @"!timer").Success)
+                {
+                    if (_commandFunctions.AddTimer(message, fromChannel)) //Everything worked
+                    {
+
+                    }
+                    else //faild to add timer
+                    {
+                        
                     }
                 }
                 //else if (Regex.Match(message, @"!addtimer").Success)
