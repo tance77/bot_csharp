@@ -23,7 +23,7 @@ namespace twitch_irc_bot
         private readonly CommandFunctions _commandFunctions = new CommandFunctions();
         private List<Messages> _channelHistory;
         private int _rateLimit;
-        private bool _debug = true;
+        private bool _debug = false;
 
 
 
@@ -47,7 +47,7 @@ namespace twitch_irc_bot
 
             /*---------------------------Timers------------------------*/
 
-            if (_debug == true)
+            if (_debug)
             {
             }
             else
@@ -67,7 +67,7 @@ namespace twitch_irc_bot
                 rateLimitTimer.AutoReset = false;
                 rateLimitTimer.Enabled = false;
             }
-            var advertiseTimer = new System.Timers.Timer { Interval = 15000 };  //900000 advertise timers in channels every 15 minutes
+            var advertiseTimer = new System.Timers.Timer { Interval = 900000 };  //900000 advertise timers in channels every 15 minutes
             advertiseTimer.Elapsed += Advertise;
             advertiseTimer.AutoReset = true;
             advertiseTimer.Enabled = true;
@@ -698,6 +698,18 @@ namespace twitch_irc_bot
                     var diceRoll = _commandFunctions.DiceRoll();
                     SendChatMessage(msgSender + " rolled a " + diceRoll, fromChannel);
                 }
+                else if (Regex.Match(message, @"^!coinflip$").Success)
+                {
+                    var coinFlip = _commandFunctions.CoinFlip();
+                    if (coinFlip)
+                    {
+                        SendChatMessage(msgSender + " flipped a coin and it came up heads", fromChannel);
+                    }
+                    else
+                    {
+                        SendChatMessage(msgSender + " flipped a coin and it came up tails", fromChannel);
+                    }
+                }
                 else if (Regex.Match(message, @"!timer").Success)
                 {
                     if (_commandFunctions.AddTimer(_db, message, fromChannel)) //Everything worked
@@ -708,6 +720,14 @@ namespace twitch_irc_bot
                     {
                         
                         SendChatMessage("Failed to add timer", fromChannel);
+                    }
+                }
+                else if (Regex.Match(message, @"^!mytimers$").Success)
+                {
+                    var toBeSent = _commandFunctions.ChannelTimers(_db, fromChannel);
+                    if (toBeSent != null)
+                    {
+                        SendChatMessage(toBeSent, fromChannel);
                     }
                 }
                 //else if (Regex.Match(message, @"!addtimer").Success)

@@ -19,13 +19,12 @@ namespace twitch_irc_bot
 
         public bool AddTimer(DatabaseFunctions db,string msg, string channel)
         {
-            msg = msg.Split(' ')[1];
             var msgArray = msg.Split(' ');
             msg = "";
             var actualMessage = new StringBuilder();
-            for (int i = 0; i < msgArray.Length; i++)
+            for (int i = 1; i < msgArray.Length; i++)
             {
-                if (msgArray.Length > 1)
+                if (msgArray.Length > 2)
                 {
                     if (i == msgArray.Length)
                     {
@@ -40,12 +39,25 @@ namespace twitch_irc_bot
                     actualMessage.Append(msgArray[i]);
                 }
             }
-            if (db.AddTimer(channel, msg))
+            if (db.AddTimer(channel, actualMessage.ToString()))
             {
                 return true;
             }
             else { return false; }
 
+        }
+
+        public string ChannelTimers(DatabaseFunctions db, string fromChannel)
+        {
+            var channelTimerDict = db.GetTimers(fromChannel);
+            if (channelTimerDict == null) return null;
+            var message = new StringBuilder();
+            message.Append("Timer list with ID's: ");
+            foreach (var item in channelTimerDict)
+            {
+                message.Append(item.Value + " " + item.Key + " ");
+            }
+            return message.ToString();
         }
 
         public int DiceRoll()
@@ -385,6 +397,13 @@ namespace twitch_irc_bot
         public void JoinAssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
         {
             db.ParseRecentFollowers(fromChannel, twitchApi);
+        }
+
+        public bool CoinFlip()
+        {
+            var r = new Random();
+            var a = r.Next(0, 2);
+            return a == 0;
         }
 
     }

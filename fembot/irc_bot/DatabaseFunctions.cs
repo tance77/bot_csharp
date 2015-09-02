@@ -1215,19 +1215,58 @@ namespace twitch_irc_bot
                                 "INSERT INTO TimedMessages(channel_name,message)VALUES(@channel, @msg)",
                                 dbConnection))
                     {
-                        var permit = DateTimeSqLite(DateTime.Now);
-                        var expires = DateTimeSqLite((DateTime.Now.AddMinutes(3)));
                         command.Parameters.AddWithValue("@channel", fromChannel);
                         command.Parameters.AddWithValue("@msg", message);
                         command.ExecuteNonQuery();
                     }
                 }
+                GC.Collect();
                 return true;
             }
             catch (SQLiteException e)
             {
                 Console.Write(e + "\r\n");
                 return false;
+            }
+        }
+
+        public Dictionary<int, string> GetTimers(string fromChannel)
+        {
+            var channelTimersDict = new Dictionary<int, string>();
+            try
+            {
+                using (
+                    var dbConnection =
+                        new SQLiteConnection(
+                            @"Data Source=C:\Users\Lance\Documents\GitHub\bot_csharp\fembot.sqlite;Version=3;"))
+                {
+                    dbConnection.Open();
+                    using (
+                        var command =
+                            new SQLiteCommand(
+                                "SELECT * FROM TimedMessages WHERE channel_name=@channel",
+                                dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@channel", fromChannel);
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader != null)
+                            {
+                                while (reader.Read())
+                                {
+                                    var msgSample = reader.GetString(1).Split(' ');
+                                    channelTimersDict.Add(reader.GetInt32(2), msgSample[0]);
+                                }
+                            }
+                        }
+                    }
+                }
+                return channelTimersDict;
+            }
+            catch (SQLiteException e)
+            {
+                Console.Write(e + "\r\n");
+                return null;
             }
         }
     }
