@@ -35,6 +35,17 @@ namespace twitch_irc_bot
 
         }
 
+        public bool StreamStatus(string fromChannel)
+        {
+            var url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
+            var jsonString = RequestJson(url);
+            if (!JObject.Parse(jsonString).SelectToken("stream").HasValues)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public Dictionary<string, DateTime> GetRecentFollowers(string fromChannel)
         {
             var r = new Random();
@@ -42,7 +53,7 @@ namespace twitch_irc_bot
             var url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit="+ limit;
             var jsonString = RequestJson(url);
             var followsDictionary = new Dictionary<string, DateTime>();
-            if (jsonString == "" || jsonString == "502" || jsonString=="404" || jsonString =="503") return null;
+            if (jsonString == "" || jsonString == "502" || jsonString=="404" || jsonString =="503" || jsonString == "500") return null;
             if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
             {
                 return null;

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using SpotifyAPI.SpotifyWebAPI;
 
 namespace twitch_irc_bot
 {

@@ -34,6 +34,7 @@ namespace fembot
                     song.Artist = reader["artist"].ToString();
                     song.Title = reader["title"].ToString();
                     song.Url = reader["url"].ToString();
+                    song.Id = reader["id"].ToString();
                     songList.Add(song);
                 }
             }

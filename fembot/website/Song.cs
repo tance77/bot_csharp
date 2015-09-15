@@ -12,5 +12,7 @@ namespace fembot
         public string Durration { get; set; }
         public string RequestedBy { get; set; }
         public string Url { get; set; }
+
+        public string Id { get; set; }
     }
 }

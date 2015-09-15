@@ -44,3 +44,4 @@ C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\System.Data.
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\irc_bot.csprojResolveAssemblyReference.cache
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\twitch_irc_bot.exe
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Debug\twitch_irc_bot.pdb
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Debug\MySql.Data.dll

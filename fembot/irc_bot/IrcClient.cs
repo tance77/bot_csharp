@@ -45,6 +45,11 @@ namespace twitch_irc_bot
             _rateLimit = 5;
             _outputStream.Flush();
 
+
+            //_db.RemoveFromChannels("cupcake2413");
+            //_db.RemoveFromChannels("laserhappy");
+            //_db.RemoveFromChannels("whitemarmalade");
+
             /*---------------------------Timers------------------------*/
 
             if (_debug)
@@ -71,7 +76,6 @@ namespace twitch_irc_bot
             advertiseTimer.Elapsed += Advertise;
             advertiseTimer.AutoReset = true;
             advertiseTimer.Enabled = true;
-
         }
 
         private void Advertise(Object source, ElapsedEventArgs e)
@@ -82,17 +86,21 @@ namespace twitch_irc_bot
             {
                 var r = new Random();
                 var randomMsg = r.Next(0, item.Value.Count);
-                SendChatMessage(item.Value[randomMsg], item.Key);
+                if (_twitchApi.StreamStatus(item.Key))
+                {
+                    SendChatMessage(item.Value[randomMsg], item.Key);
+                }
             }
         }
 
         private void ResetRateLimit(Object source, ElapsedEventArgs e)
         {
-            _rateLimit = 2;
+            _rateLimit = 0;
         }
         public void AnnounceFollowers(Object source, ElapsedEventArgs e)
         {
             var channelList = _db.GetListOfChannels();
+            if (channelList == null) return;
             foreach (var channel in channelList)
             {
                 var message = _commandFunctions.AssembleFollowerList(channel, _db, _twitchApi);
@@ -144,24 +152,25 @@ namespace twitch_irc_bot
         {
             _outputStream.WriteLine(message);
             _outputStream.Flush();
+            _rateLimit += 1;
         }
 
         private void SendChatMessageLobby(string message)
         {
             SendIrcMessage(":" + _botUserName + "!" + _botUserName + "@"
-                + _botUserName + ".tim.twitch.tv PRIVMSG #chinnbot :" + message);
+                + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
         }
 
         private void SendWhisper(string message, string channelName)
         {
             SendIrcMessage(":" + _botUserName + "!" + _botUserName + "@"
-                + _botUserName + ".tim.twitch.tv WHISPER #" + _botUserName + " :" + message);
+                + _botUserName + ".tmi.twitch.tv WHISPER #" + _botUserName + " :" + message);
         }
 
         public void SendChatMessage(string message, string channelName)
         {
             SendIrcMessage(":" + _botUserName + "!" + _botUserName + "@"
-                + _botUserName + ".tim.twitch.tv PRIVMSG #" + channelName + " :" + message);
+                + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
         }
 
         public string ReadMessage()
@@ -538,10 +547,7 @@ namespace twitch_irc_bot
                     {
                         SendChatMessage(_commandFunctions.UrlToggle(fromChannel, false, _db), fromChannel);
                     }
-                    else
-                    {
-                        SendChatMessage("Insufficient privileges", fromChannel);
-                    }
+          
                 }
                 else if (Regex.Match(message, @"^!dicksize$").Success)
                 {
@@ -554,10 +560,7 @@ namespace twitch_irc_bot
                     {
                         SendChatMessage(_commandFunctions.DickSizeToggle(fromChannel, true, _db), fromChannel);
                     }
-                    else
-                    {
-                        SendChatMessage("Insufficient privileges", fromChannel);
-                    }
+ 
                 }
                 else if (Regex.Match(message, @"^!dicksize\soff$").Success)
                 {
@@ -565,10 +568,8 @@ namespace twitch_irc_bot
                     {
                         SendChatMessage(_commandFunctions.DickSizeToggle(fromChannel, false, _db), fromChannel);
                     }
-                    else
-                    {
-                        SendChatMessage("Insufficient privileges", fromChannel);
-                    }
+
+ 
                 }
                 else if (Regex.Match(message, @"!addcom").Success)
                 {
@@ -580,10 +581,8 @@ namespace twitch_irc_bot
                             SendChatMessage(response, fromChannel);
                         }
                     }
-                    else
-                    {
-                        SendChatMessage("Insufficient privileges", fromChannel);
-                    }
+
+        
                 }
                 else if (Regex.Match(message, @"!editcom").Success)
                 {
@@ -595,10 +594,8 @@ namespace twitch_irc_bot
                             SendChatMessage(response, fromChannel);
                         }
                     }
-                    else
-                    {
-                        SendChatMessage("Insufficient privileges", fromChannel);
-                    }
+      
+   
                 }
                 else if (Regex.Match(message, @"!removecom").Success || Regex.Match(message, @"!delcom").Success)
                 {
@@ -610,10 +607,7 @@ namespace twitch_irc_bot
                             SendChatMessage(response, fromChannel);
                         }
                     }
-                    else
-                    {
-                        SendChatMessage("Insufficient privileges", fromChannel);
-                    }
+    
                 }
                 else if (Regex.Match(message, @"^!roulette$").Success)
                 {
@@ -655,21 +649,14 @@ namespace twitch_irc_bot
                     {
                         SendChatMessage(_commandFunctions.GgToggle(fromChannel, true, _db), fromChannel);
                     }
-                    else
-                    {
-                        SendChatMessage("Insufficient privileges", fromChannel);
                     }
-                }
                 else if (Regex.Match(message, @"^!gg\soff$").Success)
                 {
                     if (userType == "mod")
                     {
                         SendChatMessage(_commandFunctions.GgToggle(fromChannel, false, _db), fromChannel);
                     }
-                    else
-                    {
-                        SendChatMessage("Insufficient privileges", fromChannel);
-                    }
+     
                 }
                 else if (
                     Regex.Match(message,
@@ -710,26 +697,27 @@ namespace twitch_irc_bot
                         SendChatMessage(msgSender + " flipped a coin and it came up tails", fromChannel);
                     }
                 }
-                else if (Regex.Match(message, @"!timer").Success)
-                {
-                    if (_commandFunctions.AddTimer(_db, message, fromChannel)) //Everything worked
-                    {
-                        SendChatMessage("Timer was addedd succesffully", fromChannel);
-                    }
-                    else //faild to add timer
-                    {
+                //else if (Regex.Match(message, @"!timer").Success)
+                //{
+                //    if (_commandFunctions.AddTimer(_db, message, fromChannel)) //Everything worked
+                //    {
+                //        SendChatMessage("Timer was addedd succesffully", fromChannel);
+                //    }
+                //    else //faild to add timer
+                //    {
                         
-                        SendChatMessage("Failed to add timer", fromChannel);
-                    }
-                }
-                else if (Regex.Match(message, @"^!mytimers$").Success)
-                {
-                    var toBeSent = _commandFunctions.ChannelTimers(_db, fromChannel);
-                    if (toBeSent != null)
-                    {
-                        SendChatMessage(toBeSent, fromChannel);
-                    }
-                }
+                //        SendChatMessage("Failed to add timer", fromChannel);
+                //    }
+                //}
+                //else if (Regex.Match(message, @"^!mytimers$").Success)
+                //{
+                //    var toBeSent = _commandFunctions.ChannelTimers(_db, fromChannel);
+                //    if (toBeSent != null)
+                //    {
+                //        SendChatMessage(toBeSent, fromChannel);
+                //    }
+                //}
+
                 //else if (Regex.Match(message, @"!addtimer").Success)
                 //{
                 //    var mytimer = _commandFunctions.AddTimer(fromChannel, message, 3, this);

@@ -22,3 +22,4 @@ C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Release\RestSharp.
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Release\SpotifyAPI.xml
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Release\System.Data.SQLite.xml
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Release\irc_bot.csprojResolveAssemblyReference.cache
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Release\MySql.Data.dll

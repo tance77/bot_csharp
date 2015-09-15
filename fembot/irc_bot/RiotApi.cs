@@ -127,9 +127,15 @@ namespace twitch_irc_bot
                     .First.SelectToken("entries")
                     .First.SelectToken("division")
                     .ToString();
+            var lp =
+                JObject.Parse(jsonString)
+                    .SelectToken(summonerId)
+                    .First.SelectToken("entries")
+                    .First.SelectToken("leaguePoints")
+                    .ToString();
             var tier =
-                JObject.Parse(jsonString).SelectToken(summonerId).First.SelectToken("tier").ToString();
-            return tier + " " + division;
+                JObject.Parse(jsonString).SelectToken(summonerId).First.SelectToken("tier").ToString().ToLower();
+            return tier + " " + division + " with " + lp + " league points";
         }
     }
 }

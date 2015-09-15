@@ -7,8 +7,8 @@ namespace twitch_irc_bot
     {
         static void Main(string[] args)
         {
-            var irc = new IrcClient("irc.twitch.tv", 6667, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
-            //var irc = new IrcClient("192.16.64.152", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+            //var irc = new IrcClient("irc.twitch.tv", 6667, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+            var irc = new IrcClient("192.16.64.152", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
             //var irc = new IrcClient("192.16.64.155", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
             //var irc = new IrcClient("192.16.64.51", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
           //"chat_servers": 
@@ -24,7 +24,7 @@ namespace twitch_irc_bot
           //  "192.16.64.45:443",
           //  "199.9.251.168:443"
             irc.JoinChannelStartup();
-            //irc.JoinChannel("whitemarmalade");
+            //irc.JoinChannel("blackmarmalade");
             //irc.JoinChannel("liveegg");
 
 

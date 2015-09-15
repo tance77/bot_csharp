@@ -15,18 +15,20 @@
                     <asp:AsyncPostBackTrigger ControlID="Timer1"/>
                 </Triggers>
                 <ContentTemplate>
-                    <asp:GridView ID="GridView1" runat="server" DataSourceID="fembot" AllowPaging="True" AutoGenerateColumns="False" CssClass="table table-bordered table-striped table-hover" DataKeyNames="rowid">
+                    <asp:GridView ID="GridView1" runat="server" DataSourceID="fembot" AllowPaging="True" AutoGenerateColumns="False" CssClass="table table-bordered table-striped table-hover" DataKeyNames="id">
                         <Columns>
-                            <asp:BoundField DataField="rowid" HeaderText="ID" ReadOnly="True" SortExpression="rowid" />
-                            <asp:BoundField DataField="title" HeaderText="Title" SortExpression="title" />
-                            <asp:BoundField DataField="artist" HeaderText="Artist" SortExpression="artist" />
-                            <asp:BoundField DataField="durration" HeaderText="Durration" SortExpression="durration" />
-                            <asp:BoundField DataField="requested_by" HeaderText="Requested By" SortExpression="requested_by" />
-                            <asp:HyperLinkField DataNavigateUrlFields="url" DataTextField="url" HeaderText="URL" />
+                            <asp:BoundField DataField="channel_name" HeaderText="channel_name" SortExpression="channel_name" />
+                            <asp:BoundField DataField="requested_by" HeaderText="requested_by" SortExpression="requested_by" />
+                            <asp:BoundField DataField="song_id" HeaderText="song_id" SortExpression="song_id" />
+                            <asp:BoundField DataField="duration" HeaderText="duration" SortExpression="duration" />
+                            <asp:BoundField DataField="artist" HeaderText="artist" SortExpression="artist" />
+                            <asp:BoundField DataField="title" HeaderText="title" SortExpression="title" />
+                            <asp:BoundField DataField="url" HeaderText="url" SortExpression="url" />
+                            <asp:BoundField DataField="id" HeaderText="id" ReadOnly="True" SortExpression="id" />
                         </Columns>
                         <HeaderStyle CssClass="success" />
                     </asp:GridView>
-                    <asp:SqlDataSource ID="fembot" runat="server" ConnectionString="<%$ ConnectionStrings:ConnectionString %>" ProviderName="<%$ ConnectionStrings:ConnectionString.ProviderName %>" SelectCommand="SELECT rowid, requested_by, durration, artist, title, url FROM Songs WHERE (channel_name = &quot;jchinn&quot;)"></asp:SqlDataSource>
+                    <asp:SqlDataSource ID="fembot" runat="server" ConnectionString="<%$ ConnectionStrings:ConnectionString %>" ProviderName="<%$ ConnectionStrings:ConnectionString.ProviderName %>" SelectCommand="SELECT * FROM [Songs]"></asp:SqlDataSource>
                 </ContentTemplate>
             </asp:UpdatePanel>
         </div>
