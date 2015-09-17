@@ -1,44 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Security.Policy;
 using Newtonsoft.Json.Linq;
 
 namespace twitch_irc_bot
 {
-    class TwitchApi : WebFunctions
+    internal class TwitchApi : WebFunctions
     {
         public string GetStreamUptime(string fromChannel)
         {
-            var url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
-            var jsonString = RequestJson(url);
+            string url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
+            string jsonString = RequestJson(url);
             if (!JObject.Parse(jsonString).SelectToken("stream").HasValues)
             {
                 return "Stream is offline.";
             }
-            var createdAt = JObject.Parse(jsonString).SelectToken("stream").SelectToken("created_at").ToString();
+            string createdAt = JObject.Parse(jsonString).SelectToken("stream").SelectToken("created_at").ToString();
             DateTime startedAt;
             if (!DateTime.TryParse(createdAt, out startedAt))
             {
                 return "Could not reach Twitch API";
             }
-            var nowTime = DateTime.Now;
+            DateTime nowTime = DateTime.Now;
             nowTime = nowTime.ToUniversalTime();
-            var onlineForHours = (nowTime - startedAt).Hours;
-            var onlineForMinutes = (nowTime - startedAt).Minutes;
-            var onlineForSeconds = (nowTime - startedAt).Seconds;
+            int onlineForHours = (nowTime - startedAt).Hours;
+            int onlineForMinutes = (nowTime - startedAt).Minutes;
+            int onlineForSeconds = (nowTime - startedAt).Seconds;
 
             return fromChannel + " has been online for " + onlineForHours + " hours " + onlineForMinutes + " minutes " +
                    onlineForSeconds + " seconds";
-
         }
 
         public bool StreamStatus(string fromChannel)
         {
-            var url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
-            var jsonString = RequestJson(url);
+            string url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
+            string jsonString = RequestJson(url);
             if (!JObject.Parse(jsonString).SelectToken("stream").HasValues)
             {
                 return false;
@@ -49,25 +45,26 @@ namespace twitch_irc_bot
         public Dictionary<string, DateTime> GetRecentFollowers(string fromChannel)
         {
             var r = new Random();
-            var limit = r.Next(25, 100);
-            var url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit="+ limit;
-            var jsonString = RequestJson(url);
+            int limit = r.Next(25, 100);
+            string url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=" + limit;
+            string jsonString = RequestJson(url);
             var followsDictionary = new Dictionary<string, DateTime>();
-            if (jsonString == "" || jsonString == "502" || jsonString=="404" || jsonString =="503" || jsonString == "500") return null;
+            if (jsonString == "" || jsonString == "502" || jsonString == "404" || jsonString == "503" ||
+                jsonString == "500") return null;
             if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
             {
                 return null;
             }
-            var jsonArr = JObject.Parse(jsonString).SelectToken("follows");
-            foreach (var item in jsonArr)
+            JToken jsonArr = JObject.Parse(jsonString).SelectToken("follows");
+            foreach (JToken item in jsonArr)
             {
-                var createdAt = JObject.Parse(item.ToString()).SelectToken("created_at").ToString();
+                string createdAt = JObject.Parse(item.ToString()).SelectToken("created_at").ToString();
                 DateTime followDate;
                 if (!DateTime.TryParse(createdAt, out followDate))
                 {
                     return null;
                 }
-                var displayName =
+                string displayName =
                     JObject.Parse(item.ToString()).SelectToken("user").SelectToken("display_name").ToString();
                 followsDictionary.Add(displayName, followDate);
             }
@@ -78,14 +75,14 @@ namespace twitch_irc_bot
         public List<string> GetActiveUsers(string fromChannel) //via chatters json deprecated
         {
             var userList = new List<string>();
-            var url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
-            var jsonString = RequestJson(url);
+            string url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
+            string jsonString = RequestJson(url);
             if (jsonString == "" || jsonString == "502") return null;
-            var mods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("moderators");
-            var staff = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("staff");
-            var admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
-            var globalMods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("global_mods");
-            var viewers = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("viewers");
+            JToken mods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("moderators");
+            JToken staff = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("staff");
+            JToken admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
+            JToken globalMods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("global_mods");
+            JToken viewers = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("viewers");
             userList.AddRange(mods.Select(mod => (string) mod));
             userList.AddRange(staff.Select(user => (string) user));
             userList.AddRange(admins.Select(admin => (string) admin));

@@ -2,24 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json.Linq;
 
 namespace twitch_irc_bot
 {
     internal class CommandFunctions : WebFunctions
     {
-
-
-
-        //public Timer AddTimer(string fromChannel, string message, int seconds, IrcClient irc)
-        //{
-        //    var miliseconds = seconds*1000;
-        //    return new Timer(miliseconds, message, fromChannel, irc);
-        //}
-
-        public bool AddTimer(DatabaseFunctions db,string msg, string channel)
+        public bool AddTimer(DatabaseFunctions db, string msg, string channel)
         {
-            var msgArray = msg.Split(' ');
+            string[] msgArray = msg.Split(' ');
             msg = "";
             var actualMessage = new StringBuilder();
             for (int i = 1; i < msgArray.Length; i++)
@@ -35,7 +25,8 @@ namespace twitch_irc_bot
                         actualMessage.Append(msgArray[i] + " ");
                     }
                 }
-                else{
+                else
+                {
                     actualMessage.Append(msgArray[i]);
                 }
             }
@@ -43,13 +34,12 @@ namespace twitch_irc_bot
             {
                 return true;
             }
-            else { return false; }
-
+            return false;
         }
 
         public string ChannelTimers(DatabaseFunctions db, string fromChannel)
         {
-            var channelTimerDict = db.GetTimers(fromChannel);
+            Dictionary<int, string> channelTimerDict = db.GetTimers(fromChannel);
             if (channelTimerDict == null) return null;
             var message = new StringBuilder();
             message.Append("Timer list with ID's: ");
@@ -63,35 +53,37 @@ namespace twitch_irc_bot
         public int DiceRoll()
         {
             var r = new Random();
-            var diceRoll = r.Next(1, 100);
+            int diceRoll = r.Next(1, 100);
             return diceRoll;
         }
 
         public bool Roulette(string channel)
         {
             var chamber = new Random();
-            var deathShot = chamber.Next(1, 3);
-            var playerShot = chamber.Next(1, 3);
+            int deathShot = chamber.Next(1, 3);
+            int playerShot = chamber.Next(1, 3);
             if (deathShot == playerShot)
             {
                 return true;
             }
             return false;
-
         }
+
         public string CheckSummonerName(string fromChannel, DatabaseFunctions db, RiotApi riotApi)
         {
-            var summonerName = db.SummonerStatus(fromChannel);
+            string summonerName = db.SummonerStatus(fromChannel);
             if (summonerName == "") return "No Summoner Name";
-            var summonerId = riotApi.GetSummonerId(summonerName);
+            string summonerId = riotApi.GetSummonerId(summonerName);
             //GetRunes(summonerId);
-            if (summonerId == "400" || summonerId == "401" || summonerId == "404" || summonerId == "429" || summonerId == "500" || summonerId == "503") // Invalid summoner name
+            if (summonerId == "400" || summonerId == "401" || summonerId == "404" || summonerId == "429" ||
+                summonerId == "500" || summonerId == "503") // Invalid summoner name
             {
                 return summonerId;
             }
             if (!db.SetSummonerId(fromChannel, summonerId)) return "ERR Summoner ID";
-            var rank = riotApi.GetRank(summonerId);
-            if (rank == "400" || rank == "401" || rank == "404" || rank == "429" || rank == "500" || rank == "503") // Invalid summoner name
+            string rank = riotApi.GetRank(summonerId);
+            if (rank == "400" || rank == "401" || rank == "404" || rank == "429" || rank == "500" || rank == "503")
+                // Invalid summoner name
             {
                 return rank;
             }
@@ -100,7 +92,7 @@ namespace twitch_irc_bot
 
         public string GetLeagueRank(string fromChannel, string msgSender, DatabaseFunctions db, RiotApi riotApi)
         {
-            var result = CheckSummonerName(fromChannel, db, riotApi);
+            string result = CheckSummonerName(fromChannel, db, riotApi);
             switch (result)
             {
                 case "No Summoner Name":
@@ -123,10 +115,11 @@ namespace twitch_irc_bot
 
         public string GetMasteries(string fromChannel, RiotApi riotApi)
         {
-            var masteriesDictionary = riotApi.GetMasteries(fromChannel);
+            Dictionary<string, int> masteriesDictionary = riotApi.GetMasteries(fromChannel);
             if (masteriesDictionary == null)
             {
-                return "No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]";
+                return
+                    "No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]";
             }
             var message = new StringBuilder();
             foreach (var tree in masteriesDictionary)
@@ -139,8 +132,11 @@ namespace twitch_irc_bot
 
         public string SetSummonerName(string fromChannel, string summonerName, string msgSender, DatabaseFunctions db)
         {
-            if (msgSender != fromChannel) { return "Insufficient privileges"; }
-            if (db.SetSummonerName(fromChannel, summonerName))// on success
+            if (msgSender != fromChannel)
+            {
+                return "Insufficient privileges";
+            }
+            if (db.SetSummonerName(fromChannel, summonerName)) // on success
             {
                 return "Summoner name has been set to " + summonerName;
             }
@@ -149,7 +145,7 @@ namespace twitch_irc_bot
 
         public string SplitSummonerName(string message)
         {
-            var msgParts = message.Split(' ');
+            string[] msgParts = message.Split(' ');
             var summonerName = new StringBuilder();
             for (int i = 1; i < msgParts.Length; i++)
             {
@@ -182,13 +178,13 @@ namespace twitch_irc_bot
 
         public string GetChannelCommands(string fromChannel, DatabaseFunctions db)
         {
-            var commands = db.GetChannelCommands(fromChannel);
+            List<string> commands = db.GetChannelCommands(fromChannel);
             if (commands == null || !commands.Any())
             {
                 return "No commands were found for this channel.";
             }
-            var sendString = "";
-            for (var i = 0; i < commands.Count(); i++)
+            string sendString = "";
+            for (int i = 0; i < commands.Count(); i++)
             {
                 if (i == commands.Count() - 1)
                 {
@@ -204,13 +200,16 @@ namespace twitch_irc_bot
 
         public string AddCommand(string channel, string message, DatabaseFunctions db)
         {
-            if (!message.StartsWith("!")) { return null; }
+            if (!message.StartsWith("!"))
+            {
+                return null;
+            }
             try
             {
-                var messageArray = message.Split(' ');
-                var command = messageArray[1].Split('!')[1];
-                var commandDescription = "";
-                for (var i = 2; i < messageArray.Length; i++)
+                string[] messageArray = message.Split(' ');
+                string command = messageArray[1].Split('!')[1];
+                string commandDescription = "";
+                for (int i = 2; i < messageArray.Length; i++)
                 {
                     if (i == messageArray.Length - 1)
                     {
@@ -221,7 +220,7 @@ namespace twitch_irc_bot
                         commandDescription += messageArray[i] + " ";
                     }
                 }
-                var success = db.AddCommand(command, commandDescription, false, channel);
+                bool success = db.AddCommand(command, commandDescription, false, channel);
                 command = "!" + command;
                 if (success)
                 {
@@ -245,9 +244,9 @@ namespace twitch_irc_bot
             if (!message.StartsWith("!")) return null;
             try
             {
-                var splitMessage = message.Split(' ');
-                var command = splitMessage[1].Split('!')[1];
-                var succes = db.RemoveCommand(command, fromChannel);
+                string[] splitMessage = message.Split(' ');
+                string command = splitMessage[1].Split('!')[1];
+                bool succes = db.RemoveCommand(command, fromChannel);
                 command = "!" + command;
                 if (succes)
                 {
@@ -268,14 +267,16 @@ namespace twitch_irc_bot
 
         public string EditCommand(string fromChannel, string message, DatabaseFunctions db)
         {
-
-            if (!message.StartsWith("!")) { return null; }
+            if (!message.StartsWith("!"))
+            {
+                return null;
+            }
             try
             {
-                var splitMessage = message.Split(' ');
-                var command = splitMessage[1].Split('!')[1];
-                var commandDescription = "";
-                for (var i = 2; i < splitMessage.Length; i++)
+                string[] splitMessage = message.Split(' ');
+                string command = splitMessage[1].Split('!')[1];
+                string commandDescription = "";
+                for (int i = 2; i < splitMessage.Length; i++)
                 {
                     if (i == splitMessage.Length - 1)
                     {
@@ -283,7 +284,7 @@ namespace twitch_irc_bot
                     }
                     else commandDescription += splitMessage[i] + " ";
                 }
-                var success = db.EditCommand(command, commandDescription, false, fromChannel);
+                bool success = db.EditCommand(command, commandDescription, false, fromChannel);
                 command = "!" + command;
                 if (success)
                 {
@@ -304,14 +305,17 @@ namespace twitch_irc_bot
 
         public string DickSize(string channel, string sender, DatabaseFunctions db)
         {
-            var response = db.DickSize(channel);
-            if (response == null) { return null; }
+            string response = db.DickSize(channel);
+            if (response == null)
+            {
+                return null;
+            }
             return sender + ", " + response;
         }
 
         public string DickSizeToggle(string channel, bool toggle, DatabaseFunctions db)
         {
-            var success = db.DickSizeToggle(channel, toggle);
+            bool success = db.DickSizeToggle(channel, toggle);
             if (success)
             {
                 return toggle ? "Dicksize is now on." : "Dicksize is now off.";
@@ -321,7 +325,7 @@ namespace twitch_irc_bot
 
         public string UrlToggle(string channel, bool toggle, DatabaseFunctions db)
         {
-            var success = db.UrlToggle(channel, toggle);
+            bool success = db.UrlToggle(channel, toggle);
             if (success)
             {
                 return toggle ? "URL's are now allowed." : "URL's are no longer allowed.";
@@ -331,24 +335,26 @@ namespace twitch_irc_bot
 
         public string GgToggle(string channel, bool toggle, DatabaseFunctions db)
         {
-            var success = db.GgToggle(channel, toggle);
+            bool success = db.GgToggle(channel, toggle);
             if (success)
             {
                 return toggle ? "GG is now on." : "GG is now off.";
             }
-               return "Something went wrong on my end.";
+            return "Something went wrong on my end.";
         }
+
         public bool CheckGg(string fromChannel, DatabaseFunctions db)
         {
             return db.GgStatus(fromChannel);
         }
 
-        public string PermitUser(string fromChannel, string msgSender, string message, string userType, DatabaseFunctions db)
+        public string PermitUser(string fromChannel, string msgSender, string message, string userType,
+            DatabaseFunctions db)
         {
-            if(db.UrlStatus(fromChannel) || userType != "mod") return null;
-            var msgArr = message.Split(' ');
+            if (db.UrlStatus(fromChannel) || userType != "mod") return null;
+            string[] msgArr = message.Split(' ');
             var userToPermit = new StringBuilder();
-            for (var i = 1; i < msgArr.Length; i++)
+            for (int i = 1; i < msgArr.Length; i++)
             {
                 if (i == msgArr.Length)
                 {
@@ -360,17 +366,18 @@ namespace twitch_irc_bot
                 }
             }
             if (userToPermit.ToString() == "") return null;
-            var success = db.PermitUser(fromChannel.ToLower().Trim(' '), userToPermit.ToString().ToLower().Trim(' '));
+            bool success = db.PermitUser(fromChannel.ToLower().Trim(' '), userToPermit.ToString().ToLower().Trim(' '));
             if (success)
             {
-                return msgSender + " -> " + userToPermit + " can post 1 link anytime in the next 3 minutes and will not get timed out.";
+                return msgSender + " -> " + userToPermit +
+                       " can post 1 link anytime in the next 3 minutes and will not get timed out.";
             }
             return null;
         }
 
         public string AssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
         {
-            var followersList = db.ParseRecentFollowers(fromChannel,twitchApi);
+            List<string> followersList = db.ParseRecentFollowers(fromChannel, twitchApi);
             if (followersList == null) return null;
             var message = new StringBuilder();
             message.Append("/me ");
@@ -380,7 +387,7 @@ namespace twitch_irc_bot
             }
             else
             {
-                foreach (var item in followersList)
+                foreach (string item in followersList)
                 {
                     if (item == followersList.Last())
                     {
@@ -394,6 +401,7 @@ namespace twitch_irc_bot
             }
             return message.ToString();
         }
+
         public void JoinAssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
         {
             db.ParseRecentFollowers(fromChannel, twitchApi);
@@ -402,9 +410,8 @@ namespace twitch_irc_bot
         public bool CoinFlip()
         {
             var r = new Random();
-            var a = r.Next(0, 2);
+            int a = r.Next(0, 2);
             return a == 0;
         }
-
     }
 }

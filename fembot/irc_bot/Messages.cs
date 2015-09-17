@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace twitch_irc_bot
 {
-    class Messages
+    internal class Messages
     {
         private readonly string _channel;
-        private readonly string _sender;
         private readonly List<string> _messages;
+        private readonly string _sender;
         private DateTime _time;
 
         public Messages(string channel, string sender, string message)

@@ -1,30 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Timers;
 using Newtonsoft.Json.Linq;
+using Timer = System.Timers.Timer;
 
 namespace twitch_irc_bot
 {
-    class IrcClient
+    internal class IrcClient
     {
         private readonly string _botUserName;
+        private readonly List<Messages> _channelHistory;
+        private readonly CommandFunctions _commandFunctions = new CommandFunctions();
+        private readonly DatabaseFunctions _db = new DatabaseFunctions();
         private readonly StreamReader _inputStream;
         private readonly StreamWriter _outputStream;
-        private readonly DatabaseFunctions _db = new DatabaseFunctions();
         private readonly RiotApi _riotApi;
         private readonly TwitchApi _twitchApi = new TwitchApi();
-        private readonly CommandFunctions _commandFunctions = new CommandFunctions();
-        private List<Messages> _channelHistory;
-        private int _rateLimit;
         private bool _debug = false;
-
+        private int _rateLimit;
 
 
         public IrcClient(string ip, int port, string userName, string oAuth)
@@ -57,22 +56,22 @@ namespace twitch_irc_bot
             }
             else
             {
-                var followerTimer = new System.Timers.Timer {Interval = 30000};
+                var followerTimer = new Timer {Interval = 30000};
                 followerTimer.Elapsed += AnnounceFollowers;
                 followerTimer.AutoReset = true;
                 followerTimer.Enabled = true;
 
-                var pointsTenTimer = new System.Timers.Timer {Interval = 600000}; //1 coin every 10 minutes
+                var pointsTenTimer = new Timer {Interval = 600000}; //1 coin every 10 minutes
                 pointsTenTimer.Elapsed += AddPointsTen;
                 pointsTenTimer.AutoReset = true;
                 pointsTenTimer.Enabled = true;
 
-                var rateLimitTimer = new System.Timers.Timer {Interval = 20000}; //20 seconds for mod
+                var rateLimitTimer = new Timer {Interval = 20000}; //20 seconds for mod
                 rateLimitTimer.Elapsed += ResetRateLimit;
                 rateLimitTimer.AutoReset = false;
                 rateLimitTimer.Enabled = false;
             }
-            var advertiseTimer = new System.Timers.Timer { Interval = 900000 };  //900000 advertise timers in channels every 15 minutes
+            var advertiseTimer = new Timer {Interval = 900000}; //900000 advertise timers in channels every 15 minutes
             advertiseTimer.Elapsed += Advertise;
             advertiseTimer.AutoReset = true;
             advertiseTimer.Enabled = true;
@@ -80,12 +79,12 @@ namespace twitch_irc_bot
 
         private void Advertise(Object source, ElapsedEventArgs e)
         {
-            var timmedMessagesDict = _db.GetTimmedMessages();
+            Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimmedMessages();
             if (timmedMessagesDict == null) return;
             foreach (var item in timmedMessagesDict)
             {
                 var r = new Random();
-                var randomMsg = r.Next(0, item.Value.Count);
+                int randomMsg = r.Next(0, item.Value.Count);
                 if (_twitchApi.StreamStatus(item.Key))
                 {
                     SendChatMessage(item.Value[randomMsg], item.Key);
@@ -97,13 +96,14 @@ namespace twitch_irc_bot
         {
             _rateLimit = 0;
         }
+
         public void AnnounceFollowers(Object source, ElapsedEventArgs e)
         {
-            var channelList = _db.GetListOfChannels();
+            List<string> channelList = _db.GetListOfChannels();
             if (channelList == null) return;
-            foreach (var channel in channelList)
+            foreach (string channel in channelList)
             {
-                var message = _commandFunctions.AssembleFollowerList(channel, _db, _twitchApi);
+                string message = _commandFunctions.AssembleFollowerList(channel, _db, _twitchApi);
                 if (message != null)
                 {
                     SendChatMessage(message, channel);
@@ -111,17 +111,19 @@ namespace twitch_irc_bot
                 }
             }
         }
-        public void AddPointsTen(Object source, System.Timers.ElapsedEventArgs e)
+
+        public void AddPointsTen(Object source, ElapsedEventArgs e)
         {
-            var channelList = _db.GetListOfChannels();
-            foreach (var channel in channelList)
+            List<string> channelList = _db.GetListOfChannels();
+            foreach (string channel in channelList)
             {
-                var response = _twitchApi.GetStreamUptime(channel);
-                if (response == "Stream is offline." || response == "Could not reach Twitch API") continue; //continue the loop
-                var userList = _twitchApi.GetActiveUsers(channel);
+                string response = _twitchApi.GetStreamUptime(channel);
+                if (response == "Stream is offline." || response == "Could not reach Twitch API")
+                    continue; //continue the loop
+                List<string> userList = _twitchApi.GetActiveUsers(channel);
                 _db.AddCoins(1, channel, userList);
             }
-        } 
+        }
 
         public void JoinChannel(string channel)
         {
@@ -132,14 +134,16 @@ namespace twitch_irc_bot
 
         public void JoinChannelStartup()
         {
-            Console.Write("-------------------------------- Loading Channels to Join ------------------------------- \r\n");
-            var channelsToJoin = _db.JoinChannels();
-            foreach (var channel in channelsToJoin)
+            Console.Write(
+                "-------------------------------- Loading Channels to Join ------------------------------- \r\n");
+            List<string> channelsToJoin = _db.JoinChannels();
+            foreach (string channel in channelsToJoin)
             {
                 JoinChannel(channel);
                 Console.Write("Joining Channel " + channel + "\r\n");
             }
-            Console.Write("-------------------------------- Finished Loading Channels ------------------------------- \r\n");
+            Console.Write(
+                "-------------------------------- Finished Loading Channels ------------------------------- \r\n");
         }
 
         private void PartChannel(string channel)
@@ -158,30 +162,30 @@ namespace twitch_irc_bot
         private void SendChatMessageLobby(string message)
         {
             SendIrcMessage(":" + _botUserName + "!" + _botUserName + "@"
-                + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
+                           + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
         }
 
         private void SendWhisper(string message, string channelName)
         {
             SendIrcMessage(":" + _botUserName + "!" + _botUserName + "@"
-                + _botUserName + ".tmi.twitch.tv WHISPER #" + _botUserName + " :" + message);
+                           + _botUserName + ".tmi.twitch.tv WHISPER #" + _botUserName + " :" + message);
         }
 
         public void SendChatMessage(string message, string channelName)
         {
             SendIrcMessage(":" + _botUserName + "!" + _botUserName + "@"
-                + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
+                           + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
         }
 
         public string ReadMessage()
         {
-                var buf = _inputStream.ReadLine();
-                if (buf == null) return "";
-                if (!buf.StartsWith("PING ")) return buf;
-                _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
-                Console.Write(buf.Replace("PING", "PONG") + "\r\n");
-                _outputStream.Flush();
-                return buf;
+            string buf = _inputStream.ReadLine();
+            if (buf == null) return "";
+            if (!buf.StartsWith("PING ")) return buf;
+            _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
+            Console.Write(buf.Replace("PING", "PONG") + "\r\n");
+            _outputStream.Flush();
+            return buf;
         }
 
         private void kill_user(string fromChannel, string msgSender, string userType)
@@ -194,8 +198,9 @@ namespace twitch_irc_bot
             SendChatMessage("/timeout " + msgSender + " 3", fromChannel);
             SendChatMessage("/timeout " + msgSender + " 2", fromChannel);
             SendChatMessage("/timeout " + msgSender + " 1", fromChannel);
-            SendWhisper("/w " + msgSender + " Your chat has been purged in " + fromChannel + "'s channel. Please keep your dirty secrets to yourself.", fromChannel);
-
+            SendWhisper(
+                "/w " + msgSender + " Your chat has been purged in " + fromChannel +
+                "'s channel. Please keep your dirty secrets to yourself.", fromChannel);
         }
 
         private bool CheckSpam(string message, string fromChannel, string msgSender, string userType)
@@ -207,16 +212,23 @@ namespace twitch_irc_bot
                 Regex.Match(message, @".*?sexually Identify as*?").Success ||
                 Regex.Match(message, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
                 Regex.Match(message, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success ||
-                Regex.Match(message, @".*?[Gg][Rr][Ee][Yy].*?[Ww][Aa][Rr][Ww][Ii][Cc][Kk].*?[Mm][Ee][Dd][Ii][Ee][Vv][Aa][Ll].*?[Tt][Ww][Ii][Tt][Cc][Hh].*?[Aa][Nn][Dd].*?\d*.*?\d*.*?[Ii][]Pp].*?").Success ||
+                Regex.Match(message,
+                    @".*?[Gg][Rr][Ee][Yy].*?[Ww][Aa][Rr][Ww][Ii][Cc][Kk].*?[Mm][Ee][Dd][Ii][Ee][Vv][Aa][Ll].*?[Tt][Ww][Ii][Tt][Cc][Hh].*?[Aa][Nn][Dd].*?\d*.*?\d*.*?[Ii][]Pp].*?")
+                    .Success ||
                 Regex.Match(message, @"\$50 prepaid riot points from here").Success ||
-                Regex.Match(message, @"I just got \$50 prepaid riot points from here its legit xD!!! http:\/\/getriotpointscodes\.com\/").Success ||
+                Regex.Match(message,
+                    @"I just got \$50 prepaid riot points from here its legit xD!!! http:\/\/getriotpointscodes\.com\/")
+                    .Success ||
                 Regex.Match(message, @"http:\/\/bit\.ly\/").Success)
             {
                 if (userType == "mod") return false; //your a mod no timeout
                 Thread.Sleep(400);
                 SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
                 SendChatMessage(msgSender + ", [Spam Detected]", fromChannel);
-                SendWhisper("/w " + msgSender + "You have been banned from chatting in " + fromChannel + "'s channel. If you think you have been wrongly banned whisper a mod or message the channel owner.", fromChannel);
+                SendWhisper(
+                    "/w " + msgSender + "You have been banned from chatting in " + fromChannel +
+                    "'s channel. If you think you have been wrongly banned whisper a mod or message the channel owner.",
+                    fromChannel);
                 Thread.Sleep(400);
                 SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
                 SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
@@ -232,8 +244,9 @@ namespace twitch_irc_bot
             if (_db.UrlStatus(fromChannel)) return false;
             if (!Regex.Match(message, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)")
                 .Success || userType == "mod") return false;
-            if (_db.PermitExist(fromChannel, sender) && _db.CheckPermitStatus(fromChannel, sender)) //if they exist in permit and if permit has not expired
-            //if it got here that means it was a url and they were permitted
+            if (_db.PermitExist(fromChannel, sender) && _db.CheckPermitStatus(fromChannel, sender))
+                //if they exist in permit and if permit has not expired
+                //if it got here that means it was a url and they were permitted
             {
                 _db.RemovePermit(fromChannel, sender);
                 return false;
@@ -241,7 +254,9 @@ namespace twitch_irc_bot
             //Otherwise your not a mod or you are posting a link
             Thread.Sleep(400);
             SendChatMessage(sender + ", you need permission before posting a link. [Warning]", fromChannel);
-            SendWhisper("/w " + sender + "You can't post links in " + fromChannel + "'s channel. You have been timed out for 10 seconds.", fromChannel);
+            SendWhisper(
+                "/w " + sender + "You can't post links in " + fromChannel +
+                "'s channel. You have been timed out for 10 seconds.", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
             SendChatMessage("/timeout " + sender + " 10", fromChannel);
@@ -251,18 +266,19 @@ namespace twitch_irc_bot
 
         public void AddUserMessageHistory(string fromChannel, string msgSender, string msg)
         {
-
             var toBeDeleted = new List<Messages>();
-            var empty = true;
+            bool empty = true;
 
-            foreach (var msgContainer in _channelHistory)
+            foreach (Messages msgContainer in _channelHistory)
             {
-                if (msgContainer.GetChannel() == fromChannel && msgContainer.GetSender() == msgSender && msgContainer.Count() < 20)
+                if (msgContainer.GetChannel() == fromChannel && msgContainer.GetSender() == msgSender &&
+                    msgContainer.Count() < 20)
                 {
                     msgContainer.AddMessage(msg);
                     empty = false;
                 }
-                else if (msgContainer.GetChannel() == fromChannel && msgContainer.GetSender() == msgSender && msgContainer.Count() >= 20)
+                else if (msgContainer.GetChannel() == fromChannel && msgContainer.GetSender() == msgSender &&
+                         msgContainer.Count() >= 20)
                 {
                     msgContainer.RemoveFirst();
                     msgContainer.AddMessage(msg);
@@ -279,7 +295,7 @@ namespace twitch_irc_bot
                 _channelHistory.Add(new Messages(fromChannel, msgSender, msg));
             }
 
-            foreach (var item in toBeDeleted)
+            foreach (Messages item in toBeDeleted)
             {
                 _channelHistory.Remove(item);
             }
@@ -289,24 +305,24 @@ namespace twitch_irc_bot
         private static List<string> GetListOfMods(string fromChannel) //via chatters json deprecated
         {
             var modList = new List<string>();
-            var url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
-            var request = WebRequest.Create(url);
-            using (var response = request.GetResponse())
+            string url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
+            WebRequest request = WebRequest.Create(url);
+            using (WebResponse response = request.GetResponse())
             {
-                using (var responseStream = response.GetResponseStream())
+                using (Stream responseStream = response.GetResponseStream())
                 {
                     if (responseStream == null) return modList;
                     using (var objReader = new StreamReader(responseStream))
                     {
-                        var jsonString = objReader.ReadToEnd();
-                        var mods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("moderators");
-                        var staff = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("staff");
-                        var admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
-                        var globalMods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("global_mods");
-                        modList.AddRange(mods.Select(mod => (string)mod));
-                        modList.AddRange(staff.Select(user => (string)user));
-                        modList.AddRange(admins.Select(admin => (string)admin));
-                        modList.AddRange(globalMods.Select(globalMod => (string)globalMod));
+                        string jsonString = objReader.ReadToEnd();
+                        JToken mods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("moderators");
+                        JToken staff = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("staff");
+                        JToken admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
+                        JToken globalMods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("global_mods");
+                        modList.AddRange(mods.Select(mod => (string) mod));
+                        modList.AddRange(staff.Select(user => (string) user));
+                        modList.AddRange(admins.Select(admin => (string) admin));
+                        modList.AddRange(globalMods.Select(globalMod => (string) globalMod));
                         return modList;
                     }
                 }
@@ -316,7 +332,7 @@ namespace twitch_irc_bot
         public void MatchCommand(string message, string fromChannel, string sender)
         {
             if (!message.StartsWith("!")) return;
-            var commandFound = _db.MatchCommand(message, fromChannel);
+            Tuple<string, bool> commandFound = _db.MatchCommand(message, fromChannel);
             if (commandFound == null) return;
             if (!commandFound.Item2)
                 SendChatMessage(commandFound.Item1, fromChannel);
@@ -329,14 +345,14 @@ namespace twitch_irc_bot
             /*------- Successfull Twitch Connection -----------*/
             if (Regex.Match(m, @":tmi.twitch.tv").Success)
             {
-                var messageArray = m.Split(' ');
+                string[] messageArray = m.Split(' ');
                 if (messageArray.Length != 2)
                 {
-                    var messageSender = messageArray[0];
-                    var messageCommand = messageArray[1];
-                    var messageRecipient = messageArray[2];
-                    var message = "";
-                    for (var i = 3; i < messageArray.Length; i++)
+                    string messageSender = messageArray[0];
+                    string messageCommand = messageArray[1];
+                    string messageRecipient = messageArray[2];
+                    string message = "";
+                    for (int i = 3; i < messageArray.Length; i++)
                     {
                         if (i == messageArray.Length - 1)
                         {
@@ -351,9 +367,8 @@ namespace twitch_irc_bot
             }
             else if (Regex.Match(m, @"tmi.twitch.tv JOIN").Success)
             {
-
-                var fromChannel = m.Split('#')[1];
-                var joiner = m.Split('!')[0].Split(':')[1];
+                string fromChannel = m.Split('#')[1];
+                string joiner = m.Split('!')[0].Split(':')[1];
                 joiner = joiner.ToLower();
                 if (joiner == "dongerinouserino")
                 {
@@ -373,10 +388,10 @@ namespace twitch_irc_bot
             }
             else if (Regex.Match(m, @":jtv MODE").Success)
             {
-                var messageParts = m.Split(' ');
-                var fromChanel = messageParts[2].Split('#')[1];
-                var privlages = messageParts[3];
-                var user = messageParts[4];
+                string[] messageParts = m.Split(' ');
+                string fromChanel = messageParts[2].Split('#')[1];
+                string privlages = messageParts[3];
+                string user = messageParts[4];
             }
             else if (Regex.Match(m, @"msg-id=subs_on :tmi.twitch.tv NOTICE").Success)
             {
@@ -415,12 +430,12 @@ namespace twitch_irc_bot
             }
             else if (Regex.Match(m, @"tmi.twitch.tv PRIVMSG").Success)
             {
-                var msgArray = m.Split(' ');
-                var msg = "";
-                var fromChannel = msgArray[3].Split('#')[1];
-                var msgSender = msgArray[1].Split(':')[1].Split('!')[0];
-                var msgCommand = msgArray[2];
-                for (var s = 4; s < msgArray.Length; s++) //form the message since we split on space
+                string[] msgArray = m.Split(' ');
+                string msg = "";
+                string fromChannel = msgArray[3].Split('#')[1];
+                string msgSender = msgArray[1].Split(':')[1].Split('!')[0];
+                string msgCommand = msgArray[2];
+                for (int s = 4; s < msgArray.Length; s++) //form the message since we split on space
                 {
                     if (s == msgArray.Length - 1)
                         msg += msgArray[s];
@@ -428,29 +443,29 @@ namespace twitch_irc_bot
                         msg += msgArray[s] + " ";
                 }
                 msg = msg.TrimStart(':');
-                var prefix = msgArray[0].Split(';');
-                var color = prefix[0].Split('=')[1].Split('"')[0];
-                var displayName = prefix[1].Split('=')[1].Split('"')[0];
+                string[] prefix = msgArray[0].Split(';');
+                string color = prefix[0].Split('=')[1].Split('"')[0];
+                string displayName = prefix[1].Split('=')[1].Split('"')[0];
                 try
                 {
-                    var emotes = prefix[2].Split('=')[1].Split('"')[0];
+                    string emotes = prefix[2].Split('=')[1].Split('"')[0];
                 }
                 catch (IndexOutOfRangeException)
                 {
-                    var emotes = "";
+                    string emotes = "";
                 }
-                var subscriber = prefix[3].Split('=')[1].Split('"')[0];
-                var turbo = prefix[4].Split('=')[1].Split('"')[0];
-                var userType = prefix[5].Split('=')[1].Split('"')[0].Split(' ')[0];
+                string subscriber = prefix[3].Split('=')[1].Split('"')[0];
+                string turbo = prefix[4].Split('=')[1].Split('"')[0];
+                string userType = prefix[5].Split('=')[1].Split('"')[0].Split(' ')[0];
                 if (fromChannel == msgSender)
                 {
                     userType = "mod";
                 }
 
                 //Adds message to user message history
-                AddUserMessageHistory(fromChannel,msgSender, msg);
+                AddUserMessageHistory(fromChannel, msgSender, msg);
 
-                if (_debug == true)
+                if (_debug)
                 {
                 }
                 else
@@ -462,7 +477,8 @@ namespace twitch_irc_bot
             }
         }
 
-        public void CheckCommands(string message, string userType, string fromChannel, string msgCommand, string msgSender)
+        public void CheckCommands(string message, string userType, string fromChannel, string msgCommand,
+            string msgSender)
         {
             /*-------------------------JOIN/PART FOR CHINNBOT ONLY ------------------------*/
             if (fromChannel == "chinnbot")
@@ -514,12 +530,12 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(message, @"^!rank$").Success)
                 {
-                    var resoponse = _commandFunctions.GetLeagueRank(fromChannel, msgSender, _db, _riotApi);
+                    string resoponse = _commandFunctions.GetLeagueRank(fromChannel, msgSender, _db, _riotApi);
                     SendChatMessage(resoponse, fromChannel);
                 }
                 else if (Regex.Match(message, @"^!runes$").Success)
                 {
-                    var runeDictionary = _riotApi.GetRunes(fromChannel);
+                    Dictionary<string, int> runeDictionary = _riotApi.GetRunes(fromChannel);
                     if (runeDictionary != null)
                     {
                         SendChatMessage(_commandFunctions.ParseRuneDictionary(runeDictionary), fromChannel);
@@ -547,11 +563,10 @@ namespace twitch_irc_bot
                     {
                         SendChatMessage(_commandFunctions.UrlToggle(fromChannel, false, _db), fromChannel);
                     }
-          
                 }
                 else if (Regex.Match(message, @"^!dicksize$").Success)
                 {
-                    var response = _commandFunctions.DickSize(fromChannel, msgSender, _db);
+                    string response = _commandFunctions.DickSize(fromChannel, msgSender, _db);
                     SendChatMessage(response, fromChannel);
                 }
                 else if (Regex.Match(message, @"^!dicksize\son$").Success)
@@ -560,7 +575,6 @@ namespace twitch_irc_bot
                     {
                         SendChatMessage(_commandFunctions.DickSizeToggle(fromChannel, true, _db), fromChannel);
                     }
- 
                 }
                 else if (Regex.Match(message, @"^!dicksize\soff$").Success)
                 {
@@ -568,55 +582,48 @@ namespace twitch_irc_bot
                     {
                         SendChatMessage(_commandFunctions.DickSizeToggle(fromChannel, false, _db), fromChannel);
                     }
-
- 
                 }
                 else if (Regex.Match(message, @"!addcom").Success)
                 {
                     if (userType == "mod")
                     {
-                        var response = _commandFunctions.AddCommand(fromChannel, message, _db);
+                        string response = _commandFunctions.AddCommand(fromChannel, message, _db);
                         if (response != null)
                         {
                             SendChatMessage(response, fromChannel);
                         }
                     }
-
-        
                 }
                 else if (Regex.Match(message, @"!editcom").Success)
                 {
                     if (userType == "mod")
                     {
-                        var response = _commandFunctions.EditCommand(fromChannel, message, _db);
+                        string response = _commandFunctions.EditCommand(fromChannel, message, _db);
                         if (response != null)
                         {
                             SendChatMessage(response, fromChannel);
                         }
                     }
-      
-   
                 }
                 else if (Regex.Match(message, @"!removecom").Success || Regex.Match(message, @"!delcom").Success)
                 {
                     if (userType == "mod")
                     {
-                        var response = _commandFunctions.RemoveCommand(fromChannel, message, _db);
+                        string response = _commandFunctions.RemoveCommand(fromChannel, message, _db);
                         if (response != null)
                         {
                             SendChatMessage(response, fromChannel);
                         }
                     }
-    
                 }
                 else if (Regex.Match(message, @"^!roulette$").Success)
                 {
                     if (_commandFunctions.Roulette(fromChannel))
                     {
-
                         Thread.Sleep(400);
                         SendChatMessage("/timeout " + msgSender + " 60", fromChannel);
-                        SendWhisper("/w " + msgSender + " You have been killed. You can not speka for 1 minute.", fromChannel);
+                        SendWhisper("/w " + msgSender + " You have been killed. You can not speka for 1 minute.",
+                            fromChannel);
                         SendChatMessage(msgSender + ", took a bullet to the head.", fromChannel);
                     }
                     else
@@ -626,9 +633,10 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(message, @"!setsummoner").Success)
                 {
-                    var summonerName = _commandFunctions.SplitSummonerName(message);
-                    SendChatMessage(_commandFunctions.SetSummonerName(fromChannel, summonerName, msgSender, _db), fromChannel);
-                    var summonerId = _riotApi.GetSummonerId(summonerName);
+                    string summonerName = _commandFunctions.SplitSummonerName(message);
+                    SendChatMessage(_commandFunctions.SetSummonerName(fromChannel, summonerName, msgSender, _db),
+                        fromChannel);
+                    string summonerId = _riotApi.GetSummonerId(summonerName);
                     _db.SetSummonerId(fromChannel, summonerId);
                 }
                 else if (Regex.Match(message, @"^!suicide$").Success)
@@ -649,14 +657,13 @@ namespace twitch_irc_bot
                     {
                         SendChatMessage(_commandFunctions.GgToggle(fromChannel, true, _db), fromChannel);
                     }
-                    }
+                }
                 else if (Regex.Match(message, @"^!gg\soff$").Success)
                 {
                     if (userType == "mod")
                     {
                         SendChatMessage(_commandFunctions.GgToggle(fromChannel, false, _db), fromChannel);
                     }
-     
                 }
                 else if (
                     Regex.Match(message,
@@ -674,7 +681,7 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(message, @"!permit").Success)
                 {
-                    var response = _commandFunctions.PermitUser(fromChannel, msgSender, message, userType, _db);
+                    string response = _commandFunctions.PermitUser(fromChannel, msgSender, message, userType, _db);
                     if (response != null)
                     {
                         SendChatMessage(response, fromChannel);
@@ -682,12 +689,12 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(message, @"^!roll$").Success)
                 {
-                    var diceRoll = _commandFunctions.DiceRoll();
+                    int diceRoll = _commandFunctions.DiceRoll();
                     SendChatMessage(msgSender + " rolled a " + diceRoll, fromChannel);
                 }
                 else if (Regex.Match(message, @"^!coinflip$").Success)
                 {
-                    var coinFlip = _commandFunctions.CoinFlip();
+                    bool coinFlip = _commandFunctions.CoinFlip();
                     if (coinFlip)
                     {
                         SendChatMessage(msgSender + " flipped a coin and it came up heads", fromChannel);
@@ -705,7 +712,7 @@ namespace twitch_irc_bot
                 //    }
                 //    else //faild to add timer
                 //    {
-                        
+
                 //        SendChatMessage("Failed to add timer", fromChannel);
                 //    }
                 //}
@@ -801,7 +808,6 @@ namespace twitch_irc_bot
                 //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
                 //}
             }
-
         }
     }
 }

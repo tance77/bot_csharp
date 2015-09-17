@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Moq;
-using Newtonsoft.Json;
-using NUnit.Framework;
-using SpotifyAPI.SpotifyWebAPI;
-
-namespace twitch_irc_bot
+﻿namespace twitch_irc_bot
 {
-    class Spotify
+    internal class Spotify
     {
-        
     }
 }
