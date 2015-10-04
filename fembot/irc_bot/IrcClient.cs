@@ -456,7 +456,8 @@ namespace twitch_irc_bot
                 }
                 string subscriber = prefix[3].Split('=')[1].Split('"')[0];
                 string turbo = prefix[4].Split('=')[1].Split('"')[0];
-                string userType = prefix[5].Split('=')[1].Split('"')[0].Split(' ')[0];
+                string userId = prefix[5].Split('=')[1].Split('"')[0];
+                string userType = prefix[6].Split('=')[1].Split('"')[0].Split(' ')[0];
                 if (fromChannel == msgSender)
                 {
                     userType = "mod";
@@ -785,11 +786,14 @@ namespace twitch_irc_bot
                 //{
                 //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
                 //}
+                //Regex.Match(message, @"^!songrequest\s+").Success ||
 
-                //else if (Regex.Match(message, @"!songrequest").Success || Regex.Match(post_message, @"!sr").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
+                else if (Regex.Match(message, @"!sr\s+").Success)
+                {
+                    var response = _commandFunctions.SearchSong(message, msgSender, _db, fromChannel);
+                    response = msgSender + ", " + response;
+                    SendChatMessage(response, fromChannel);
+                }
                 //else if (Regex.Match(message, @"!songlist").Success || Regex.Match(post_message, @"!sl").Success || Regex.Match(post_message, @"!playlist").Success)
                 //{
                 //    SendChatMessage("Temporaryily Unavailable.", fromChannel);

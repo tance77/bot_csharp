@@ -2,17 +2,18 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>SpotifyAPI-NET</id>
-    <version>1.2</version>
+    <version>2.2.0</version>
     <title>SpotifyAPI-NET</title>
     <authors>JohnnyCrazy</authors>
     <owners>JohnnyCrazy</owners>
-    <projectUrl>https://github.com/JohnnyCrazy/SpotifyAPI-NET</projectUrl>
+    <licenseUrl>https://github.com/JohnnyCrazy/SpotifyAPI-NET/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/JohnnyCrazy/SpotifyAPI-NET/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>An API for the Spotify-Client and Spotify's Web API, written in .NET
 
 For more infos, visit https://github.com/JohnnyCrazy/SpotifyAPI-NET</description>
     <language />
-    <tags>spotify api net music</tags>
+    <tags>spotify api music .net c# spotify-client</tags>
     <dependencies>
       <dependency id="Newtonsoft.Json" version="6.0.6" />
     </dependencies>

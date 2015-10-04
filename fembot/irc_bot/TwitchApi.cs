@@ -11,6 +11,7 @@ namespace twitch_irc_bot
         {
             string url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
             string jsonString = RequestJson(url);
+            if (jsonString == "" || jsonString == "502" || jsonString == "404" || jsonString == "503" || jsonString == "422" || jsonString == "500") return "Stream is offline.";
             if (!JObject.Parse(jsonString).SelectToken("stream").HasValues)
             {
                 return "Stream is offline.";
@@ -35,7 +36,7 @@ namespace twitch_irc_bot
         {
             string url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
             string jsonString = RequestJson(url);
-            if (!JObject.Parse(jsonString).SelectToken("stream").HasValues)
+            if (jsonString != "" || !JObject.Parse(jsonString).SelectToken("stream").HasValues)
             {
                 return false;
             }
@@ -49,7 +50,7 @@ namespace twitch_irc_bot
             string url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=" + limit;
             string jsonString = RequestJson(url);
             var followsDictionary = new Dictionary<string, DateTime>();
-            if (jsonString == "" || jsonString == "502" || jsonString == "404" || jsonString == "503" ||
+            if (jsonString == "" || jsonString == "502" || jsonString == "404" || jsonString == "503" || jsonString =="422" ||
                 jsonString == "500") return null;
             if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
             {

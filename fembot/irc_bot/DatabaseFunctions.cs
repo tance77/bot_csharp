@@ -913,7 +913,7 @@ namespace twitch_irc_bot
                                 {
                                     if (reader.Read())
                                     {
-                                        return null;
+                                        continue;
                                     }
                                 }
                             }
@@ -1111,6 +1111,42 @@ namespace twitch_irc_bot
             {
                 Console.Write(e + "\r\n");
                 return null;
+            }
+        }
+
+        public bool AddSong(string channelName, string requestedBy, string songId, string duration, string artist,
+            string title, string url, string albumUrl)
+        {
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                        var command =
+                            new MySqlCommand(
+                                "insert into Songs (channel_name,requested_by,song_id,duration,artist,title,url, album_url) Values(@c, @rb, @s, @d, @a, @t, @u, @au)",
+                                dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", channelName);
+                        command.Parameters.AddWithValue("@rb", requestedBy);
+                        command.Parameters.AddWithValue("@s", songId);
+                        command.Parameters.AddWithValue("@d", duration);
+                        command.Parameters.AddWithValue("@a", artist);
+                        command.Parameters.AddWithValue("@t", title);
+                        command.Parameters.AddWithValue("@u", url);
+                        command.Parameters.AddWithValue("@au", albumUrl);
+                        command.ExecuteNonQuery();
+                    }
+                }
+                GC.Collect();
+                return true;
+            }
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+
             }
         }
     }

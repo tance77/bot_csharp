@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
+using SpotifyAPI.Web.Models;
 
 namespace twitch_irc_bot
 {
@@ -83,7 +88,7 @@ namespace twitch_irc_bot
             if (!db.SetSummonerId(fromChannel, summonerId)) return "ERR Summoner ID";
             string rank = riotApi.GetRank(summonerId);
             if (rank == "400" || rank == "401" || rank == "404" || rank == "429" || rank == "500" || rank == "503")
-                // Invalid summoner name
+            // Invalid summoner name
             {
                 return rank;
             }
@@ -412,6 +417,222 @@ namespace twitch_irc_bot
             var r = new Random();
             int a = r.Next(0, 2);
             return a == 0;
+        }
+
+        public string SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel)
+        {
+            const string baseUrl = "https://api.spotify.com/v1";
+            var foundSong = "";
+            var songDuration = "";
+            var songAlbumUrl = "";
+            var songArtists = "";
+            var songUrl = "";
+            var songId = "";
+            var songTitle = "";
+            if (message.StartsWith("!songrequest ") || message.StartsWith("!sr "))
+            {
+                var msgAry = message.Split(' ');
+                var queryString = "";
+
+
+                for (var i = 1; i < msgAry.Length; i++)
+                {
+                    queryString += msgAry[i] + " ";
+                }
+                queryString = queryString.Trim(' ');
+
+                //song track URL
+                if (Regex.Match(queryString, @"^https:\/\/.*com\/track\/").Success)
+                {
+                    queryString = queryString.Split('/')[4];
+                }
+
+                //song URI Request
+                if (queryString.Length == 36 && queryString.Contains("spotify:track:"))
+                {
+                    queryString = queryString.Split(':')[2];
+                }
+
+                //don't allow request by album
+                if (queryString.Length == 36 && queryString.Contains("spotify:album:") ||
+                    Regex.Match(message, @"^https:\/\/.*com\/album\/").Success)
+                {
+                    return "sorry you can't request a whole album.";
+                }
+
+                //don't allow request by artist
+                if (queryString.Length == 37 && queryString.Contains("spotify:artist:") ||
+                    Regex.Match(message, @"^https:\/\/.*com\/artist\/").Success)
+                {
+                    return "Sorry you can't request an artist";
+                }
+
+                //don't allow youtube requests
+                const string pattern =
+                    @"^(?:https?:\/\/|\/\/)?(?:www\.|m\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})(?![\w-])";
+
+                if (Regex.Match(message, pattern).Success)
+                {
+                    return "sorry we are using Spotify not YouTube.";
+                }
+
+                //track ID only look up by track id
+                if (!queryString.Contains(" ") && queryString.Length == 22)
+                {
+                    //look up by track id here
+
+                    var requestUrl = baseUrl + "/tracks/" + queryString;
+
+                    var response = RequestJson(requestUrl);
+                    if (response == "400" || response == "401" || response == "404" || response == "429" ||
+                        response == "500" || response == "503")
+                    {
+                        return "song not found.";
+                    }
+                    JToken jsonArr = JObject.Parse(response);
+                    if (!jsonArr.HasValues)
+                    {
+                        return "song not found.";
+                    }
+
+                    var availableMarketsAry = jsonArr.SelectToken("available_markets");
+                    var validCountry = false;
+                    foreach (var country in availableMarketsAry)
+                    {
+                        if (country.ToString() != "US") continue;
+                        validCountry = true;
+                        break;
+                    }
+                    //not playable in us
+                    if (!validCountry) return "song not found.";
+
+                    songAlbumUrl = jsonArr.SelectToken("album").SelectToken("images")[0].SelectToken("url").ToString();
+                    var artistAry = jsonArr.SelectToken("artists").ToArray();
+                    songArtists = "";
+                    for (var i = 0; i < artistAry.Length; i++)
+                    {
+                        if (i == artistAry.Length - 1)
+                        {
+                            songArtists += artistAry[i].SelectToken("name");
+                        }
+                        else
+                        {
+                            songArtists += artistAry[i].SelectToken("name") + " and ";
+                        }
+                    }
+
+                    var miliseconds = Int32.Parse(jsonArr.SelectToken("duration_ms").ToString());
+
+                    var a = miliseconds / 1000;
+                    var minutes = a / 60;
+                    a = a % 60;
+
+                    var seconds = a.ToString();
+
+                    if (a < 10)
+                    {
+                        seconds = "0" + a;
+                    }
+
+                    songDuration = minutes + ":" + seconds;
+
+                    songUrl = jsonArr.SelectToken("external_urls").SelectToken("spotify").ToString();
+                    songId = jsonArr.SelectToken("id").ToString();
+                    songTitle = jsonArr.SelectToken("name").ToString();
+
+                    Console.Write("\r\n" +
+                              "ID " + songId + "\r\n" +
+                              "Title " + songTitle + "\r\n" +
+                              "Artists " + songArtists + "\r\n" +
+                              "Album Url " + songAlbumUrl + "\r\n" +
+                              "Duration " + songDuration + "\r\n" +
+                              "Song Url " + songUrl + "\r\n" + "\r\n");
+                    foundSong = songTitle + " by " + songArtists + " was added to the playlist";
+
+                }
+                //If we are searching for a track with words do below
+                else
+                {
+                    string requestUrl = baseUrl + "/search?type=track&offset=0&limit=20&market=US&q=" + queryString;
+
+
+                    var response = RequestJson(requestUrl);
+                    if (response == "400" || response == "401" || response == "404" || response == "429" ||
+                        response == "500" || response == "503")
+                    {
+                        return "song not found.";
+                    }
+
+                    JToken jsonArr = JObject.Parse(response).SelectToken("tracks").SelectToken("items");
+
+                    //grab the first result
+
+                    if (!jsonArr.HasValues)
+                        return "song not found.";
+
+                    var availableMarketsAry = jsonArr[0].SelectToken("available_markets");
+                    var validCountry = false;
+                    foreach (var country in availableMarketsAry)
+                    {
+                        if (country.ToString() != "US") continue;
+                        validCountry = true;
+                        break;
+                    }
+                    //not playable in us
+                    if (!validCountry) return "song not found.";
+
+                    songAlbumUrl =
+                        (jsonArr[0].SelectToken("album").SelectToken("images")[0].SelectToken("url")).ToString();
+                    var artistAry = jsonArr[0].SelectToken("artists").ToArray();
+                    songArtists = "";
+
+                    for (var i = 0; i < artistAry.Length; i++)
+                    {
+                        if (i == artistAry.Length - 1)
+                        {
+                            songArtists += artistAry[i].SelectToken("name");
+                        }
+                        else
+                        {
+                            songArtists += artistAry[i].SelectToken("name") + " and ";
+                        }
+                    }
+                    var miliseconds = Int32.Parse(jsonArr[0].SelectToken("duration_ms").ToString());
+
+                    var a = miliseconds / 1000;
+                    var minutes = a / 60;
+                    a = a % 60;
+
+                    var seconds = a.ToString();
+
+                    if (a < 10)
+                    {
+                        seconds = "0" + a;
+                    }
+
+                    songDuration = minutes + ":" + seconds;
+
+                    songUrl = jsonArr[0].SelectToken("external_urls").SelectToken("spotify").ToString();
+                    songId = jsonArr[0].SelectToken("id").ToString();
+                    songTitle = jsonArr[0].SelectToken("name").ToString();
+
+                    foundSong = songTitle + " by " + songArtists + " was added to the playlist";
+                    Console.Write("\r\n" +
+                                  "ID " + songId + "\r\n" +
+                                  "Title " + songTitle + "\r\n" +
+                                  "Artists " + songArtists + "\r\n" +
+                                  "Album Url " + songAlbumUrl + "\r\n" +
+                                  "Duration " + songDuration + "\r\n" +
+                                  "Song Url " + songUrl + "\r\n" + "\r\n");
+
+                }
+            }
+            var succuess = db.AddSong(fromChannel, messageSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
+            if (succuess)
+            {
+                return foundSong;
+            }
+            return "sorry something went wrong on my end.";
         }
     }
 }

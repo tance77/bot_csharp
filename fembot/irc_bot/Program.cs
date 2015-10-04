@@ -23,7 +23,7 @@ namespace twitch_irc_bot
             //  "192.16.64.45:443",
             //  "199.9.251.168:443"
             irc.JoinChannelStartup();
-            //irc.JoinChannel("blackmarmalade");
+            //irc.JoinChannel("whitemarmalade");
             //irc.JoinChannel("liveegg");
 
 
