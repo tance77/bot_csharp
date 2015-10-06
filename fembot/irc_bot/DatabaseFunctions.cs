@@ -1149,5 +1149,36 @@ namespace twitch_irc_bot
 
             }
         }
+        public string GetCurrentSong(string channel)
+        {
+            var song = "";
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                        var command = new MySqlCommand("SELECT * FROM Songs Where channel_name=@channel LIMIT 1",
+                            dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        using (MySqlDataReader dr = command.ExecuteReader())
+                        {
+                            while (dr.Read())
+                                song += dr.GetString(6) + " - " + dr.GetString(5);
+                        }
+                        GC.Collect();
+                        return song;
+                    }
+                }
+            }
+            catch
+                (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return song;
+            }
+        }
+
     }
 }

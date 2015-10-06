@@ -212,6 +212,7 @@ namespace twitch_irc_bot
                 Regex.Match(message, @".*?sexually Identify as*?").Success ||
                 Regex.Match(message, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
                 Regex.Match(message, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success ||
+                Regex.Match(message, @".*?v=IacCuPMkdXk.*?").Success ||
                 Regex.Match(message,
                     @".*?[Gg][Rr][Ee][Yy].*?[Ww][Aa][Rr][Ww][Ii][Cc][Kk].*?[Mm][Ee][Dd][Ii][Ee][Vv][Aa][Ll].*?[Tt][Ww][Ii][Tt][Cc][Hh].*?[Aa][Nn][Dd].*?\d*.*?\d*.*?[Ii][]Pp].*?")
                     .Success ||
@@ -788,11 +789,16 @@ namespace twitch_irc_bot
                 //}
                 //Regex.Match(message, @"^!songrequest\s+").Success ||
 
-                else if (Regex.Match(message, @"!sr\s+").Success)
+                else if (Regex.Match(message, @"^!sr\s+").Success)
                 {
                     var response = _commandFunctions.SearchSong(message, msgSender, _db, fromChannel);
                     response = msgSender + ", " + response;
                     SendChatMessage(response, fromChannel);
+                }
+                else if (Regex.Match(message, @"^!currentsong$").Success)
+                {
+                    var song = _db.GetCurrentSong(fromChannel);
+                    SendChatMessage(song, fromChannel);
                 }
                 //else if (Regex.Match(message, @"!songlist").Success || Regex.Match(post_message, @"!sl").Success || Regex.Match(post_message, @"!playlist").Success)
                 //{
