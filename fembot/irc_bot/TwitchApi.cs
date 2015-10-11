@@ -91,5 +91,19 @@ namespace twitch_irc_bot
             userList.AddRange(viewers.Select(viewer => (string) viewer));
             return userList;
         }
+        public bool CheckAccountCreation(string user)
+        {
+            string url = "https://api.twitch.tv/kraken/users/" + user;
+            string jsonString = RequestJson(url);
+            //know way of telling if the account was created today so just return false
+            if (jsonString == "" || jsonString == "502") return false;
+            var creation_date = JObject.Parse(jsonString).SelectToken("created_at").ToString();
+            //Was the account created before today
+            var a = DateTime.Compare(DateTime.Parse(creation_date).Date , DateTime.UtcNow.Date); //.Date just compares the date
+            //returns true if creation is > = 0 else false
+            //you're to young for links
+            return a >= 0;
+            //You're an adult please continue
+        }
     }
 }

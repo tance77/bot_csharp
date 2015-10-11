@@ -201,7 +201,9 @@ namespace twitch_irc_bot
             SendWhisper(
                 "/w " + msgSender + " Your chat has been purged in " + fromChannel +
                 "'s channel. Please keep your dirty secrets to yourself.", fromChannel);
+
         }
+        /*---------------SPAM FILTERS---------------*/
 
         private bool CheckSpam(string message, string fromChannel, string msgSender, string userType)
         {
@@ -213,6 +215,8 @@ namespace twitch_irc_bot
                 Regex.Match(message, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
                 Regex.Match(message, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success ||
                 Regex.Match(message, @".*?v=IacCuPMkdXk.*?").Success ||
+                Regex.Match(message, @".*?articles4daily\.com.*?").Success ||
+                Regex.Match(message, @".*?com.*?.php\?.*?id.*?id.*?umk.*?").Success ||
                 Regex.Match(message,
                     @".*?[Gg][Rr][Ee][Yy].*?[Ww][Aa][Rr][Ww][Ii][Cc][Kk].*?[Mm][Ee][Dd][Ii][Ee][Vv][Aa][Ll].*?[Tt][Ww][Ii][Tt][Cc][Hh].*?[Aa][Nn][Dd].*?\d*.*?\d*.*?[Ii][]Pp].*?")
                     .Success ||
@@ -265,6 +269,27 @@ namespace twitch_irc_bot
         }
 
 
+
+        public bool CheckAccountCreation(string msg, string fromChannel, string msgSender, string userType)
+        {
+            var result = _twitchApi.CheckAccountCreation(msgSender);
+            //New Account less than a day old
+            if (result)
+            {
+                //match url
+                if (Regex.Match(msg, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)").Success) 
+                {
+                        SendChatMessage("/timeout " + msgSender + " 1", fromChannel);
+                        SendChatMessage(msgSender + " You're account is to new to be posting links.", fromChannel);
+                    return true;
+                }
+            }
+            //yolo they are old enough
+            return false;
+        }
+
+
+
         public void AddUserMessageHistory(string fromChannel, string msgSender, string msg)
         {
             var toBeDeleted = new List<Messages>();
@@ -303,32 +328,7 @@ namespace twitch_irc_bot
         }
 
 
-        private static List<string> GetListOfMods(string fromChannel) //via chatters json deprecated
-        {
-            var modList = new List<string>();
-            string url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
-            WebRequest request = WebRequest.Create(url);
-            using (WebResponse response = request.GetResponse())
-            {
-                using (Stream responseStream = response.GetResponseStream())
-                {
-                    if (responseStream == null) return modList;
-                    using (var objReader = new StreamReader(responseStream))
-                    {
-                        string jsonString = objReader.ReadToEnd();
-                        JToken mods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("moderators");
-                        JToken staff = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("staff");
-                        JToken admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
-                        JToken globalMods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("global_mods");
-                        modList.AddRange(mods.Select(mod => (string) mod));
-                        modList.AddRange(staff.Select(user => (string) user));
-                        modList.AddRange(admins.Select(admin => (string) admin));
-                        modList.AddRange(globalMods.Select(globalMod => (string) globalMod));
-                        return modList;
-                    }
-                }
-            }
-        }
+
 
         public void MatchCommand(string message, string fromChannel, string sender)
         {
@@ -472,12 +472,18 @@ namespace twitch_irc_bot
                 }
                 else
                 {
-                    if (CheckSpam(msg, fromChannel, msgSender, userType)) return;
-                    if (CheckUrls(msg, fromChannel, msgSender, userType)) return;
+                    if (CheckAccountCreation(msg, fromChannel, msgSender, userType)) { return; }
+                    if (CheckUrls(msg, fromChannel, msgSender, userType)) { return; }
+                    if (CheckSpam(msg, fromChannel, msgSender, userType)) {return;}
+                  
+
                 }
                 CheckCommands(msg, userType, fromChannel, msgCommand, msgSender);
             }
         }
+
+
+
 
         public void CheckCommands(string message, string userType, string fromChannel, string msgCommand,
             string msgSender)
@@ -800,10 +806,10 @@ namespace twitch_irc_bot
                     var song = _db.GetCurrentSong(fromChannel);
                     SendChatMessage(song, fromChannel);
                 }
-                //else if (Regex.Match(message, @"!songlist").Success || Regex.Match(post_message, @"!sl").Success || Regex.Match(post_message, @"!playlist").Success)
-                //{
-                //    SendChatMessage("Temporaryily Unavailable.", fromChannel);
-                //}
+                else if (Regex.Match(message, @"!songlist").Success || Regex.Match(message, @"!sl").Success || Regex.Match(message, @"!playlist").Success)
+                {
+                    SendChatMessage(msgSender + " the playlist can be found here http://chinnbot.tv/songlist?user="+fromChannel, fromChannel);
+                }
 
                 //else if (Regex.Match(message, @"!addquote").Success)
                 //{

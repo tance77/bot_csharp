@@ -87,16 +87,7 @@ namespace twitch_irc_bot
                         cmd.Parameters.AddWithValue("@gameq", false);
                         cmd.ExecuteNonQuery();
                     }
-                    using (var cmd =
-                        new MySqlCommand(
-                            "INSERT INTO Spotify(channel_name,is_setup,on_off)VALUES(@channel,@isSetup,@OnOff)",
-                            dbConnection))
-                    {
-                        cmd.Parameters.AddWithValue("@channel", channel);
-                        cmd.Parameters.AddWithValue("@isSetup", false);
-                        cmd.Parameters.AddWithValue("@OnOff", false);
-                        cmd.ExecuteNonQuery();
-                    }
+                
                     using (var cmd =
                         new MySqlCommand(
                             "INSERT INTO League(channel_name,summoner_name,summoner_id)VALUES(@channel,@summoner,@summoner_id)",
