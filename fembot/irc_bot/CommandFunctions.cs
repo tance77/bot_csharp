@@ -632,7 +632,7 @@ namespace twitch_irc_bot
             {
                 return foundSong;
             }
-            return "sorry something went wrong on my end.";
+            return "song already exists or something went wrong on my end.";
         }
     }
 }

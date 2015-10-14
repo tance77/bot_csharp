@@ -6,8 +6,8 @@ namespace twitch_irc_bot
     {
         private static void Main(string[] args)
         {
-            //var irc = new IrcClient("irc.twitch.tv", 6667, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
-            var irc = new IrcClient("192.16.64.152", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+            var irc = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+            //var irc = new IrcClient("192.16.64.152", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
             //var irc = new IrcClient("192.16.64.155", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
             //var irc = new IrcClient("192.16.64.51", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
             //"chat_servers": 
@@ -26,13 +26,20 @@ namespace twitch_irc_bot
             //irc.JoinChannel("whitemarmalade");
             //irc.JoinChannel("liveegg");
 
-
             while (true)
             {
-                string message = irc.ReadMessage();
-
+                var message = irc.ReadMessage();
                 if (string.IsNullOrEmpty(message)) continue;
-                irc.MessageHandler(message);
+
+                var chatEvent = new TwitchChatEvent();
+                var command = chatEvent.MessageHandler(message);
+
+                if (command != null && command == "PRIVMSG")
+                {
+                    var chatHandler = new TwitchChatEventHandler(chatEvent, irc);
+                    if (chatHandler.CheckSpam()) continue;
+                    chatHandler.CheckCommands();
+                }
                 Console.Write(message + "\r\n");
             }
         }

@@ -32,11 +32,13 @@ namespace twitch_irc_bot
                    onlineForSeconds + " seconds";
         }
 
+        //Returns weather the stream is online or not
         public bool StreamStatus(string fromChannel)
         {
             string url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
             string jsonString = RequestJson(url);
-            if (jsonString != "" || !JObject.Parse(jsonString).SelectToken("stream").HasValues)
+
+            if (jsonString == "" || !JObject.Parse(jsonString).SelectToken("stream").HasValues)
             {
                 return false;
             }
@@ -79,6 +81,10 @@ namespace twitch_irc_bot
             string url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
             string jsonString = RequestJson(url);
             if (jsonString == "" || jsonString == "502") return null;
+
+            //Line  87 is equivalent to line 89
+            //JToken modsaksjdlsakd = JObject.Parse(jsonString)["chatters"]["moderators"];
+
             JToken mods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("moderators");
             JToken staff = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("staff");
             JToken admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
@@ -96,10 +102,10 @@ namespace twitch_irc_bot
             string url = "https://api.twitch.tv/kraken/users/" + user;
             string jsonString = RequestJson(url);
             //know way of telling if the account was created today so just return false
-            if (jsonString == "" || jsonString == "502") return false;
+            if (jsonString == "" || jsonString == "502" || jsonString =="404") return false;
             var creation_date = JObject.Parse(jsonString).SelectToken("created_at").ToString();
             //Was the account created before today
-            var a = DateTime.Compare(DateTime.Parse(creation_date).Date , DateTime.UtcNow.Date); //.Date just compares the date
+            var a = DateTime.Compare(DateTime.Parse(creation_date).Date.AddDays(-1) , DateTime.UtcNow.Date); //.Date just compares the date
             //returns true if creation is > = 0 else false
             //you're to young for links
             return a >= 0;

@@ -87,7 +87,7 @@ namespace twitch_irc_bot
                         cmd.Parameters.AddWithValue("@gameq", false);
                         cmd.ExecuteNonQuery();
                     }
-                
+
                     using (var cmd =
                         new MySqlCommand(
                             "INSERT INTO League(channel_name,summoner_name,summoner_id)VALUES(@channel,@summoner,@summoner_id)",
@@ -695,7 +695,7 @@ namespace twitch_irc_bot
         }
 
         public bool CheckPermitStatus(string fromChannel, string user)
-            //Checks to see if the permit is still valid in the given time period
+        //Checks to see if the permit is still valid in the given time period
         {
             user = user.ToLower();
             user = user.Trim(' ');
@@ -718,8 +718,8 @@ namespace twitch_irc_bot
                         {
                             if (reader.Read())
                             {
-                                startTime = reader.GetString(2);
-                                endTime = reader.GetString(3);
+                                startTime = reader.GetString(3);
+                                endTime = reader.GetString(4);
                             }
                         }
                         GC.Collect();
@@ -1105,33 +1105,58 @@ namespace twitch_irc_bot
             }
         }
 
+        //1 of the same song check to see if the same sone exists before adding Lets avoid dupilcates
+
         public bool AddSong(string channelName, string requestedBy, string songId, string duration, string artist,
             string title, string url, string albumUrl)
         {
+            var exists = false;
             try
             {
                 using (var dbConnection = new MySqlConnection(ConnectionString))
                 {
                     dbConnection.Open();
-                    using (
-                        var command =
-                            new MySqlCommand(
-                                "insert into Songs (channel_name,requested_by,song_id,duration,artist,title,url, album_url) Values(@c, @rb, @s, @d, @a, @t, @u, @au)",
-                                dbConnection))
+
+                    using (var command = new MySqlCommand("SELECT * FROM Songs WHERE channel_name=@c AND song_id=@s", dbConnection))
                     {
                         command.Parameters.AddWithValue("@c", channelName);
-                        command.Parameters.AddWithValue("@rb", requestedBy);
                         command.Parameters.AddWithValue("@s", songId);
-                        command.Parameters.AddWithValue("@d", duration);
-                        command.Parameters.AddWithValue("@a", artist);
-                        command.Parameters.AddWithValue("@t", title);
-                        command.Parameters.AddWithValue("@u", url);
-                        command.Parameters.AddWithValue("@au", albumUrl);
-                        command.ExecuteNonQuery();
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            // if we found a value that means it exits and we don't want ot add a duplicate
+                            while (reader.Read())
+                            {
+                                exists = true;
+                                break;
+                            }
+                        }
+                    }
+                    GC.Collect();
+
+                    if (!exists)
+                    {
+                        using (
+                            var command =
+                                new MySqlCommand(
+                                    "insert into Songs (channel_name,requested_by,song_id,duration,artist,title,url, album_url) Values(@c, @rb, @s, @d, @a, @t, @u, @au)",
+                                    dbConnection))
+                        {
+                            command.Parameters.AddWithValue("@c", channelName);
+                            command.Parameters.AddWithValue("@rb", requestedBy);
+                            command.Parameters.AddWithValue("@s", songId);
+                            command.Parameters.AddWithValue("@d", duration);
+                            command.Parameters.AddWithValue("@a", artist);
+                            command.Parameters.AddWithValue("@t", title);
+                            command.Parameters.AddWithValue("@u", url);
+                            command.Parameters.AddWithValue("@au", albumUrl);
+                            command.ExecuteNonQuery();
+                        }
+                        GC.Collect();
+                        return true;
                     }
                 }
-                GC.Collect();
-                return true;
+                //if we here the song was a duplicate or there weas an error
+                return false;
             }
             catch (MySqlException e)
             {
