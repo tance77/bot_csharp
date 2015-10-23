@@ -88,14 +88,18 @@ namespace twitch_irc_bot
                 FromChannel = m.Split('#')[1];
                 Joiner = m.Split('!')[0].Split(':')[1];
                 Joiner = Joiner.ToLower();
-                //if (joiner == "dongerinouserino")
+                //if (Joiner == "dongerinouserino")
                 //{
-                //    SendChatMessage("ᕙ༼ຈل͜ຈ༽ᕗ flex your dongers ᕙ༼ຈل͜ຈ༽ᕗᕙ༼ຈل͜ຈ༽ᕗ DongerinoUserino is here ᕙ༼ຈل͜ຈ༽ᕗ ",
-                //        fromChannel);
+                //    Irc.SendChatMessage("ᕙ༼ຈل͜ຈ༽ᕗ flex your dongers ᕙ༼ຈل͜ຈ༽ᕗᕙ༼ຈل͜ຈ༽ᕗ DongerinoUserino is here ᕙ༼ຈل͜ຈ༽ᕗ ",
+                //        FromChannel);
                 //}
-                //if (joiner == "luminexi")
+                //if (Joiner == "luminexi")
                 //{
-                //    SendChatMessage("Luminexi... you mean Lumisexi DatSheffy", fromChannel);
+                //    Irc.SendChatMessage("Luminexi... you mean Lumisexi DatSheffy", FromChannel);
+                //}
+                //if (Joiner == "stevenwinans")
+                //{
+                //    Irc.SendChatMessage("StevenWinans, Netflix and chill? DatSheffy?", FromChannel);
                 //}
             }
             else if (Regex.Match(m, @"tmi.twitch.tv PART").Success)

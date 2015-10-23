@@ -1195,6 +1195,37 @@ namespace twitch_irc_bot
                 return song;
             }
         }
+        public List<string> GetListOfActiveChannels()
+        {
+            var listOfActiveChannels = new List<string>();
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                        var command = new MySqlCommand("SELECT * FROM Channels",
+                            dbConnection))
+                    {
+                        using (MySqlDataReader dr = command.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                listOfActiveChannels.Add(dr.GetString(0));
+                            }
+                        }
+                        GC.Collect();
+                    }
+                }
+            }
+            catch
+                (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
+            return listOfActiveChannels;
+        }
 
     }
 }

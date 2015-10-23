@@ -7,6 +7,7 @@ namespace twitch_irc_bot
         private static void Main(string[] args)
         {
             var irc = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+            var whisper_server = new IrcClient("192.16.64.212", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
             //var irc = new IrcClient("192.16.64.152", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
             //var irc = new IrcClient("192.16.64.155", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
             //var irc = new IrcClient("192.16.64.51", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
@@ -26,6 +27,11 @@ namespace twitch_irc_bot
             //irc.JoinChannel("whitemarmalade");
             //irc.JoinChannel("liveegg");
 
+
+
+
+
+
             while (true)
             {
                 var message = irc.ReadMessage();
@@ -36,11 +42,10 @@ namespace twitch_irc_bot
 
                 if (command != null && command == "PRIVMSG")
                 {
-                    var chatHandler = new TwitchChatEventHandler(chatEvent, irc);
+                    var chatHandler = new TwitchChatEventHandler(chatEvent, irc, whisper_server);
                     if (chatHandler.CheckSpam()) continue;
                     chatHandler.CheckCommands();
                 }
-                Console.Write(message + "\r\n");
             }
         }
     }

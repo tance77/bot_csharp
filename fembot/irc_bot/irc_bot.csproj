@@ -110,9 +110,9 @@
     <Compile Include="WebFunctions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="client_secret.json" />
-    <None Include="packages.config" />
+    <None Include="Config\App.config" />
+    <None Include="Config\client_secret.json" />
+    <None Include="Config\packages.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">

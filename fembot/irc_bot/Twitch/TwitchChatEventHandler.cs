@@ -16,11 +16,12 @@ namespace twitch_irc_bot
         private TwitchApi _twitchApi = new TwitchApi();
 
         #region Constructors
-        public TwitchChatEventHandler(TwitchChatEvent e, IrcClient irc)
+        public TwitchChatEventHandler(TwitchChatEvent e, IrcClient irc, IrcClient whisper_server)
         {
             Irc = irc;
-            ChatEvent = e;
-            ChannelHistory = new List<Messages>();
+            WhisperServer = whisper_server;
+            ChatEvent = e;           
+            _riotApi = new RiotApi(_db);
         }
         #endregion
 
@@ -29,7 +30,7 @@ namespace twitch_irc_bot
 
         public IrcClient Irc { get; set; }
 
-        public List<Messages> ChannelHistory { get; set; }
+        public IrcClient WhisperServer { get; set; }
 
         #endregion
 
@@ -42,7 +43,7 @@ namespace twitch_irc_bot
             Irc.SendChatMessage("/timeout " + msgSender + " 3", fromChannel);
             Irc.SendChatMessage("/timeout " + msgSender + " 2", fromChannel);
             Irc.SendChatMessage("/timeout " + msgSender + " 1", fromChannel);
-            Irc.SendWhisper(
+            WhisperServer.SendWhisper(
                 " Your chat has been purged in " + fromChannel +
                 "'s channel. Please keep your dirty secrets to yourself.", fromChannel, msgSender);
         }
@@ -50,7 +51,7 @@ namespace twitch_irc_bot
 
         public bool MatchCommand(string message, string fromChannel, string sender)
         {
-            if (!message.StartsWith("!")) return false;
+            if (!message.StartsWith("!")) return true;
             Tuple<string, bool> commandFound = _db.MatchCommand(message, fromChannel);
             if (commandFound == null) return false;
             if (!commandFound.Item2)
@@ -86,14 +87,21 @@ namespace twitch_irc_bot
                 Regex.Match(message,
                     @"I just got \$50 prepaid riot points from here its legit xD!!! http:\/\/getriotpointscodes\.com\/")
                     .Success ||
-                Regex.Match(message, @"http:\/\/bit\.ly\/").Success)
+                Regex.Match(message, @"http:\/\/bit\.ly\/").Success ||
+                Regex.Match(message, @".*?ddns.*?").Success ||
+                Regex.Match(message, @".*?testmuk.*?").Success ||
+                Regex.Match(message, @".*?traffic\.php.*?").Success ||
+                Regex.Match(message, @".*?\/ow\.ly\/.*?").Success ||
+                Regex.Match(message, @".*?testmuk.*?").Success ||
+                Regex.Match(message, @".*?myvnc.*?").Success ||
+                Regex.Match(message, @".*?ulirate.*?").Success
+                )
             {
                 if (userType == "mod") return false; //your a mod no timeout
                 Thread.Sleep(400);
+                Irc.SendChatMessage(msgSender + ", [Ban]", fromChannel);
                 Irc.SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
-                Irc.SendChatMessage(msgSender + ", [Spam Detected]", fromChannel);
-                Irc.SendWhisper(
-                    "You have been banned from chatting in " + fromChannel +
+                WhisperServer.SendWhisper("You have been banned from chatting in " + fromChannel +
                     "'s channel. If you think you have been wrongly banned whisper a mod or message the channel owner.",
                     fromChannel, msgSender);
                 Thread.Sleep(400);
@@ -121,7 +129,7 @@ namespace twitch_irc_bot
             //Otherwise your not a mod or you are posting a link
             Thread.Sleep(400);
             Irc.SendChatMessage(sender + ", you need permission before posting a link. [Warning]", fromChannel);
-            Irc.SendWhisper(
+            WhisperServer.SendWhisper(
                 "You can't post links in " + fromChannel +
                 "'s channel. You have been timed out for 10 seconds.", fromChannel, sender);
             Irc.SendChatMessage("/timeout " + sender + " 10", fromChannel);
@@ -166,7 +174,7 @@ namespace twitch_irc_bot
             var toBeDeleted = new List<Messages>();
             bool empty = true;
 
-            foreach (Messages msgContainer in ChannelHistory)
+            foreach (Messages msgContainer in Irc._ChannelHistory)
             {
                 if (msgContainer.GetChannel() == fromChannel && msgContainer.GetSender() == msgSender &&
                     msgContainer.Count() < 20)
@@ -189,12 +197,12 @@ namespace twitch_irc_bot
 
             if (empty)
             {
-                ChannelHistory.Add(new Messages(fromChannel, msgSender, msg));
+                Irc._ChannelHistory.Add(new Messages(fromChannel, msgSender, msg));
             }
 
             foreach (Messages item in toBeDeleted)
             {
-                ChannelHistory.Remove(item);
+                Irc._ChannelHistory.Remove(item);
             }
         }
 
@@ -250,7 +258,7 @@ namespace twitch_irc_bot
             else
             {
                 //Match Specific Channel Commands From Our Database
-                if (MatchCommand(ChatEvent.Msg, ChatEvent.FromChannel, ChatEvent.MsgSender))
+                if (!MatchCommand(ChatEvent.Msg, ChatEvent.FromChannel, ChatEvent.MsgSender))
                 {
                     //we found a user command in our database
                     return;
@@ -260,7 +268,10 @@ namespace twitch_irc_bot
 
                 if (Regex.Match(ChatEvent.Msg, @"!commands").Success)
                 {
-                    Irc.SendChatMessage(_commandFunctions.GetChannelCommands(ChatEvent.FromChannel, _db), ChatEvent.FromChannel);
+                    Irc.SendChatMessage(
+                        ChatEvent.MsgSender +
+                        ", the commands for this channel can be found here http://chinnbot.tv/commands?user=" +
+                        ChatEvent.FromChannel, ChatEvent.FromChannel);
                 }
                 else if (Regex.Match(ChatEvent.Msg, @"^!masteries$").Success)
                 {
@@ -360,7 +371,7 @@ namespace twitch_irc_bot
                     {
                         Thread.Sleep(400);
                         Irc.SendChatMessage("/timeout " + ChatEvent.MsgSender + " 60", ChatEvent.FromChannel);
-                        Irc.SendWhisper(" You have been killed. You can not speka for 1 minute.",
+                        WhisperServer.SendWhisper(" You have been killed. You can not speak for 1 minute.",
                             ChatEvent.FromChannel, ChatEvent.MsgSender);
                         Irc.SendChatMessage(ChatEvent.MsgSender + ", took a bullet to the head.", ChatEvent.FromChannel);
                     }
