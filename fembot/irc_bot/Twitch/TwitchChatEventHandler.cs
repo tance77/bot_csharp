@@ -94,7 +94,12 @@ namespace twitch_irc_bot
                 Regex.Match(message, @".*?\/ow\.ly\/.*?").Success ||
                 Regex.Match(message, @".*?testmuk.*?").Success ||
                 Regex.Match(message, @".*?myvnc.*?").Success ||
-                Regex.Match(message, @".*?ulirate.*?").Success
+                Regex.Match(message, @".*?ulirate.*?").Success ||
+                Regex.Match(message, @".*?uslada\..*?").Success ||
+                Regex.Match(message, @".*?bounceme\..*?").Success ||
+                Regex.Match(message, @".*?serveblog\..*?").Success ||
+                Regex.Match(message, @".*?oeptmf\..*?").Success ||
+                Regex.Match(message, @".*?servebeer\..*?").Success
                 )
             {
                 if (userType == "mod") return false; //your a mod no timeout

@@ -61,6 +61,7 @@ namespace twitch_irc_bot
             followerTimer.Enabled = true;
 
             var pointsTenTimer = new Timer { Interval = 600000 }; //1 coin every 10 minutes
+            //var pointsTenTimer = new Timer { Interval = 20 }; //1 coin every 10 minutes
             pointsTenTimer.Elapsed += AddPointsTen;
             pointsTenTimer.AutoReset = true;
             pointsTenTimer.Enabled = true;
@@ -218,20 +219,28 @@ namespace twitch_irc_bot
 
         public string ReadMessage()
         {
-            var buf = _inputStream.ReadLine();
-            if (buf == null) return "";
-            if (!buf.StartsWith("PING "))
+            try
             {
-                _outputStream.Flush();
+                var buf = _inputStream.ReadLine();
+                if (buf == null) return "";
+                if (!buf.StartsWith("PING "))
+                {
+                    _outputStream.Flush();
+                    Console.Write(buf + "\r\n");
+                    return buf;
+                }
                 Console.Write(buf + "\r\n");
+                _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
+                Console.Write(buf.Replace("PING", "PONG") + "\r\n");
+                _outputStream.Flush();
                 return buf;
             }
-            Console.Write(buf + "\r\n");
-            _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
-            Console.Write(buf.Replace("PING", "PONG") + "\r\n");
-            _outputStream.Flush();
-            return buf;
+            catch (Exception e)
+            {
+                return null;
+            }
         }
     }
+    
         #endregion
 }

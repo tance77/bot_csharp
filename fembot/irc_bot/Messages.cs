@@ -9,19 +9,40 @@ namespace twitch_irc_bot
         private readonly List<string> _messages;
         private readonly string _sender;
         private DateTime _time;
+        private Dictionary<string,DateTime> _messagesWithTimes; 
 
         public Messages(string channel, string sender, string message)
         {
             _channel = channel;
             _sender = sender;
             _time = DateTime.Now;
+            _messagesWithTimes = new Dictionary<string, DateTime>();
+            if (!_messagesWithTimes.ContainsKey(message))
+            {
+                _messagesWithTimes.Add(message, _time);
+            }
             _messages = new List<string> {message};
+        }
+
+        public void ClearMessageHistory(){
+            _messagesWithTimes.Clear();
+            _messages.Clear();
+        }
+
+        public Dictionary<string, DateTime> GetMessagesWithTimes(){
+            return _messagesWithTimes;
+        }
+
+        public List<string> GetMessages()
+        {
+            return _messages;
         }
 
         public void AddMessage(string message)
         {
             _messages.Add(message);
             _time = DateTime.Now;
+
         }
 
         public void RemoveFirst()
@@ -52,6 +73,10 @@ namespace twitch_irc_bot
         public bool LastMessageTime()
         {
             return DateTime.Now > _time.AddHours(3);
+        }
+
+        public void DumpMessagesToFile() { 
+
         }
     }
 }

@@ -22,3 +22,4 @@ C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Release\SpotifyAPI
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\bin\Release\System.Data.SQLite.xml
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Release\twitch_irc_bot.exe
 C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Release\twitch_irc_bot.pdb
+C:\Users\Lance\Documents\GitHub\bot_csharp\fembot\irc_bot\obj\Release\irc_bot.csprojResolveAssemblyReference.cache

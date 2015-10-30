@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -145,6 +146,7 @@ namespace twitch_irc_bot
             }
             else if (Regex.Match(m, @":tmi.twitch.tv CLEARCHAT").Success)
             {
+                File.WriteAllText("./bad.txt", m);
             }
             else if (Regex.Match(m, @":tmi.twitch.tv USERSTATE").Success)
             {
@@ -191,6 +193,10 @@ namespace twitch_irc_bot
                     _userId = 0;
                 }
                 UserType = prefix[6].Split('=')[1].Split('"')[0].Split(' ')[0];
+                if (MsgSender.ToLower() == FromChannel.ToLower())
+                {
+                    UserType = "mod";
+                }
             }
             return Command;
         }
