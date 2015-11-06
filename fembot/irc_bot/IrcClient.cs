@@ -24,14 +24,14 @@ namespace twitch_irc_bot
 
     public List<MessageHistory> ChannelHistory { get; set; }
 
-    public Queue<string> MesssagesQueue{ get; set; }
+    public Queue<string> MessageQueue{ get; set; }
 
     #region Constructors
 
     public IrcClient(string ip, int port, string userName, string oAuth)
     {
       RateLimit = 0;
-      MesssagesToBeSent = new Queue<string>();
+      MessageQueue = new Queue<string>();
 
       //_riotApi = new RiotApi(_db);
       _listOfActiveChannels = new List<string>();
@@ -46,7 +46,6 @@ namespace twitch_irc_bot
       _outputStream.WriteLine("CAP REQ :twitch.tv/membership");
       _outputStream.WriteLine("CAP REQ :twitch.tv/tags");
       _outputStream.WriteLine("CAP REQ :twitch.tv/commands");
-      RateLimit = 5;
       _outputStream.Flush();
       ChannelHistory = new List<MessageHistory>();
 
@@ -57,6 +56,11 @@ namespace twitch_irc_bot
       channelUpdate.Elapsed += UpdateActiveChannels;
       channelUpdate.AutoReset = true;
       channelUpdate.Enabled = true;
+        
+      var rateCheckTimer = new Timer { Interval = 300};
+      rateCheckTimer.Elapsed += CheckRateAndSend;
+      rateCheckTimer.AutoReset = true;
+      rateCheckTimer.Enabled = true;
 
       var followerTimer = new Timer { Interval = 30000 };
       followerTimer.Elapsed += AnnounceFollowers;
@@ -71,8 +75,8 @@ namespace twitch_irc_bot
 
       var rateLimitTimer = new Timer { Interval = 30000 }; //20 messages every 30 seconds
       rateLimitTimer.Elapsed += ResetRateLimit;
-      rateLimitTimer.AutoReset = false;
-      rateLimitTimer.Enabled = false;
+      rateLimitTimer.AutoReset = true;
+      rateLimitTimer.Enabled = true;
 
       var advertiseTimer = new Timer { Interval = 900000 }; //900000 advertise timers in channels every 15 minutes
       advertiseTimer.Elapsed += Advertise;
@@ -82,6 +86,16 @@ namespace twitch_irc_bot
     }
 
     #endregion
+
+    public void CheckRateAndSend(Object source, ElapsedEventArgs e)
+    {
+        Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
+        //Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
+        while (RateLimit < 20 && MessageQueue.Count > 0)
+        {
+            SendIrcMessage(MessageQueue.Dequeue());
+        }
+    }
 
     private void Advertise(Object source, ElapsedEventArgs e)
     {
@@ -114,7 +128,6 @@ namespace twitch_irc_bot
         if (message != null)
         {
             AddMessagesToMessageList(message, channel);
-          Thread.Sleep(1000);
         }
       }
     }
@@ -137,33 +150,33 @@ namespace twitch_irc_bot
 
     public void UpdateActiveChannels(Object source, ElapsedEventArgs e)
     {
-      List<string> listOfDbChannels = _db.GetListOfActiveChannels();
-      if (listOfDbChannels == null) return;
-      var listOfChannelsToRemove = new List<string>();
-      foreach (var channel in listOfDbChannels)
-      {
-        //If our active channels doesn't contain the channels in our DB we need to join that channel
-        if (!_listOfActiveChannels.Contains(channel))
+        List<string> listOfDbChannels = _db.GetListOfActiveChannels();
+        if (listOfDbChannels == null) return;
+        var listOfChannelsToRemove = new List<string>();
+        foreach (var channel in listOfDbChannels)
         {
-          JoinChannel(channel);
+            //If our active channels doesn't contain the channels in our DB we need to join that channel
+            if (!_listOfActiveChannels.Contains(channel))
+            {
+                JoinChannel(channel);
+            }
         }
-      }
-      foreach (var channel in _listOfActiveChannels)
-      {
-        //If our database doesn't contain a channel in the active channels list we need to part that channel
-        if (!listOfDbChannels.Contains(channel))
+        foreach (var channel in _listOfActiveChannels)
         {
-            AddMessagesToMessageList("Goodbye cruel world.", channel);
-          _outputStream.WriteLine("PART #" + channel);
-          _outputStream.Flush();
-          listOfChannelsToRemove.Add(channel);
+            //If our database doesn't contain a channel in the active channels list we need to part that channel
+            if (!listOfDbChannels.Contains(channel))
+            {
+                AddMessagesToMessageList("Goodbye cruel world.", channel);
+                _outputStream.WriteLine("PART #" + channel);
+                _outputStream.Flush();
+                listOfChannelsToRemove.Add(channel);
+            }
         }
-      }
-      //Finally we need to remove the channels that we parted
-      foreach (var channel in listOfChannelsToRemove)
-      {
-        _listOfActiveChannels.Remove(channel);
-      }
+        //Finally we need to remove the channels that we parted
+        foreach (var channel in listOfChannelsToRemove)
+        {
+            _listOfActiveChannels.Remove(channel);
+        }
     }
 
     public void JoinChannel(string channel)
@@ -202,26 +215,32 @@ namespace twitch_irc_bot
       _outputStream.Flush();
     }
 
-    public void CheckRateAndSend()
-    {
-        while(RateLimit < 20){
-          SendIrcMessage(MesssagesToBeSent.Dequeu());
-      }
-    }
-
+   
     public void AddLobbyMessageToMessageList(string message)
     {
+        if (message == null)
+        {
+            return;
+        }
       MessageQueue.Enqueue(":" + _botUserName + "!" + _botUserName + "@"
       + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
     }
 
     public void AddWhisperToMessagesList(string message, string channelName, string msgSender)
     {
+        if (message == null)
+        {
+            return;
+        }
       MessageQueue.Enqueue("PRIVMSG #jtv :/w " + msgSender + " " + message);
     }
 
     public void AddMessagesToMessageList(string message, string channelName)
     {
+        if (message == null)
+        {
+            return;
+        }
       MessageQueue.Enqueue(":" + _botUserName + "!" + _botUserName + "@"
       + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
     }

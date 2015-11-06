@@ -14,7 +14,7 @@ namespace twitch_irc_bot
     {
         #region Constructors
 
-        public TwitchMessage()
+        public TwitchMessage(string data)
         {
           Command = null;
           FromChannel = null;
@@ -31,6 +31,7 @@ namespace twitch_irc_bot
           Subscriber = false;
           Turbo = false;
           UserId = 0;
+            MessageHandler(data);
 
         }
 
@@ -177,7 +178,7 @@ namespace twitch_irc_bot
                 * :CHANNEL!CHANNEL@CHANNEL.tmi.twitch.tv PRIVMSG #RECIPIENT :asd
                 */
                 string[] msgArray = m.Split(' ');
-                Msg = "";
+                //Msg = "";
                 FromChannel = msgArray[3].Split('#')[1];
                 MsgSender = msgArray[1].Split(':')[1].Split('!')[0];
                 Command = msgArray[2];

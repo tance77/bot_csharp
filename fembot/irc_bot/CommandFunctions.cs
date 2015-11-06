@@ -404,6 +404,10 @@ namespace twitch_irc_bot
                     }
                 }
             }
+            if (message.ToString() == "/me ")
+            {
+                return null;
+            }
             return message.ToString();
         }
 

@@ -7,28 +7,27 @@ namespace twitch_irc_bot
     {
         private static void Main(string[] args)
         {
-            var irc = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
-            var whisper_server = new IrcClient("192.16.64.212", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
-            irc.JoinChannel("whitemarmalade");
-            //irc.JoinChannelStartup();
+            var ircServer = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+            var whisperServer = new IrcClient("192.16.64.212", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+            //ircServer.JoinChannel("whitemarmalade");
+            ircServer.JoinChannelStartup();
 
             while (true)
             {
-                var data = irc.ReadMessage();
+                var data = ircServer.ReadMessage();
                 if (data == null)
                 {
-                    irc = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
-                    whisper_server = new IrcClient("192.16.64.212", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
-                    irc.JoinChannelStartup();
+                    ircServer = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+                    whisperServer = new IrcClient("192.16.64.212", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+                    ircServer.JoinChannelStartup();
                 }
+
                 if (string.IsNullOrEmpty(data)) continue;
 
-                var twitchMessage = new TwitchMessage();
-                // var command = twitchMessage.MessageHandler(data);
-                var commandHandler = new IrcCommandHandler(twitchMessage, irc, whisper_server);
+                var twitchMessage = new TwitchMessage(data);
+                var commandHandler = new IrcCommandHandler(twitchMessage, ircServer, whisperServer);
                 commandHandler.Run();
-                irc.CheckRateAndSend();
-                whisper_server.CheckRateAndSend();
+
 
 
 
