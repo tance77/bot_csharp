@@ -28,8 +28,8 @@ namespace twitch_irc_bot
           DisplayName = null;
           Emotes = null;
           UserType = null;
-          Subscriber = null;
-          Turbo = null;
+          Subscriber = false;
+          Turbo = false;
           UserId = 0;
 
         }
@@ -204,19 +204,20 @@ namespace twitch_irc_bot
 
                 Subscriber = prefix[3].Split('=')[1].Split('"')[0] != "0";
                 Turbo = prefix[4].Split('=')[1].Split('"')[0] != "0";
-                 if(!Int32.TryParse(prefix[5].Split('=')[1].Split('"')[0], out _userId))
-                {
-                    UserId = 0;
-                }
+                var tmp = 0;
+                 if(!Int32.TryParse(prefix[5].Split('=')[1].Split('"')[0], out tmp))
+                 {
+                     UserId = tmp;
+                 }
                 UserType = prefix[6].Split('=')[1].Split('"')[0].Split(' ')[0];
                 if (MsgSender.ToLower() == FromChannel.ToLower())
                 {
                     UserType = "mod";
                 }
+            Command = "PRIVMSG";
             }
-            Command = "CLEARCHAT";
-        }
             return Command;
+        }
 
         #endregion
 

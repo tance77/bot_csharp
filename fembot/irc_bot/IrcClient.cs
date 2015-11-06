@@ -204,18 +204,18 @@ namespace twitch_irc_bot
 
     public void AddLobbyMessageToMessageList(string message)
     {
-      MesssagesToBeSent.add(":" + _botUserName + "!" + _botUserName + "@"
+      MesssagesToBeSent.Add(":" + _botUserName + "!" + _botUserName + "@"
       + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
     }
 
     public void AddWhisperToMessagesList(string message, string channelName, string msgSender)
     {
-      MesssagesToBeSent.add("PRIVMSG #jtv :/w " + msgSender + " " + message);
+      MesssagesToBeSent.Add("PRIVMSG #jtv :/w " + msgSender + " " + message);
     }
 
     public void AddMessagesToMessageList(string message, string channelName)
     {
-      MesssagesToBeSent.add(":" + _botUserName + "!" + _botUserName + "@"
+      MesssagesToBeSent.Add(":" + _botUserName + "!" + _botUserName + "@"
       + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
     }
 
