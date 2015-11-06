@@ -12,32 +12,32 @@ namespace twitch_irc_bot
 
     internal class TwitchMessage
     {
-        #region Constructors
+#region Constructors
 
         public TwitchMessage(string data)
         {
-          Command = null;
-          FromChannel = null;
-          MsgSender = null;
-          MsgRecipient = null;
-          Msg = null;
-          Joiner = null;
-          Privlages = null;
-          OperatingUser = null;
-          Color = null;
-          DisplayName = null;
-          Emotes = null;
-          UserType = null;
-          Subscriber = false;
-          Turbo = false;
-          UserId = 0;
+            Command = null;
+            FromChannel = null;
+            MsgSender = null;
+            MsgRecipient = null;
+            Msg = null;
+            Joiner = null;
+            Privlages = null;
+            OperatingUser = null;
+            Color = null;
+            DisplayName = null;
+            Emotes = null;
+            UserType = null;
+            Subscriber = false;
+            Turbo = false;
+            UserId = 0;
             MessageHandler(data);
 
         }
 
-        #endregion
+#endregion
 
-        #region Geters/Setters
+#region Geters/Setters
 
         public string Command { get; set; }
 
@@ -71,9 +71,9 @@ namespace twitch_irc_bot
 
         public int UserId {get; set; }
 
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
 
         public string MessageHandler(string m)
         {
@@ -162,7 +162,7 @@ namespace twitch_irc_bot
             }
             else if (Regex.Match(m, @":tmi\.twitch\.tv CLEARCHAT").Success) //see if this regex matches
             {
-              Command = "CLEARCHAT";
+                Command = "CLEARCHAT";
                 File.WriteAllText("./bad.txt", m);
             }
             else if (Regex.Match(m, @":tmi.twitch.tv USERSTATE").Success)
@@ -174,9 +174,9 @@ namespace twitch_irc_bot
             else if (Regex.Match(m, @"tmi.twitch.tv PRIVMSG").Success)
             {
                 /*
-                * @color=#FFFFFF;display-name=TWITCHNAME;emotes=;subscriber=0;turbo=0;user-id=0000000;user-type=mod
-                * :CHANNEL!CHANNEL@CHANNEL.tmi.twitch.tv PRIVMSG #RECIPIENT :asd
-                */
+                 * @color=#FFFFFF;display-name=TWITCHNAME;emotes=;subscriber=0;turbo=0;user-id=0000000;user-type=mod
+                 * :CHANNEL!CHANNEL@CHANNEL.tmi.twitch.tv PRIVMSG #RECIPIENT :asd
+                 */
                 string[] msgArray = m.Split(' ');
                 //Msg = "";
                 FromChannel = msgArray[3].Split('#')[1];
@@ -206,21 +206,21 @@ namespace twitch_irc_bot
                 Subscriber = prefix[3].Split('=')[1].Split('"')[0] != "0";
                 Turbo = prefix[4].Split('=')[1].Split('"')[0] != "0";
                 var tmp = 0;
-                 if(!Int32.TryParse(prefix[5].Split('=')[1].Split('"')[0], out tmp))
-                 {
-                     UserId = tmp;
-                 }
+                if(!Int32.TryParse(prefix[5].Split('=')[1].Split('"')[0], out tmp))
+                {
+                    UserId = tmp;
+                }
                 UserType = prefix[6].Split('=')[1].Split('"')[0].Split(' ')[0];
                 if (MsgSender.ToLower() == FromChannel.ToLower())
                 {
                     UserType = "mod";
                 }
-            Command = "PRIVMSG";
+                Command = "PRIVMSG";
             }
             return Command;
         }
 
-        #endregion
+#endregion
 
     }
 }

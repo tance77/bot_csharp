@@ -25,11 +25,11 @@ namespace twitch_irc_bot
             }
             catch
                 (WebException e)
-            {
-                string errorCode = e.ToString().Split('(')[1].Split(')')[0];
-                Console.Write(e + "\r\n");
-                return errorCode;
-            }
+                {
+                    string errorCode = e.ToString().Split('(')[1].Split(')')[0];
+                    Console.Write(e + "\r\n");
+                    return errorCode;
+                }
         }
     }
 }

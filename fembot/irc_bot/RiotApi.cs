@@ -20,10 +20,10 @@ namespace twitch_irc_bot
             var masteriesList = new Dictionary<string, int>();
 
             string url = "https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId + "/masteries?api_key=" +
-                         _apiKey;
+                _apiKey;
             string jsonString = RequestJson(url);
             if (jsonString == "400" || jsonString == "401" || jsonString == "404" || jsonString == "429" ||
-                jsonString == "500" || jsonString == "503")
+                    jsonString == "500" || jsonString == "503")
             {
                 return null;
             }
@@ -51,7 +51,7 @@ namespace twitch_irc_bot
             foreach (var masteryId in masteriesList)
             {
                 string url2 = "https://global.api.pvp.net/api/lol/static-data/na/v1.2/mastery/" + masteryId.Key +
-                              "?masteryData=masteryTree&api_key=" + _apiKey;
+                    "?masteryData=masteryTree&api_key=" + _apiKey;
                 string masteryJson = RequestJson(url2);
                 string masteryTree = JObject.Parse(masteryJson).SelectToken("masteryTree").ToString();
                 masterDictionary[masteryTree] += masteryId.Value;
@@ -63,10 +63,10 @@ namespace twitch_irc_bot
         {
             summonerName = summonerName.Trim(' ');
             string url = "https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/" + summonerName + "?api_key=" +
-                         _apiKey;
+                _apiKey;
             string jsonString = RequestJson(url);
             if (jsonString == "400" || jsonString == "401" || jsonString == "404" || jsonString == "429" ||
-                jsonString == "500" || jsonString == "503")
+                    jsonString == "500" || jsonString == "503")
             {
                 return jsonString;
             }
@@ -83,7 +83,7 @@ namespace twitch_irc_bot
             string url = "https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId + "/runes?api_key=" + _apiKey;
             string jsonString = RequestJson(url);
             if (jsonString == "400" || jsonString == "401" || jsonString == "404" || jsonString == "429" ||
-                jsonString == "500" || jsonString == "503")
+                    jsonString == "500" || jsonString == "503")
             {
                 return null;
             }
@@ -113,7 +113,7 @@ namespace twitch_irc_bot
             foreach (var id in runeDictionary)
             {
                 string url2 = "https://global.api.pvp.net/api/lol/static-data/na/v1.2/rune/" + id.Key + "?api_key=" +
-                              _apiKey;
+                    _apiKey;
                 string jsonString2 = RequestJson(url2);
                 string runeName = JObject.Parse(jsonString2).SelectToken("name").ToString();
                 runeDictionaryNames.Add(runeName, id.Value);
@@ -124,25 +124,25 @@ namespace twitch_irc_bot
         public string GetRank(string summonerId)
         {
             string url = "https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/" + summonerId + "/entry?api_key=" +
-                         _apiKey;
+                _apiKey;
             string jsonString = RequestJson(url);
             if (jsonString == "400" || jsonString == "401" || jsonString == "404" || jsonString == "429" ||
-                jsonString == "500" || jsonString == "503")
+                    jsonString == "500" || jsonString == "503")
             {
                 return jsonString;
             }
             string division =
                 JObject.Parse(jsonString)
-                    .SelectToken(summonerId)
-                    .First.SelectToken("entries")
-                    .First.SelectToken("division")
-                    .ToString();
+                .SelectToken(summonerId)
+                .First.SelectToken("entries")
+                .First.SelectToken("division")
+                .ToString();
             string lp =
                 JObject.Parse(jsonString)
-                    .SelectToken(summonerId)
-                    .First.SelectToken("entries")
-                    .First.SelectToken("leaguePoints")
-                    .ToString();
+                .SelectToken(summonerId)
+                .First.SelectToken("entries")
+                .First.SelectToken("leaguePoints")
+                .ToString();
             string tier =
                 JObject.Parse(jsonString).SelectToken(summonerId).First.SelectToken("tier").ToString().ToLower();
             return tier + " " + division + " with " + lp + " league points";

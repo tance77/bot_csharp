@@ -29,7 +29,7 @@ namespace twitch_irc_bot
             int onlineForSeconds = (nowTime - startedAt).Seconds;
 
             return fromChannel + " has been online for " + onlineForHours + " hours " + onlineForMinutes + " minutes " +
-                   onlineForSeconds + " seconds";
+                onlineForSeconds + " seconds";
         }
 
         //Returns weather the stream is online or not
@@ -53,7 +53,7 @@ namespace twitch_irc_bot
             string jsonString = RequestJson(url);
             var followsDictionary = new Dictionary<string, DateTime>();
             if (jsonString == "" || jsonString == "502" || jsonString == "404" || jsonString == "503" || jsonString =="422" ||
-                jsonString == "500" || jsonString == "504") return null;
+                    jsonString == "500" || jsonString == "504") return null;
             if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
             {
                 return null;

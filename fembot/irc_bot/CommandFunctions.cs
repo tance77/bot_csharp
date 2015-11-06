@@ -81,14 +81,14 @@ namespace twitch_irc_bot
             string summonerId = riotApi.GetSummonerId(summonerName);
             //GetRunes(summonerId);
             if (summonerId == "400" || summonerId == "401" || summonerId == "404" || summonerId == "429" ||
-                summonerId == "500" || summonerId == "503") // Invalid summoner name
+                    summonerId == "500" || summonerId == "503") // Invalid summoner name
             {
                 return summonerId;
             }
             if (!db.SetSummonerId(fromChannel, summonerId)) return "ERR Summoner ID";
             string rank = riotApi.GetRank(summonerId);
             if (rank == "400" || rank == "401" || rank == "404" || rank == "429" || rank == "500" || rank == "503")
-            // Invalid summoner name
+                // Invalid summoner name
             {
                 return rank;
             }
@@ -354,7 +354,7 @@ namespace twitch_irc_bot
         }
 
         public string PermitUser(string fromChannel, string msgSender, string message, string userType,
-            DatabaseFunctions db)
+                DatabaseFunctions db)
         {
             if (db.UrlStatus(fromChannel) || userType != "mod") return null;
             string[] msgArr = message.Split(' ');
@@ -375,7 +375,7 @@ namespace twitch_irc_bot
             if (success)
             {
                 return msgSender + " -> " + userToPermit +
-                       " can post 1 link anytime in the next 3 minutes and will not get timed out.";
+                    " can post 1 link anytime in the next 3 minutes and will not get timed out.";
             }
             return null;
         }
@@ -459,14 +459,14 @@ namespace twitch_irc_bot
 
                 //don't allow request by album
                 if (queryString.Length == 36 && queryString.Contains("spotify:album:") ||
-                    Regex.Match(message, @"^https:\/\/.*com\/album\/").Success)
+                        Regex.Match(message, @"^https:\/\/.*com\/album\/").Success)
                 {
                     return "sorry you can't request a whole album.";
                 }
 
                 //don't allow request by artist
                 if (queryString.Length == 37 && queryString.Contains("spotify:artist:") ||
-                    Regex.Match(message, @"^https:\/\/.*com\/artist\/").Success)
+                        Regex.Match(message, @"^https:\/\/.*com\/artist\/").Success)
                 {
                     return "Sorry you can't request an artist";
                 }
@@ -489,7 +489,7 @@ namespace twitch_irc_bot
 
                     var response = RequestJson(requestUrl);
                     if (response == "400" || response == "401" || response == "404" || response == "429" ||
-                        response == "500" || response == "503")
+                            response == "500" || response == "503")
                     {
                         return "song not found.";
                     }
@@ -545,12 +545,12 @@ namespace twitch_irc_bot
                     songTitle = jsonArr.SelectToken("name").ToString();
 
                     Console.Write("\r\n" +
-                              "ID " + songId + "\r\n" +
-                              "Title " + songTitle + "\r\n" +
-                              "Artists " + songArtists + "\r\n" +
-                              "Album Url " + songAlbumUrl + "\r\n" +
-                              "Duration " + songDuration + "\r\n" +
-                              "Song Url " + songUrl + "\r\n" + "\r\n");
+                            "ID " + songId + "\r\n" +
+                            "Title " + songTitle + "\r\n" +
+                            "Artists " + songArtists + "\r\n" +
+                            "Album Url " + songAlbumUrl + "\r\n" +
+                            "Duration " + songDuration + "\r\n" +
+                            "Song Url " + songUrl + "\r\n" + "\r\n");
                     foundSong = songTitle + " by " + songArtists + " was added to the playlist";
 
                 }
@@ -562,7 +562,7 @@ namespace twitch_irc_bot
 
                     var response = RequestJson(requestUrl);
                     if (response == "400" || response == "401" || response == "404" || response == "429" ||
-                        response == "500" || response == "503")
+                            response == "500" || response == "503")
                     {
                         return "song not found.";
                     }
@@ -622,12 +622,12 @@ namespace twitch_irc_bot
 
                     foundSong = songTitle + " by " + songArtists + " was added to the playlist";
                     Console.Write("\r\n" +
-                                  "ID " + songId + "\r\n" +
-                                  "Title " + songTitle + "\r\n" +
-                                  "Artists " + songArtists + "\r\n" +
-                                  "Album Url " + songAlbumUrl + "\r\n" +
-                                  "Duration " + songDuration + "\r\n" +
-                                  "Song Url " + songUrl + "\r\n" + "\r\n");
+                            "ID " + songId + "\r\n" +
+                            "Title " + songTitle + "\r\n" +
+                            "Artists " + songArtists + "\r\n" +
+                            "Album Url " + songAlbumUrl + "\r\n" +
+                            "Duration " + songDuration + "\r\n" +
+                            "Song Url " + songUrl + "\r\n" + "\r\n");
 
                 }
             }

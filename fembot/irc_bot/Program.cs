@@ -33,9 +33,9 @@ namespace twitch_irc_bot
 
                 // if (command != null && command == "PRIVMSG")
                 // {
-                    // var handledMessage = new TwitchMessageHandler(twitchMessage, irc, whisper_server);
-                    // if (CheckSpam()) continue;
-                    // handledMessage.CheckCommands();
+                // var handledMessage = new TwitchMessageHandler(twitchMessage, irc, whisper_server);
+                // if (CheckSpam()) continue;
+                // handledMessage.CheckCommands();
                 // }
                 // else if (command != null && command == "CLEARCHAT")
                 // {
