@@ -24,7 +24,11 @@ namespace twitch_irc_bot
                 if (string.IsNullOrEmpty(data)) continue;
 
                 var twitchMessage = new TwitchMessage();
-                var command = twitchMessage.MessageHandler(data);
+                // var command = twitchMessage.MessageHandler(data);
+                var commandHandler = new IrcCommandHandler(twitchMessage, irc, whisper_server);
+                commandHandler.Run();
+                irc.CheckRateAndSend();
+                whisper_server.CheckRateAndSend();
 
 
 

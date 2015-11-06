@@ -24,14 +24,14 @@ namespace twitch_irc_bot
 
     public List<MessageHistory> ChannelHistory { get; set; }
 
-    public List<string> MesssagesToBeSent{ get; set; }
+    public Queue<string> MesssagesQueue{ get; set; }
 
     #region Constructors
 
     public IrcClient(string ip, int port, string userName, string oAuth)
     {
       RateLimit = 0;
-      MesssagesToBeSent = new List<string>();
+      MesssagesToBeSent = new Queue<string>();
 
       //_riotApi = new RiotApi(_db);
       _listOfActiveChannels = new List<string>();
@@ -202,20 +202,27 @@ namespace twitch_irc_bot
       _outputStream.Flush();
     }
 
+    public void CheckRateAndSend()
+    {
+        while(RateLimit < 20){
+          SendIrcMessage(MesssagesToBeSent.Dequeu());
+      }
+    }
+
     public void AddLobbyMessageToMessageList(string message)
     {
-      MesssagesToBeSent.Add(":" + _botUserName + "!" + _botUserName + "@"
+      MessageQueue.Enqueue(":" + _botUserName + "!" + _botUserName + "@"
       + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
     }
 
     public void AddWhisperToMessagesList(string message, string channelName, string msgSender)
     {
-      MesssagesToBeSent.Add("PRIVMSG #jtv :/w " + msgSender + " " + message);
+      MessageQueue.Enqueue("PRIVMSG #jtv :/w " + msgSender + " " + message);
     }
 
     public void AddMessagesToMessageList(string message, string channelName)
     {
-      MesssagesToBeSent.Add(":" + _botUserName + "!" + _botUserName + "@"
+      MessageQueue.Enqueue(":" + _botUserName + "!" + _botUserName + "@"
       + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
     }
 
