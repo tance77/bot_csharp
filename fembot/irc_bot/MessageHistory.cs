@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace twitch_irc_bot
 {
-    internal class Messages
+    internal class MessageHistory
     {
         private readonly string _channel;
         private readonly List<string> _messages;
@@ -11,7 +11,7 @@ namespace twitch_irc_bot
         private DateTime _time;
         private Dictionary<string,DateTime> _messagesWithTimes; 
 
-        public Messages(string channel, string sender, string message)
+        public MessageHistory(string channel, string sender, string message)
         {
             _channel = channel;
             _sender = sender;

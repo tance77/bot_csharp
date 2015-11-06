@@ -99,14 +99,14 @@
     <Compile Include="DatabaseFunctions.cs" />
     <Compile Include="CommandFunctions.cs" />
     <Compile Include="IrcClient.cs" />
-    <Compile Include="Messages.cs" />
+    <Compile Include="MessageHistory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RiotApi.cs" />
     <Compile Include="Spotify.cs" />
     <Compile Include="Twitch\TwitchApi.cs" />
-    <Compile Include="Twitch\TwitchChatEvent.cs" />
-    <Compile Include="Twitch\TwitchChatEventHandler.cs" />
+    <Compile Include="Twitch\TwitchMessage.cs" />
+    <Compile Include="Twitch\TwitchMessageHandler.cs" />
     <Compile Include="WebFunctions.cs" />
   </ItemGroup>
   <ItemGroup>

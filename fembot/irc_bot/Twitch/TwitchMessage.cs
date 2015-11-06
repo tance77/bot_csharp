@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 namespace twitch_irc_bot
 {
 
-    internal class TwitchChatEvent
+    internal class TwitchMessage
     {
         #region Constructors
 
-        public TwitchChatEvent()
+        public TwitchMessage()
         {
             
         }

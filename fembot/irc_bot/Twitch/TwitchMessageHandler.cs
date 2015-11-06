@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace twitch_irc_bot
 {
-    class TwitchChatEventHandler
+    class TwitchMessageHandler
     {
         private CommandFunctions _commandFunctions = new CommandFunctions();
         private DatabaseFunctions _db = new DatabaseFunctions();
@@ -16,17 +16,17 @@ namespace twitch_irc_bot
         private TwitchApi _twitchApi = new TwitchApi();
 
         #region Constructors
-        public TwitchChatEventHandler(TwitchChatEvent e, IrcClient irc, IrcClient whisper_server)
+        public TwitchMessageHandler(TwitchMessage e, IrcClient irc, IrcClient whisper_server)
         {
             Irc = irc;
             WhisperServer = whisper_server;
-            ChatEvent = e;           
+            Message = e;
             _riotApi = new RiotApi(_db);
         }
         #endregion
 
         #region Getters/Setters
-        public TwitchChatEvent ChatEvent { get; set; }
+        public TwitchMessage Message { get; set; }
 
         public IrcClient Irc { get; set; }
 
@@ -39,11 +39,11 @@ namespace twitch_irc_bot
         private void kill_user(string fromChannel, string msgSender, string userType)
         {
             if (userType == "mod") return;
-            Irc.SendChatMessage("/timeout " + msgSender + " 4", fromChannel);
-            Irc.SendChatMessage("/timeout " + msgSender + " 3", fromChannel);
-            Irc.SendChatMessage("/timeout " + msgSender + " 2", fromChannel);
-            Irc.SendChatMessage("/timeout " + msgSender + " 1", fromChannel);
-            WhisperServer.SendWhisper(
+            Irc.AddMessageToMessageList("/timeout " + msgSender + " 4", fromChannel);
+            Irc.AddMessageToMessageList("/timeout " + msgSender + " 3", fromChannel);
+            Irc.AddMessageToMessageList("/timeout " + msgSender + " 2", fromChannel);
+            Irc.AddMessageToMessageList("/timeout " + msgSender + " 1", fromChannel);
+            WhisperServer.AddWhisperToMessagesList(
                 " Your chat has been purged in " + fromChannel +
                 "'s channel. Please keep your dirty secrets to yourself.", fromChannel, msgSender);
         }
@@ -56,12 +56,12 @@ namespace twitch_irc_bot
             if (commandFound == null) return false;
             if (!commandFound.Item2)
             {
-                Irc.SendChatMessage(commandFound.Item1, fromChannel);
+                Irc.AddMessageToMessageList(commandFound.Item1, fromChannel);
                 return true;
             }
             else
             {
-                Irc.SendChatMessage(sender + ", " + commandFound.Item1, fromChannel);
+                Irc.AddMessageToMessageList(sender + ", " + commandFound.Item1, fromChannel);
                 return true;
             }
         }
@@ -104,16 +104,16 @@ namespace twitch_irc_bot
             {
                 if (userType == "mod") return false; //your a mod no timeout
                 Thread.Sleep(400);
-                Irc.SendChatMessage(msgSender + ", [Ban]", fromChannel);
-                Irc.SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
-                WhisperServer.SendWhisper("You have been banned from chatting in " + fromChannel +
+                Irc.AddMessageToMessageList(msgSender + ", [Ban]", fromChannel);
+                Irc.AddMessageToMessageList("/timeout " + msgSender + " 120", fromChannel);
+                WhisperServer.AddWhisperToMessagesList("You have been banned from chatting in " + fromChannel +
                     "'s channel. If you think you have been wrongly banned whisper a mod or message the channel owner.",
                     fromChannel, msgSender);
                 Thread.Sleep(400);
-                Irc.SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
-                Irc.SendChatMessage("/timeout " + msgSender + " 120", fromChannel);
+                Irc.AddMessageToMessageList("/timeout " + msgSender + " 120", fromChannel);
+                Irc.AddMessageToMessageList("/timeout " + msgSender + " 120", fromChannel);
                 Thread.Sleep(400);
-                Irc.SendChatMessage("/ban " + msgSender, fromChannel);
+                Irc.AddMessageToMessageList("/ban " + msgSender, fromChannel);
                 return true;
             }
             return false; //no spam in message
@@ -133,13 +133,13 @@ namespace twitch_irc_bot
             }
             //Otherwise your not a mod or you are posting a link
             Thread.Sleep(400);
-            Irc.SendChatMessage(sender + ", you need permission before posting a link. [Warning]", fromChannel);
-            WhisperServer.SendWhisper(
+            Irc.AddMessageToMessageList(sender + ", you need permission before posting a link. [Warning]", fromChannel);
+            WhisperServer.AddWhisperToMessagesList(
                 "You can't post links in " + fromChannel +
                 "'s channel. You have been timed out for 10 seconds.", fromChannel, sender);
-            Irc.SendChatMessage("/timeout " + sender + " 10", fromChannel);
-            Irc.SendChatMessage("/timeout " + sender + " 10", fromChannel);
-            Irc.SendChatMessage("/timeout " + sender + " 10", fromChannel);
+            Irc.AddMessageToMessageList("/timeout " + sender + " 10", fromChannel);
+            Irc.AddMessageToMessageList("/timeout " + sender + " 10", fromChannel);
+            Irc.AddMessageToMessageList("/timeout " + sender + " 10", fromChannel);
             return true;
         }
 
@@ -159,11 +159,11 @@ namespace twitch_irc_bot
                 //match url
                 if (Regex.Match(msg, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)").Success)
                 {
-                    Irc.SendChatMessage("/timeout " + msgSender + " 1", fromChannel);
-                    Irc.SendChatMessage("/timeout " + msgSender + " 1", fromChannel);
-                    Irc.SendChatMessage("/timeout " + msgSender + " 1", fromChannel);
-                    Irc.SendChatMessage("/timeout " + msgSender + " 1", fromChannel);
-                    Irc.SendChatMessage(msgSender + " You're account is to new to be posting links.", fromChannel);
+                    Irc.AddMessageToMessageList("/timeout " + msgSender + " 1", fromChannel);
+                    Irc.AddMessageToMessageList("/timeout " + msgSender + " 1", fromChannel);
+                    Irc.AddMessageToMessageList("/timeout " + msgSender + " 1", fromChannel);
+                    Irc.AddMessageToMessageList("/timeout " + msgSender + " 1", fromChannel);
+                    Irc.AddMessageToMessageList(msgSender + " You're account is to new to be posting links.", fromChannel);
                     return true;
                 }
             }
@@ -176,10 +176,10 @@ namespace twitch_irc_bot
 
         public void AddUserMessageHistory(string fromChannel, string msgSender, string msg)
         {
-            var toBeDeleted = new List<Messages>();
+            var toBeDeleted = new List<MessageHistory>();
             bool empty = true;
 
-            foreach (Messages msgContainer in Irc._ChannelHistory)
+            foreach (MessageHistory msgContainer in Irc.ChannelHistory)
             {
                 if (msgContainer.GetChannel() == fromChannel && msgContainer.GetSender() == msgSender &&
                     msgContainer.Count() < 20)
@@ -202,68 +202,68 @@ namespace twitch_irc_bot
 
             if (empty)
             {
-                Irc._ChannelHistory.Add(new Messages(fromChannel, msgSender, msg));
+                Irc.ChannelHistory.Add(new MessageHistory(fromChannel, msgSender, msg));
             }
 
-            foreach (Messages item in toBeDeleted)
+            foreach (MessageHistory item in toBeDeleted)
             {
-                Irc._ChannelHistory.Remove(item);
+                Irc.ChannelHistory.Remove(item);
             }
         }
 
         public bool CheckSpam()
         {
             //Adds message to user message history
-            AddUserMessageHistory(ChatEvent.FromChannel, ChatEvent.MsgSender, ChatEvent.Msg);
-            if (CheckAccountCreation(ChatEvent.Msg, ChatEvent.FromChannel, ChatEvent.MsgSender, ChatEvent.UserType)) { return true; }
-            if (CheckUrls(ChatEvent.Msg, ChatEvent.FromChannel, ChatEvent.MsgSender, ChatEvent.UserType)) { return true; }
-            if (CheckSpam(ChatEvent.Msg, ChatEvent.FromChannel, ChatEvent.MsgSender, ChatEvent.UserType)) { return true;}
+            AddUserMessageHistory(Message.FromChannel, Message.MsgSender, Message.Msg);
+            if (CheckAccountCreation(Message.Msg, Message.FromChannel, Message.MsgSender, Message.UserType)) { return true; }
+            if (CheckUrls(Message.Msg, Message.FromChannel, Message.MsgSender, Message.UserType)) { return true; }
+            if (CheckSpam(Message.Msg, Message.FromChannel, Message.MsgSender, Message.UserType)) { return true;}
             return false;
         }
 
         public void CheckCommands()
         {
             #region Chinnbot Only Commands
-            if (ChatEvent.FromChannel == "chinnbot")
+            if (Message.FromChannel == "chinnbot")
             {
-                if (Regex.Match(ChatEvent.Msg, @"!join").Success)
+                if (Regex.Match(Message.Msg, @"!join").Success)
                 {
-                    if (_db.AddToChannels(ChatEvent.MsgSender))
+                    if (_db.AddToChannels(Message.MsgSender))
                     {
-                        _commandFunctions.JoinAssembleFollowerList(ChatEvent.FromChannel, _db, _twitchApi);
-                        Irc.SendChatMessageLobby("Joining channel, " + ChatEvent.MsgSender +
+                        _commandFunctions.JoinAssembleFollowerList(Message.FromChannel, _db, _twitchApi);
+                        Irc.AddMessageToMessageListLobby("Joining channel, " + Message.MsgSender +
                                              ", please remember to mod me in your channel. Type /mod chinnbot into the chat to mod me.");
-                        Irc.JoinChannel(ChatEvent.MsgSender);
+                        Irc.JoinChannel(Message.MsgSender);
                     }
                     else
                     {
-                        Irc.SendChatMessageLobby(ChatEvent.MsgSender +
+                        Irc.AddMessageToMessageListLobby(Message.MsgSender +
                                              ", I am already in your channel. Type !part if you wish me to leave your channel.");
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"!part").Success)
+                else if (Regex.Match(Message.Msg, @"!part").Success)
                 {
-                    if (_db.RemoveFromChannels(ChatEvent.MsgSender))
+                    if (_db.RemoveFromChannels(Message.MsgSender))
                     {
-                        Irc.PartChannel(ChatEvent.MsgSender);
-                        Irc.SendChatMessageLobby(ChatEvent.MsgSender + ", I will no longer monitor your channel.");
+                        Irc.PartChannel(Message.MsgSender);
+                        Irc.AddMessageToMessageListLobby(Message.MsgSender + ", I will no longer monitor your channel.");
                     }
                     else
                     {
-                        Irc.SendChatMessageLobby(ChatEvent.MsgSender +
+                        Irc.AddMessageToMessageListLobby(Message.MsgSender +
                                              ", I don't belive I'm in your channel. Type !join if you wish me to monitor your channel.");
                     }
                 }
             #endregion
             }
-            else if (ChatEvent.MsgSender == "nightbot" || ChatEvent.MsgSender == "moobot" || ChatEvent.MsgSender == "xanbot")
+            else if (Message.MsgSender == "nightbot" || Message.MsgSender == "moobot" || Message.MsgSender == "xanbot")
             {
             }
             #region Built In Commands
             else
             {
                 //Match Specific Channel Commands From Our Database
-                if (!MatchCommand(ChatEvent.Msg, ChatEvent.FromChannel, ChatEvent.MsgSender))
+                if (!MatchCommand(Message.Msg, Message.FromChannel, Message.MsgSender))
                 {
                     //we found a user command in our database
                     return;
@@ -271,203 +271,203 @@ namespace twitch_irc_bot
 
                 //If we don't find a channel command check the built in commands
 
-                if (Regex.Match(ChatEvent.Msg, @"!commands").Success)
+                if (Regex.Match(Message.Msg, @"!commands").Success)
                 {
-                    Irc.SendChatMessage(
-                        ChatEvent.MsgSender +
+                    Irc.AddMessageToMessageList(
+                        Message.MsgSender +
                         ", the commands for this channel can be found here http://chinnbot.tv/commands?user=" +
-                        ChatEvent.FromChannel, ChatEvent.FromChannel);
+                        Message.FromChannel, Message.FromChannel);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!masteries$").Success)
+                else if (Regex.Match(Message.Msg, @"^!masteries$").Success)
                 {
-                    Irc.SendChatMessage(_commandFunctions.GetMasteries(ChatEvent.FromChannel, _riotApi), ChatEvent.FromChannel);
+                    Irc.AddMessageToMessageList(_commandFunctions.GetMasteries(Message.FromChannel, _riotApi), Message.FromChannel);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!rank$").Success)
+                else if (Regex.Match(Message.Msg, @"^!rank$").Success)
                 {
-                    string resoponse = _commandFunctions.GetLeagueRank(ChatEvent.FromChannel, ChatEvent.MsgSender, _db, _riotApi);
-                    Irc.SendChatMessage(resoponse, ChatEvent.FromChannel);
+                    string resoponse = _commandFunctions.GetLeagueRank(Message.FromChannel, Message.MsgSender, _db, _riotApi);
+                    Irc.AddMessageToMessageList(resoponse, Message.FromChannel);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!runes$").Success)
+                else if (Regex.Match(Message.Msg, @"^!runes$").Success)
                 {
-                    Dictionary<string, int> runeDictionary = _riotApi.GetRunes(ChatEvent.FromChannel);
+                    Dictionary<string, int> runeDictionary = _riotApi.GetRunes(Message.FromChannel);
                     if (runeDictionary != null)
                     {
-                        Irc.SendChatMessage(_commandFunctions.ParseRuneDictionary(runeDictionary), ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(_commandFunctions.ParseRuneDictionary(runeDictionary), Message.FromChannel);
                     }
                     else
                     {
-                        Irc.SendChatMessage("Please set up your summoner name by typing !setsummoner [summonername]",
-                            ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList("Please set up your summoner name by typing !setsummoner [summonername]",
+                            Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!allowurls\son$").Success)
+                else if (Regex.Match(Message.Msg, @"^!allowurls\son$").Success)
                 {
-                    if (ChatEvent.UserType == "mod")
+                    if (Message.UserType == "mod")
                     {
-                        Irc.SendChatMessage(_commandFunctions.UrlToggle(ChatEvent.FromChannel, true, _db), ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(_commandFunctions.UrlToggle(Message.FromChannel, true, _db), Message.FromChannel);
                     }
                     else
                     {
-                        Irc.SendChatMessage("Insufficient privileges", ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList("Insufficient privileges", Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!allowurls\soff$").Success)
+                else if (Regex.Match(Message.Msg, @"^!allowurls\soff$").Success)
                 {
-                    if (ChatEvent.UserType == "mod")
+                    if (Message.UserType == "mod")
                     {
-                        Irc.SendChatMessage(_commandFunctions.UrlToggle(ChatEvent.FromChannel, false, _db), ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(_commandFunctions.UrlToggle(Message.FromChannel, false, _db), Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!dicksize$").Success)
+                else if (Regex.Match(Message.Msg, @"^!dicksize$").Success)
                 {
-                    string response = _commandFunctions.DickSize(ChatEvent.FromChannel, ChatEvent.MsgSender, _db);
-                    Irc.SendChatMessage(response, ChatEvent.FromChannel);
+                    string response = _commandFunctions.DickSize(Message.FromChannel, Message.MsgSender, _db);
+                    Irc.AddMessageToMessageList(response, Message.FromChannel);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!dicksize\son$").Success)
+                else if (Regex.Match(Message.Msg, @"^!dicksize\son$").Success)
                 {
-                    if (ChatEvent.UserType == "mod")
+                    if (Message.UserType == "mod")
                     {
-                        Irc.SendChatMessage(_commandFunctions.DickSizeToggle(ChatEvent.FromChannel, true, _db), ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(_commandFunctions.DickSizeToggle(Message.FromChannel, true, _db), Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!dicksize\soff$").Success)
+                else if (Regex.Match(Message.Msg, @"^!dicksize\soff$").Success)
                 {
-                    if (ChatEvent.UserType == "mod")
+                    if (Message.UserType == "mod")
                     {
-                        Irc.SendChatMessage(_commandFunctions.DickSizeToggle(ChatEvent.FromChannel, false, _db), ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(_commandFunctions.DickSizeToggle(Message.FromChannel, false, _db), Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"!addcom").Success)
+                else if (Regex.Match(Message.Msg, @"!addcom").Success)
                 {
-                    if (ChatEvent.UserType == "mod")
+                    if (Message.UserType == "mod")
                     {
-                        string response = _commandFunctions.AddCommand(ChatEvent.FromChannel, ChatEvent.Msg, _db);
+                        string response = _commandFunctions.AddCommand(Message.FromChannel, Message.Msg, _db);
                         if (response != null)
                         {
-                            Irc.SendChatMessage(response, ChatEvent.FromChannel);
+                            Irc.AddMessageToMessageList(response, Message.FromChannel);
                         }
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"!editcom").Success)
+                else if (Regex.Match(Message.Msg, @"!editcom").Success)
                 {
-                    if (ChatEvent.UserType == "mod")
+                    if (Message.UserType == "mod")
                     {
-                        string response = _commandFunctions.EditCommand(ChatEvent.FromChannel, ChatEvent.Msg, _db);
+                        string response = _commandFunctions.EditCommand(Message.FromChannel, Message.Msg, _db);
                         if (response != null)
                         {
-                            Irc.SendChatMessage(response, ChatEvent.FromChannel);
+                            Irc.AddMessageToMessageList(response, Message.FromChannel);
                         }
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"!removecom").Success || Regex.Match(ChatEvent.Msg, @"!delcom").Success)
+                else if (Regex.Match(Message.Msg, @"!removecom").Success || Regex.Match(Message.Msg, @"!delcom").Success)
                 {
-                    if (ChatEvent.UserType == "mod")
+                    if (Message.UserType == "mod")
                     {
-                        string response = _commandFunctions.RemoveCommand(ChatEvent.FromChannel, ChatEvent.Msg, _db);
+                        string response = _commandFunctions.RemoveCommand(Message.FromChannel, Message.Msg, _db);
                         if (response != null)
                         {
-                            Irc.SendChatMessage(response, ChatEvent.FromChannel);
+                            Irc.AddMessageToMessageList(response, Message.FromChannel);
                         }
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!roulette$").Success)
+                else if (Regex.Match(Message.Msg, @"^!roulette$").Success)
                 {
-                    if (_commandFunctions.Roulette(ChatEvent.FromChannel))
+                    if (_commandFunctions.Roulette(Message.FromChannel))
                     {
                         Thread.Sleep(400);
-                        Irc.SendChatMessage("/timeout " + ChatEvent.MsgSender + " 60", ChatEvent.FromChannel);
-                        WhisperServer.SendWhisper(" You have been killed. You can not speak for 1 minute.",
-                            ChatEvent.FromChannel, ChatEvent.MsgSender);
-                        Irc.SendChatMessage(ChatEvent.MsgSender + ", took a bullet to the head.", ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList("/timeout " + Message.MsgSender + " 60", Message.FromChannel);
+                        WhisperServer.AddWhisperToMessagesList(" You have been killed. You can not speak for 1 minute.",
+                            Message.FromChannel, Message.MsgSender);
+                        Irc.AddMessageToMessageList(Message.MsgSender + ", took a bullet to the head.", Message.FromChannel);
                     }
                     else
                     {
-                        Irc.SendChatMessage(ChatEvent.MsgSender + ", pulled the trigger and nothing happened.", ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(Message.MsgSender + ", pulled the trigger and nothing happened.", Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"!setsummoner").Success)
+                else if (Regex.Match(Message.Msg, @"!setsummoner").Success)
                 {
-                    string summonerName = _commandFunctions.SplitSummonerName(ChatEvent.Msg);
-                    Irc.SendChatMessage(_commandFunctions.SetSummonerName(ChatEvent.FromChannel, summonerName, ChatEvent.MsgSender, _db),
-                        ChatEvent.FromChannel);
+                    string summonerName = _commandFunctions.SplitSummonerName(Message.Msg);
+                    Irc.AddMessageToMessageList(_commandFunctions.SetSummonerName(Message.FromChannel, summonerName, Message.MsgSender, _db),
+                        Message.FromChannel);
                     string summonerId = _riotApi.GetSummonerId(summonerName);
-                    _db.SetSummonerId(ChatEvent.FromChannel, summonerId);
+                    _db.SetSummonerId(Message.FromChannel, summonerId);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!suicide$").Success)
+                else if (Regex.Match(Message.Msg, @"^!suicide$").Success)
                 {
-                    kill_user(ChatEvent.FromChannel, ChatEvent.MsgSender, ChatEvent.UserType);
+                    kill_user(Message.FromChannel, Message.MsgSender, Message.UserType);
                 }
 
-                else if (ChatEvent.Msg == "gg")
+                else if (Message.Msg == "gg")
                 {
-                    if (_commandFunctions.CheckGg(ChatEvent.FromChannel, _db))
+                    if (_commandFunctions.CheckGg(Message.FromChannel, _db))
                     {
-                        Irc.SendChatMessage("GG", ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList("GG", Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!gg\son$").Success)
+                else if (Regex.Match(Message.Msg, @"^!gg\son$").Success)
                 {
-                    if (ChatEvent.UserType == "mod")
+                    if (Message.UserType == "mod")
                     {
-                        Irc.SendChatMessage(_commandFunctions.GgToggle(ChatEvent.FromChannel, true, _db), ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(_commandFunctions.GgToggle(Message.FromChannel, true, _db), Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!gg\soff$").Success)
+                else if (Regex.Match(Message.Msg, @"^!gg\soff$").Success)
                 {
-                    if (ChatEvent.UserType == "mod")
+                    if (Message.UserType == "mod")
                     {
-                        Irc.SendChatMessage(_commandFunctions.GgToggle(ChatEvent.FromChannel, false, _db), ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(_commandFunctions.GgToggle(Message.FromChannel, false, _db), Message.FromChannel);
                     }
                 }
                 else if (
-                    Regex.Match(ChatEvent.Msg,
+                    Regex.Match(Message.Msg,
                         @".*?[Ss][Hh][Oo][Ww].*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?")
                         .Success ||
-                    Regex.Match(ChatEvent.Msg,
+                    Regex.Match(Message.Msg,
                         @".*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?[Pp]+[Ll]+(([Ee]+[Aa]+[Ss]+[Ee]+)|([Zz]+)|([Ss]+)).*?")
                         .Success)
                 {
-                    Irc.SendChatMessage(ChatEvent.MsgSender + " here's  your boobs NSFW https://goo.gl/BNl3Gl", ChatEvent.FromChannel);
+                    Irc.AddMessageToMessageList(Message.MsgSender + " here's  your boobs NSFW https://goo.gl/BNl3Gl", Message.FromChannel);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!uptime$").Success)
+                else if (Regex.Match(Message.Msg, @"^!uptime$").Success)
                 {
-                    Irc.SendChatMessage(_twitchApi.GetStreamUptime(ChatEvent.FromChannel), ChatEvent.FromChannel);
+                    Irc.AddMessageToMessageList(_twitchApi.GetStreamUptime(Message.FromChannel), Message.FromChannel);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"!permit").Success)
+                else if (Regex.Match(Message.Msg, @"!permit").Success)
                 {
-                    string response = _commandFunctions.PermitUser(ChatEvent.FromChannel, ChatEvent.MsgSender, ChatEvent.Msg, ChatEvent.UserType, _db);
+                    string response = _commandFunctions.PermitUser(Message.FromChannel, Message.MsgSender, Message.Msg, Message.UserType, _db);
                     if (response != null)
                     {
-                        Irc.SendChatMessage(response, ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(response, Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!roll$").Success)
+                else if (Regex.Match(Message.Msg, @"^!roll$").Success)
                 {
                     int diceRoll = _commandFunctions.DiceRoll();
-                    Irc.SendChatMessage(ChatEvent.MsgSender + " rolled a " + diceRoll, ChatEvent.FromChannel);
+                    Irc.AddMessageToMessageList(Message.MsgSender + " rolled a " + diceRoll, Message.FromChannel);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!coinflip$").Success)
+                else if (Regex.Match(Message.Msg, @"^!coinflip$").Success)
                 {
                     bool coinFlip = _commandFunctions.CoinFlip();
                     if (coinFlip)
                     {
-                        Irc.SendChatMessage(ChatEvent.MsgSender + " flipped a coin and it came up heads", ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(Message.MsgSender + " flipped a coin and it came up heads", Message.FromChannel);
                     }
                     else
                     {
-                        Irc.SendChatMessage(ChatEvent.MsgSender + " flipped a coin and it came up tails", ChatEvent.FromChannel);
+                        Irc.AddMessageToMessageList(Message.MsgSender + " flipped a coin and it came up tails", Message.FromChannel);
                     }
                 }
                 //else if (Regex.Match(message, @"!timer").Success)
                 //{
                 //    if (_commandFunctions.AddTimer(_db, message, FromChannel)) //Everything worked
                 //    {
-                //        SendChatMessage("Timer was addedd succesffully", FromChannel);
+                //        AddMessageToMessageList("Timer was addedd succesffully", FromChannel);
                 //    }
                 //    else //faild to add timer
                 //    {
 
-                //        SendChatMessage("Failed to add timer", FromChannel);
+                //        AddMessageToMessageList("Failed to add timer", FromChannel);
                 //    }
                 //}
                 //else if (Regex.Match(message, @"^!mytimers$").Success)
@@ -475,14 +475,14 @@ namespace twitch_irc_bot
                 //    var toBeSent = _commandFunctions.ChannelTimers(_db, FromChannel);
                 //    if (toBeSent != null)
                 //    {
-                //        SendChatMessage(toBeSent, FromChannel);
+                //        AddMessageToMessageList(toBeSent, FromChannel);
                 //    }
                 //}
 
                 //else if (Regex.Match(message, @"!addtimer").Success)
                 //{
                 //    var mytimer = _commandFunctions.AddTimer(FromChannel, message, 3, this);
-                //    SendChatMessage("Timer added", FromChannel);
+                //    AddMessageToMessageList("Timer added", FromChannel);
                 //    GC.KeepAlive(mytimer);
                 //}
 
@@ -493,11 +493,11 @@ namespace twitch_irc_bot
                 //    if (listOfMods.Contains(MsgSender))
                 //    {
                 //        //sr turned on
-                //        SendChatMessage("Song requests are now on.", FromChannel);
+                //        AddMessageToMessageList("Song requests are now on.", FromChannel);
                 //    }
                 //    else
                 //    {
-                //        SendChatMessage("Only moderators can turn song requests on.", FromChannel);
+                //        AddMessageToMessageList("Only moderators can turn song requests on.", FromChannel);
                 //    }
                 //}
                 //else if (Regex.Match(message, @"!sroff").Success)
@@ -506,67 +506,67 @@ namespace twitch_irc_bot
                 //    if (listOfMods.Contains(MsgSender))
                 //    {
                 //        //sr turned on
-                //        SendChatMessage("Song requests are now off.", FromChannel);
+                //        AddMessageToMessageList("Song requests are now off.", FromChannel);
                 //    }
                 //    else
                 //    {
-                //        SendChatMessage("Only moderators can turn song requests off.", FromChannel);
+                //        AddMessageToMessageList("Only moderators can turn song requests off.", FromChannel);
                 //    }
                 //}
                 //}
                 //else if (Regex.Match(message, @"!gameqon").Success)
                 //{
-                //    SendChatMessage("Temporaryily Unavailable.", FromChannel);
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
                 //}
                 //else if (Regex.Match(message, @"!gameqoff").Success)
                 //{
-                //    SendChatMessage("Temporaryily Unavailable.", FromChannel);
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
                 //}
                 //else if (Regex.Match(message, @"!clearq").Success)
                 //{
-                //    SendChatMessage("Temporaryily Unavailable.", FromChannel);
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
                 //}
                 //else if (Regex.Match(message, @"!players").Success)
                 //{
-                //    SendChatMessage("Temporaryily Unavailable.", FromChannel);
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
                 //}
                 //else if (Regex.Match(message, @"!leave").Success)
                 //{
-                //    SendChatMessage("Temporaryily Unavailable.", FromChannel);
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
                 //}
                 //else if (Regex.Match(message, @"!position").Success)
                 //{
-                //    SendChatMessage("Temporaryily Unavailable.", FromChannel);
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
                 //}
                 //Regex.Match(message, @"^!songrequest\s+").Success ||
 
-                else if (Regex.Match(ChatEvent.Msg, @"^!sr\s+").Success)
+                else if (Regex.Match(Message.Msg, @"^!sr\s+").Success)
                 {
-                    var response = _commandFunctions.SearchSong(ChatEvent.Msg, ChatEvent.MsgSender, _db, ChatEvent.FromChannel);
-                    response = ChatEvent.MsgSender + ", " + response;
-                    Irc.SendChatMessage(response, ChatEvent.FromChannel);
+                    var response = _commandFunctions.SearchSong(Message.Msg, Message.MsgSender, _db, Message.FromChannel);
+                    response = Message.MsgSender + ", " + response;
+                    Irc.AddMessageToMessageList(response, Message.FromChannel);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"^!currentsong$").Success)
+                else if (Regex.Match(Message.Msg, @"^!currentsong$").Success)
                 {
-                    var song = _db.GetCurrentSong(ChatEvent.FromChannel);
-                    Irc.SendChatMessage(song, ChatEvent.FromChannel);
+                    var song = _db.GetCurrentSong(Message.FromChannel);
+                    Irc.AddMessageToMessageList(song, Message.FromChannel);
                 }
-                else if (Regex.Match(ChatEvent.Msg, @"!songlist").Success || Regex.Match(ChatEvent.Msg, @"!sl").Success || Regex.Match(ChatEvent.Msg, @"!playlist").Success)
+                else if (Regex.Match(Message.Msg, @"!songlist").Success || Regex.Match(Message.Msg, @"!sl").Success || Regex.Match(Message.Msg, @"!playlist").Success)
                 {
-                    Irc.SendChatMessage(ChatEvent.MsgSender + " the playlist can be found here http://chinnbot.tv/songlist?user=" + ChatEvent.FromChannel, ChatEvent.FromChannel);
+                    Irc.AddMessageToMessageList(Message.MsgSender + " the playlist can be found here http://chinnbot.tv/songlist?user=" + Message.FromChannel, Message.FromChannel);
                 }
 
                 //else if (Regex.Match(message, @"!addquote").Success)
                 //{
-                //    SendChatMessage("Temporaryily Unavailable.", FromChannel);
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
                 //}
                 //else if (Regex.Match(message, @"!quote").Success)
                 //{
-                //    SendChatMessage("Temporaryily Unavailable.", FromChannel);
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
                 //}
                 //else if (Regex.Match(message, @"!m8b").Success)
                 //{
-                //    SendChatMessage("Temporaryily Unavailable.", FromChannel);
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
                 //}
             }
             #endregion
