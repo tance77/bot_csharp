@@ -440,7 +440,7 @@ namespace twitch_irc_bot
                 @".*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?[Pp]+[Ll]+(([Ee]+[Aa]+[Ss]+[Ee]+)|([Zz]+)|([Ss]+)).*?")
                 .Success)
                 {
-                    Irc.AddMessagesToMessageList(Message.MsgSender + " here's  your boobs NSFW https://goo.gl/BNl3Gl", Message.FromChannel);
+                    Irc.AddMessagesToMessageList(Message.MsgSender + " here's  your boobs NSFW https://goo.gl/gGMasE", Message.FromChannel);
                 }
                 else if (Regex.Match(Message.Msg, @"^!uptime$").Success)
                 {
