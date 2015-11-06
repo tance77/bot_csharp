@@ -16,7 +16,22 @@ namespace twitch_irc_bot
 
         public TwitchMessage()
         {
-            
+          Command = null;
+          FromChannel = null;
+          MsgSender = null;
+          MsgRecipient = null;
+          Msg = null;
+          Joiner = null;
+          Privlages = null;
+          OperatingUser = null;
+          Color = null;
+          DisplayName = null;
+          Emotes = null;
+          UserType = null;
+          Subscriber = null;
+          Turbo = null;
+          UserId = 0;
+
         }
 
         #endregion
@@ -53,7 +68,7 @@ namespace twitch_irc_bot
 
         public IrcClient Irc { get; set; }
 
-        private int _userId = 0;
+        public int UserId {get; set; }
 
         #endregion
 
@@ -144,8 +159,9 @@ namespace twitch_irc_bot
             {
                 //> :tmi.twitch.tv HOSTTARGET #hosting_channel :- [number]
             }
-            else if (Regex.Match(m, @":tmi.twitch.tv CLEARCHAT").Success)
+            else if (Regex.Match(m, @":tmi\.twitch\.tv CLEARCHAT").Success) //see if this regex matches
             {
+              Command = "CLEARCHAT";
                 File.WriteAllText("./bad.txt", m);
             }
             else if (Regex.Match(m, @":tmi.twitch.tv USERSTATE").Success)
@@ -157,7 +173,7 @@ namespace twitch_irc_bot
             else if (Regex.Match(m, @"tmi.twitch.tv PRIVMSG").Success)
             {
                 /*
-                * @color=#FFFFFF;display-name=TWITCHNAME;emotes=;subscriber=0;turbo=0;user-id=0000000;user-type=mod 
+                * @color=#FFFFFF;display-name=TWITCHNAME;emotes=;subscriber=0;turbo=0;user-id=0000000;user-type=mod
                 * :CHANNEL!CHANNEL@CHANNEL.tmi.twitch.tv PRIVMSG #RECIPIENT :asd
                 */
                 string[] msgArray = m.Split(' ');
@@ -166,7 +182,7 @@ namespace twitch_irc_bot
                 MsgSender = msgArray[1].Split(':')[1].Split('!')[0];
                 Command = msgArray[2];
                 //form the message since we split on space
-                for (var s = 4; s < msgArray.Length; s++) 
+                for (var s = 4; s < msgArray.Length; s++)
                 {
                     if (s == msgArray.Length - 1)
                         Msg += msgArray[s];
@@ -185,12 +201,12 @@ namespace twitch_irc_bot
                 {
                     Emotes = "";
                 }
-                
+
                 Subscriber = prefix[3].Split('=')[1].Split('"')[0] != "0";
                 Turbo = prefix[4].Split('=')[1].Split('"')[0] != "0";
                  if(!Int32.TryParse(prefix[5].Split('=')[1].Split('"')[0], out _userId))
                 {
-                    _userId = 0;
+                    UserId = 0;
                 }
                 UserType = prefix[6].Split('=')[1].Split('"')[0].Split(' ')[0];
                 if (MsgSender.ToLower() == FromChannel.ToLower())
@@ -198,8 +214,9 @@ namespace twitch_irc_bot
                     UserType = "mod";
                 }
             }
-            return Command;
+            Command = "CLEARCHAT";
         }
+            return Command;
 
         #endregion
 
