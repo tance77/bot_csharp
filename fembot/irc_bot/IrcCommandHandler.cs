@@ -10,7 +10,7 @@ namespace twitch_irc_bot
 {
     class IrcCommandHandler
     {
-        private CommandFunctions _commandFunctions = new CommandFunctions();
+        private CommandHelpers _commandHelpers = new CommandHelpers();
         private DatabaseFunctions _db = new DatabaseFunctions();
         private RiotApi _riotApi;
         private TwitchApi _twitchApi = new TwitchApi();
@@ -243,7 +243,7 @@ namespace twitch_irc_bot
                 {
                     if (_db.AddToChannels(Message.MsgSender))
                     {
-                        _commandFunctions.JoinAssembleFollowerList(Message.FromChannel, _db, _twitchApi);
+                        _commandHelpers.JoinAssembleFollowerList(Message.FromChannel, _db, _twitchApi);
                         Irc.AddLobbyMessageToMessageList("Joining channel, " + Message.MsgSender +
                         ", please remember to mod me in your channel. Type /mod chinnbot into the chat to mod me.");
                         Irc.JoinChannel(Message.MsgSender);
@@ -293,11 +293,11 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(Message.Msg, @"^!masteries$").Success)
                 {
-                    Irc.AddMessagesToMessageList(_commandFunctions.GetMasteries(Message.FromChannel, _riotApi), Message.FromChannel);
+                    Irc.AddMessagesToMessageList(_commandHelpers.GetMasteries(Message.FromChannel, _riotApi), Message.FromChannel);
                 }
                 else if (Regex.Match(Message.Msg, @"^!rank$").Success)
                 {
-                    string resoponse = _commandFunctions.GetLeagueRank(Message.FromChannel, Message.MsgSender, _db, _riotApi);
+                    string resoponse = _commandHelpers.GetLeagueRank(Message.FromChannel, Message.MsgSender, _db, _riotApi);
                     Irc.AddMessagesToMessageList(resoponse, Message.FromChannel);
                 }
                 else if (Regex.Match(Message.Msg, @"^!runes$").Success)
@@ -305,7 +305,7 @@ namespace twitch_irc_bot
                     Dictionary<string, int> runeDictionary = _riotApi.GetRunes(Message.FromChannel);
                     if (runeDictionary != null)
                     {
-                        Irc.AddMessagesToMessageList(_commandFunctions.ParseRuneDictionary(runeDictionary), Message.FromChannel);
+                        Irc.AddMessagesToMessageList(_commandHelpers.ParseRuneDictionary(runeDictionary), Message.FromChannel);
                     }
                     else
                     {
@@ -317,7 +317,7 @@ namespace twitch_irc_bot
                 {
                     if (Message.UserType == "mod")
                     {
-                        Irc.AddMessagesToMessageList(_commandFunctions.UrlToggle(Message.FromChannel, true, _db), Message.FromChannel);
+                        Irc.AddMessagesToMessageList(_commandHelpers.UrlToggle(Message.FromChannel, true, _db), Message.FromChannel);
                     }
                     else
                     {
@@ -328,33 +328,33 @@ namespace twitch_irc_bot
                 {
                     if (Message.UserType == "mod")
                     {
-                        Irc.AddMessagesToMessageList(_commandFunctions.UrlToggle(Message.FromChannel, false, _db), Message.FromChannel);
+                        Irc.AddMessagesToMessageList(_commandHelpers.UrlToggle(Message.FromChannel, false, _db), Message.FromChannel);
                     }
                 }
                 else if (Regex.Match(Message.Msg, @"^!dicksize$").Success)
                 {
-                    string response = _commandFunctions.DickSize(Message.FromChannel, Message.MsgSender, _db);
+                    string response = _commandHelpers.DickSize(Message.FromChannel, Message.MsgSender, _db);
                     Irc.AddMessagesToMessageList(response, Message.FromChannel);
                 }
                 else if (Regex.Match(Message.Msg, @"^!dicksize\son$").Success)
                 {
                     if (Message.UserType == "mod")
                     {
-                        Irc.AddMessagesToMessageList(_commandFunctions.DickSizeToggle(Message.FromChannel, true, _db), Message.FromChannel);
+                        Irc.AddMessagesToMessageList(_commandHelpers.DickSizeToggle(Message.FromChannel, true, _db), Message.FromChannel);
                     }
                 }
                 else if (Regex.Match(Message.Msg, @"^!dicksize\soff$").Success)
                 {
                     if (Message.UserType == "mod")
                     {
-                        Irc.AddMessagesToMessageList(_commandFunctions.DickSizeToggle(Message.FromChannel, false, _db), Message.FromChannel);
+                        Irc.AddMessagesToMessageList(_commandHelpers.DickSizeToggle(Message.FromChannel, false, _db), Message.FromChannel);
                     }
                 }
                 else if (Regex.Match(Message.Msg, @"!addcom").Success)
                 {
                     if (Message.UserType == "mod")
                     {
-                        string response = _commandFunctions.AddCommand(Message.FromChannel, Message.Msg, _db);
+                        string response = _commandHelpers.AddCommand(Message.FromChannel, Message.Msg, _db);
                         if (response != null)
                         {
                             Irc.AddMessagesToMessageList(response, Message.FromChannel);
@@ -365,7 +365,7 @@ namespace twitch_irc_bot
                 {
                     if (Message.UserType == "mod")
                     {
-                        string response = _commandFunctions.EditCommand(Message.FromChannel, Message.Msg, _db);
+                        string response = _commandHelpers.EditCommand(Message.FromChannel, Message.Msg, _db);
                         if (response != null)
                         {
                             Irc.AddMessagesToMessageList(response, Message.FromChannel);
@@ -376,7 +376,7 @@ namespace twitch_irc_bot
                 {
                     if (Message.UserType == "mod")
                     {
-                        string response = _commandFunctions.RemoveCommand(Message.FromChannel, Message.Msg, _db);
+                        string response = _commandHelpers.RemoveCommand(Message.FromChannel, Message.Msg, _db);
                         if (response != null)
                         {
                             Irc.AddMessagesToMessageList(response, Message.FromChannel);
@@ -385,7 +385,7 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(Message.Msg, @"^!roulette$").Success)
                 {
-                    if (_commandFunctions.Roulette(Message.FromChannel))
+                    if (_commandHelpers.Roulette(Message.FromChannel))
                     {
                         Thread.Sleep(400);
                         Irc.AddMessagesToMessageList("/timeout " + Message.MsgSender + " 60", Message.FromChannel);
@@ -400,8 +400,8 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(Message.Msg, @"!setsummoner").Success)
                 {
-                    string summonerName = _commandFunctions.SplitSummonerName(Message.Msg);
-                    Irc.AddMessagesToMessageList(_commandFunctions.SetSummonerName(Message.FromChannel, summonerName, Message.MsgSender, _db),
+                    string summonerName = _commandHelpers.SplitSummonerName(Message.Msg);
+                    Irc.AddMessagesToMessageList(_commandHelpers.SetSummonerName(Message.FromChannel, summonerName, Message.MsgSender, _db),
                     Message.FromChannel);
                     string summonerId = _riotApi.GetSummonerId(summonerName);
                     _db.SetSummonerId(Message.FromChannel, summonerId);
@@ -413,7 +413,7 @@ namespace twitch_irc_bot
 
                 else if (Message.Msg == "gg")
                 {
-                    if (_commandFunctions.CheckGg(Message.FromChannel, _db))
+                    if (_commandHelpers.CheckGg(Message.FromChannel, _db))
                     {
                         Irc.AddMessagesToMessageList("GG", Message.FromChannel);
                     }
@@ -422,14 +422,14 @@ namespace twitch_irc_bot
                 {
                     if (Message.UserType == "mod")
                     {
-                        Irc.AddMessagesToMessageList(_commandFunctions.GgToggle(Message.FromChannel, true, _db), Message.FromChannel);
+                        Irc.AddMessagesToMessageList(_commandHelpers.GgToggle(Message.FromChannel, true, _db), Message.FromChannel);
                     }
                 }
                 else if (Regex.Match(Message.Msg, @"^!gg\soff$").Success)
                 {
                     if (Message.UserType == "mod")
                     {
-                        Irc.AddMessagesToMessageList(_commandFunctions.GgToggle(Message.FromChannel, false, _db), Message.FromChannel);
+                        Irc.AddMessagesToMessageList(_commandHelpers.GgToggle(Message.FromChannel, false, _db), Message.FromChannel);
                     }
                 }
                 else if (
@@ -448,7 +448,7 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(Message.Msg, @"!permit").Success)
                 {
-                    string response = _commandFunctions.PermitUser(Message.FromChannel, Message.MsgSender, Message.Msg, Message.UserType, _db);
+                    string response = _commandHelpers.PermitUser(Message.FromChannel, Message.MsgSender, Message.Msg, Message.UserType, _db);
                     if (response != null)
                     {
                         Irc.AddMessagesToMessageList(response, Message.FromChannel);
@@ -456,12 +456,12 @@ namespace twitch_irc_bot
                 }
                 else if (Regex.Match(Message.Msg, @"^!roll$").Success)
                 {
-                    int diceRoll = _commandFunctions.DiceRoll();
+                    int diceRoll = _commandHelpers.DiceRoll();
                     Irc.AddMessagesToMessageList(Message.MsgSender + " rolled a " + diceRoll, Message.FromChannel);
                 }
                 else if (Regex.Match(Message.Msg, @"^!coinflip$").Success)
                 {
-                    bool coinFlip = _commandFunctions.CoinFlip();
+                    bool coinFlip = _commandHelpers.CoinFlip();
                     if (coinFlip)
                     {
                         Irc.AddMessagesToMessageList(Message.MsgSender + " flipped a coin and it came up heads", Message.FromChannel);
@@ -473,7 +473,7 @@ namespace twitch_irc_bot
                 }
                 //else if (Regex.Match(message, @"!timer").Success)
                 //{
-                //    if (_commandFunctions.AddTimer(_db, message, FromChannel)) //Everything worked
+                //    if (_commandHelpers.AddTimer(_db, message, FromChannel)) //Everything worked
                 //    {
                 //        AddMessageToMessageList("Timer was addedd succesffully", FromChannel);
                 //    }
@@ -485,7 +485,7 @@ namespace twitch_irc_bot
                 //}
                 //else if (Regex.Match(message, @"^!mytimers$").Success)
                 //{
-                //    var toBeSent = _commandFunctions.ChannelTimers(_db, FromChannel);
+                //    var toBeSent = _commandHelpers.ChannelTimers(_db, FromChannel);
                 //    if (toBeSent != null)
                 //    {
                 //        AddMessageToMessageList(toBeSent, FromChannel);
@@ -494,7 +494,7 @@ namespace twitch_irc_bot
 
                 //else if (Regex.Match(message, @"!addtimer").Success)
                 //{
-                //    var mytimer = _commandFunctions.AddTimer(FromChannel, message, 3, this);
+                //    var mytimer = _commandHelpers.AddTimer(FromChannel, message, 3, this);
                 //    AddMessageToMessageList("Timer added", FromChannel);
                 //    GC.KeepAlive(mytimer);
                 //}
@@ -555,7 +555,7 @@ namespace twitch_irc_bot
 
                 else if (Regex.Match(Message.Msg, @"^!sr\s+").Success)
                 {
-                    var response = _commandFunctions.SearchSong(Message.Msg, Message.MsgSender, _db, Message.FromChannel);
+                    var response = _commandHelpers.SearchSong(Message.Msg, Message.MsgSender, _db, Message.FromChannel);
                     response = Message.MsgSender + ", " + response;
                     Irc.AddMessagesToMessageList(response, Message.FromChannel);
                 }

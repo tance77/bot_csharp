@@ -10,7 +10,7 @@ using SpotifyAPI.Web.Models;
 
 namespace twitch_irc_bot
 {
-    internal class CommandFunctions : WebFunctions
+    internal class CommandHelpers : WebFunctions
     {
         public bool AddTimer(DatabaseFunctions db, string msg, string channel)
         {
