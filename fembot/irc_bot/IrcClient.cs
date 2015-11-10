@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -15,7 +16,7 @@ namespace twitch_irc_bot
         private readonly StreamReader _inputStream;
         private readonly StreamWriter _outputStream;
         private List<string> _listOfActiveChannels;
-        private readonly CommandFunctions _commandFunctions = new CommandFunctions();
+        private readonly CommandHelpers _commandHelpers = new CommandHelpers();
         private readonly DatabaseFunctions _db = new DatabaseFunctions();
         private readonly RiotApi _riotApi;
         private readonly TwitchApi _twitchApi = new TwitchApi();
@@ -124,7 +125,7 @@ namespace twitch_irc_bot
             if (channelList == null) return;
             foreach (string channel in channelList)
             {
-                string message = _commandFunctions.AssembleFollowerList(channel, _db, _twitchApi);
+                string message = _commandHelpers.AssembleFollowerList(channel, _db, _twitchApi);
                 if (message != null)
                 {
                     AddMessagesToMessageList(message, channel);
