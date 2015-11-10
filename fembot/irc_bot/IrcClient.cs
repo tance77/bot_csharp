@@ -25,6 +25,7 @@ namespace twitch_irc_bot
 
         public List<MessageHistory> ChannelHistory { get; set; }
 
+
         public BlockingCollection<string> BlockingMessageQueue{ get; set; }
 
         #region Constructors
