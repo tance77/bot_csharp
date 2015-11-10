@@ -1,6 +1,6 @@
 # Folders
 
-/fembot/irc_bot/bin
+fembot/irc_bot/bin
 
 # Windows image file caches
 Thumbs.db
