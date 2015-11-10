@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
@@ -24,14 +24,14 @@ namespace twitch_irc_bot
 
         public List<MessageHistory> ChannelHistory { get; set; }
 
-        public Queue<string> MessageQueue{ get; set; }
+        public BlockingCollection<string> BlockingMessageQueue{ get; set; }
 
-#region Constructors
+        #region Constructors
 
         public IrcClient(string ip, int port, string userName, string oAuth)
         {
             RateLimit = 0;
-            MessageQueue = new Queue<string>();
+            BlockingMessageQueue = new BlockingCollection<string>();
 
             //_riotApi = new RiotApi(_db);
             _listOfActiveChannels = new List<string>();
@@ -50,7 +50,7 @@ namespace twitch_irc_bot
             ChannelHistory = new List<MessageHistory>();
 
 
-#region Timers
+            #region Timers
 
             var channelUpdate = new Timer { Interval = 30000 }; //check if someone requested chinnbot to join channel every 30 secodns or leave
             channelUpdate.Elapsed += UpdateActiveChannels;
@@ -82,18 +82,18 @@ namespace twitch_irc_bot
             advertiseTimer.Elapsed += Advertise;
             advertiseTimer.AutoReset = true;
             advertiseTimer.Enabled = true;
-#endregion
+            #endregion
         }
 
-#endregion
+        #endregion
 
         public void CheckRateAndSend(Object source, ElapsedEventArgs e)
         {
             Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
             //Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
-            while (RateLimit < 20 && MessageQueue.Count > 0)
+            while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
             {
-                SendIrcMessage(MessageQueue.Dequeue());
+                SendIrcMessage(BlockingMessageQueue.Take());
             }
         }
 
@@ -140,13 +140,13 @@ namespace twitch_irc_bot
             {
                 string response = _twitchApi.GetStreamUptime(channel);
                 if (response == "Stream is offline." || response == "Could not reach Twitch API")
-                    continue; //continue the loop
+                continue; //continue the loop
                 List<string> userList = _twitchApi.GetActiveUsers(channel);
                 _db.AddCoins(1, channel, userList);
             }
         }
 
-#region Methods
+        #region Methods
 
         public void UpdateActiveChannels(Object source, ElapsedEventArgs e)
         {
@@ -190,7 +190,7 @@ namespace twitch_irc_bot
         public void JoinChannelStartup()
         {
             Console.Write(
-                    "-------------------------------- Loading Channels to Join ------------------------------- \r\n");
+            "-------------------------------- Loading Channels to Join ------------------------------- \r\n");
             List<string> channelsToJoin = _db.JoinChannels();
             foreach (string channel in channelsToJoin)
             {
@@ -198,7 +198,7 @@ namespace twitch_irc_bot
                 Console.Write("Joining Channel " + channel + "\r\n");
             }
             Console.Write(
-                    "-------------------------------- Finished Loading Channels ------------------------------- \r\n");
+            "-------------------------------- Finished Loading Channels ------------------------------- \r\n");
         }
 
         public void PartChannel(string channel)
@@ -222,8 +222,8 @@ namespace twitch_irc_bot
             {
                 return;
             }
-            MessageQueue.Enqueue(":" + _botUserName + "!" + _botUserName + "@"
-                    + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
+            BlockingMessageQueue.Add(":" + _botUserName + "!" + _botUserName + "@"
+            + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
         }
 
         public void AddWhisperToMessagesList(string message, string channelName, string msgSender)
@@ -232,7 +232,7 @@ namespace twitch_irc_bot
             {
                 return;
             }
-            MessageQueue.Enqueue("PRIVMSG #jtv :/w " + msgSender + " " + message);
+            BlockingMessageQueue.Add("PRIVMSG #jtv :/w " + msgSender + " " + message);
         }
 
         public void AddMessagesToMessageList(string message, string channelName)
@@ -241,8 +241,8 @@ namespace twitch_irc_bot
             {
                 return;
             }
-            MessageQueue.Enqueue(":" + _botUserName + "!" + _botUserName + "@"
-                    + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
+            BlockingMessageQueue.Add(":" + _botUserName + "!" + _botUserName + "@"
+            + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
         }
 
         public string ReadMessage()
@@ -270,5 +270,5 @@ namespace twitch_irc_bot
         }
     }
 
-#endregion
+    #endregion
 }
