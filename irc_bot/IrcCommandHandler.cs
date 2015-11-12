@@ -499,61 +499,17 @@ namespace twitch_irc_bot
                 //    GC.KeepAlive(mytimer);
                 //}
 
-                //if (Regex.Match(message, @"!sron").Success)
-                //{
+                if (Regex.Match(message, @"!sron").Success && Message.UserType == "mod")
+                {
+                       //sr turned on
+                       Irc.AddMessagesToMessageList(_commandHelpers.SongRequestToggle(Message.FromChannel, true, _db), Message.FromChannel);
+                }
+                else if (Regex.Match(message, @"!sroff").Success && Messsage.UserType == "mod")
+                {
+                       Irc.AddMessagesToMessageList(_commandHelpers.SongRequestToggle(Message.FromChannel, false, _db), Message.FromChannel);
+                }
 
-                //    var listOfMods = get_list_of_mods(FromChannel);
-                //    if (listOfMods.Contains(MsgSender))
-                //    {
-                //        //sr turned on
-                //        AddMessageToMessageList("Song requests are now on.", FromChannel);
-                //    }
-                //    else
-                //    {
-                //        AddMessageToMessageList("Only moderators can turn song requests on.", FromChannel);
-                //    }
-                //}
-                //else if (Regex.Match(message, @"!sroff").Success)
-                //{
-                //    var listOfMods = get_list_of_mods(FromChannel);
-                //    if (listOfMods.Contains(MsgSender))
-                //    {
-                //        //sr turned on
-                //        AddMessageToMessageList("Song requests are now off.", FromChannel);
-                //    }
-                //    else
-                //    {
-                //        AddMessageToMessageList("Only moderators can turn song requests off.", FromChannel);
-                //    }
-                //}
-                //}
-                //else if (Regex.Match(message, @"!gameqon").Success)
-                //{
-                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
-                //}
-                //else if (Regex.Match(message, @"!gameqoff").Success)
-                //{
-                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
-                //}
-                //else if (Regex.Match(message, @"!clearq").Success)
-                //{
-                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
-                //}
-                //else if (Regex.Match(message, @"!players").Success)
-                //{
-                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
-                //}
-                //else if (Regex.Match(message, @"!leave").Success)
-                //{
-                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
-                //}
-                //else if (Regex.Match(message, @"!position").Success)
-                //{
-                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
-                //}
-                //Regex.Match(message, @"^!songrequest\s+").Success ||
-
-                else if (Regex.Match(Message.Msg, @"^!sr\s+").Success)
+                else if (Regex.Match(Message.Msg, @"^!sr\s+").Success && _db.CheckSongRequestStatus(Msg.FromChannel) != false)
                 {
                     var response = _commandHelpers.SearchSong(Message.Msg, Message.MsgSender, _db, Message.FromChannel);
                     response = Message.MsgSender + ", " + response;

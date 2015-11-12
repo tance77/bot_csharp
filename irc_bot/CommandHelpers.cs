@@ -327,6 +327,15 @@ namespace twitch_irc_bot
             }
             return "Something went wrong on my end.";
         }
+        public string SongRequestToggle(string channel, bool toggle, DatabaseFunctions db)
+        {
+            bool success = db.SongRequestToggle(channel, toggle);
+            if (success)
+            {
+                return toggle ? "Song Request is now on." : "Songrequest is now off.";
+            }
+            return "Something went wrong on my end."
+        }
 
         public string UrlToggle(string channel, bool toggle, DatabaseFunctions db)
         {
