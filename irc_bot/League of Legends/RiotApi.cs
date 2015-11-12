@@ -46,7 +46,7 @@ namespace twitch_irc_bot
                 }
             }
 
-            var masterDictionary = new Dictionary<string, int> {{"Offense", 0}, {"Defense", 0}, {"Utility", 0}};
+            var masterDictionary = new Dictionary<string, int> {{"Ferocity", 0}, {"Cunning", 0}, {"Resolve", 0}};
 
             foreach (var masteryId in masteriesList)
             {
@@ -54,7 +54,21 @@ namespace twitch_irc_bot
                     "?masteryData=masteryTree&api_key=" + _apiKey;
                 string masteryJson = RequestJson(url2);
                 string masteryTree = JObject.Parse(masteryJson).SelectToken("masteryTree").ToString();
-                masterDictionary[masteryTree] += masteryId.Value;
+                if (masteryTree == "Offense")
+                {
+                    masterDictionary["Ferocity"] += masteryId.Value;
+                    
+                }
+                if (masteryTree == "Utility")
+                {
+                    masterDictionary["Resolve"] += masteryId.Value;
+                }
+                if (masteryTree == "Defense")
+                {
+                    masterDictionary["Cunning"] += masteryId.Value;
+                }
+
+
             }
             return masterDictionary;
         }
