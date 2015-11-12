@@ -334,7 +334,7 @@ namespace twitch_irc_bot
             {
                 return toggle ? "Song Request is now on." : "Songrequest is now off.";
             }
-            return "Something went wrong on my end."
+            return "Something went wrong on my end.";
         }
 
         public string UrlToggle(string channel, bool toggle, DatabaseFunctions db)

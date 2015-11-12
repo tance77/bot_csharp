@@ -644,7 +644,7 @@ namespace twitch_irc_bot
                 }
             }
         }
-        public bool SongRequesToggle(string channel, bool toggle)
+        public bool SongRequestToggle(string channel, bool toggle)
         {
             using (var dbConnection = new MySqlConnection(ConnectionString))
             {
@@ -1140,11 +1140,15 @@ namespace twitch_irc_bot
                 {
                     try
                     {
-                        command.Parameters.AddWithValue("@channel", channel);
+                        command.Parameters.AddWithValue("@channel", channelName);
                         command.ExecuteNonQuery();
                         using (MySqlDataReader reader = command.ExecuteReader())
                         {
-                            return reader.GetBoolean(4);
+                            if (reader.Read())
+                            {
+                                return reader.GetBoolean(4);
+                            }
+                            return false;
                         }
                     }
                     catch (MySqlException e)
