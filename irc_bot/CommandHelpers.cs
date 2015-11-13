@@ -393,11 +393,10 @@ namespace twitch_irc_bot
         {
             List<string> followersList = db.ParseRecentFollowers(fromChannel, twitchApi);
             if (followersList == null) return null;
-            var message = new StringBuilder();
-            message.Append("/me ");
+            var message = "/me ";
             if (followersList.Count == 1)
             {
-                message.Append(followersList.First() + " thanks for following!");
+                message += followersList.First() + " thanks for following!";
             }
             else
             {
@@ -405,19 +404,15 @@ namespace twitch_irc_bot
                 {
                     if (item == followersList.Last())
                     {
-                        message.Append("and " + item + ", thank you for following!");
+                        message += "and " + item + ", thank you for following!";
                     }
                     else
                     {
-                        message.Append(item + ", ");
+                        message += item + ", ";
                     }
                 }
             }
-            if (message.ToString() == "/me ")
-            {
-                return null;
-            }
-            return message.ToString();
+            return message == "/me " ? null : message;
         }
 
         public void JoinAssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
