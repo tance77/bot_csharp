@@ -42,6 +42,7 @@ namespace twitch_irc_bot
             var tcpClient = new TcpClient(ip, port);
             _inputStream = new StreamReader(tcpClient.GetStream());
             _outputStream = new StreamWriter(tcpClient.GetStream());
+            _outputStream.AutoFlush = true;
 
             _outputStream.WriteLine("PASS " + oAuth);
             _outputStream.WriteLine("NICK " + userName);
@@ -214,7 +215,7 @@ namespace twitch_irc_bot
         {
             RateLimit += 1;
             _outputStream.WriteLine(message);
-            _outputStream.Flush();
+            //_outputStream.Flush();
         }
 
 

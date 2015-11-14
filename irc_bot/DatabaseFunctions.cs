@@ -918,10 +918,10 @@ namespace twitch_irc_bot
                         foreach (var follower in followersDictionary)
                         {
                             using (
-                            var command =
-                            new MySqlCommand(
-                            "SELECT * FROM Followers WHERE follower_name=@follower and channel_name=@channel",
-                            dbConnection))
+                                var command =
+                                    new MySqlCommand(
+                                        "SELECT * FROM Followers WHERE follower_name=@follower and channel_name=@channel",
+                                        dbConnection))
                             {
                                 command.Parameters.AddWithValue("@channel", fromChannel);
                                 command.Parameters.AddWithValue("@follower", follower.Key);
@@ -935,11 +935,11 @@ namespace twitch_irc_bot
                             }
                             GC.Collect();
                             using (
-                            var command =
-                            new MySqlCommand(
-                            "INSERT INTO Followers(channel_name,follower_name,follow_date)VALUES(@channel,@follower,@date)",
-                            dbConnection)
-                            )
+                                var command =
+                                    new MySqlCommand(
+                                        "INSERT INTO Followers(channel_name,follower_name,follow_date)VALUES(@channel,@follower,@date)",
+                                        dbConnection)
+                                )
                             {
                                 command.Parameters.AddWithValue("@channel", fromChannel);
                                 command.Parameters.AddWithValue("@follower", follower.Key);
@@ -953,7 +953,12 @@ namespace twitch_irc_bot
                     return followersList;
                 }
                 catch
-                (MySqlException e)
+                    (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
+                catch (TimeoutException e)
                 {
                     Console.Write(e + "\r\n");
                     return null;
