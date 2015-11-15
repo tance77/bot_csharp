@@ -41,15 +41,14 @@ namespace twitch_irc_bot
             //_channelHistory = new List<Messages>();
             var tcpClient = new TcpClient(ip, port);
             _inputStream = new StreamReader(tcpClient.GetStream());
-            _outputStream = new StreamWriter(tcpClient.GetStream());
-            _outputStream.AutoFlush = true;
+            _outputStream = new StreamWriter(tcpClient.GetStream()) {AutoFlush = true};
 
             _outputStream.WriteLine("PASS " + oAuth);
             _outputStream.WriteLine("NICK " + userName);
             _outputStream.WriteLine("CAP REQ :twitch.tv/membership");
             _outputStream.WriteLine("CAP REQ :twitch.tv/tags");
             _outputStream.WriteLine("CAP REQ :twitch.tv/commands");
-            _outputStream.Flush();
+            //_outputStream.Flush();
             ChannelHistory = new List<MessageHistory>();
 
 
@@ -171,7 +170,7 @@ namespace twitch_irc_bot
                 {
                     AddMessagesToMessageList("Goodbye cruel world.", channel);
                     _outputStream.WriteLine("PART #" + channel);
-                    _outputStream.Flush();
+                    //_outputStream.Flush();
                     listOfChannelsToRemove.Add(channel);
                 }
             }
@@ -185,7 +184,7 @@ namespace twitch_irc_bot
         public void JoinChannel(string channel)
         {
             _outputStream.WriteLine("JOIN #" + channel);
-            _outputStream.Flush();
+            //_outputStream.Flush();
             _listOfActiveChannels.Add(channel);
         }
 
@@ -207,14 +206,21 @@ namespace twitch_irc_bot
         public void PartChannel(string channel)
         {
             _outputStream.WriteLine("PART #" + channel);
-            _outputStream.Flush();
+            //_outputStream.Flush();
             _listOfActiveChannels.Remove(channel);
         }
 
         private void SendIrcMessage(string message)
         {
             RateLimit += 1;
-            _outputStream.WriteLine(message);
+            try
+            {
+                _outputStream.WriteLine(message);
+            }
+            catch (IOException)
+            {
+                BlockingMessageQueue.Add(message);            
+            }
             //_outputStream.Flush();
         }
 
@@ -256,14 +262,14 @@ namespace twitch_irc_bot
                 if (buf == null) return "";
                 if (!buf.StartsWith("PING "))
                 {
-                    _outputStream.Flush();
+                    //_outputStream.Flush();
                     Console.Write(buf + "\r\n");
                     return buf;
                 }
                 Console.Write(buf + "\r\n");
                 _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
                 Console.Write(buf.Replace("PING", "PONG") + "\r\n");
-                _outputStream.Flush();
+                //_outputStream.Flush();
                 return buf;
             }
             catch (Exception e)

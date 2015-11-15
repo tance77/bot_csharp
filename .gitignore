@@ -2,6 +2,9 @@
 
 /irc_bot/bin
 /irc_bot/obj
+/fembot
+/irc_bot/Config
+/irc_bot/Properties
 
 # Windows image file caches
 Thumbs.db

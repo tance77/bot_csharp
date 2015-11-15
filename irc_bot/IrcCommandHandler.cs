@@ -413,11 +413,14 @@ namespace twitch_irc_bot
                 {
                     if (_commandHelpers.Roulette(Message.FromChannel))
                     {
-                        Thread.Sleep(400);
-                        Irc.AddMessagesToMessageList("/timeout " + Message.MsgSender + " 60", Message.FromChannel);
+                        Irc.AddMessagesToMessageList("/timeout " + Message.MsgSender + " 300", Message.FromChannel);
                         WhisperServer.AddWhisperToMessagesList(
-                            " You have been killed. You can not speak for 1 minute.",
+                            " You have been killed. You can not speak for 5 minutes.",
                             Message.FromChannel, Message.MsgSender);
+                        WhisperServer.AddWhisperToMessagesList(
+                            " To better simulate death the death timer has been increased from 1 minute to 5 minutes..",
+                            Message.FromChannel, Message.MsgSender);
+
                         Irc.AddMessagesToMessageList(Message.MsgSender + ", took a bullet to the head.",
                             Message.FromChannel);
                     }
