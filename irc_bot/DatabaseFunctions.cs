@@ -76,14 +76,14 @@ namespace twitch_irc_bot
                     }
                     using (var cmd =
                     new MySqlCommand(
-                    "INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,eight_ball,gameq)VALUES(@channel,@urls,@dicksize,@gg,@eight_ball,@gameq)",
+                    "INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,song_request,gameq)VALUES(@channel,@urls,@dicksize,@gg,@song_request,@gameq)",
                     dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.Parameters.AddWithValue("@urls", true);
                         cmd.Parameters.AddWithValue("@dicksize", false);
                         cmd.Parameters.AddWithValue("@gg", false);
-                        cmd.Parameters.AddWithValue("@eight_ball", false);
+                        cmd.Parameters.AddWithValue("@song_request", false);
                         cmd.Parameters.AddWithValue("@gameq", false);
                         cmd.ExecuteNonQuery();
                     }

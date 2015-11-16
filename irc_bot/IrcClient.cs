@@ -48,16 +48,17 @@ namespace twitch_irc_bot
             _outputStream.WriteLine("CAP REQ :twitch.tv/membership");
             _outputStream.WriteLine("CAP REQ :twitch.tv/tags");
             _outputStream.WriteLine("CAP REQ :twitch.tv/commands");
-            //_outputStream.Flush();
             ChannelHistory = new List<MessageHistory>();
 
 
             #region Timers
-
-            var channelUpdate = new Timer { Interval = 30000 }; //check if someone requested chinnbot to join channel every 30 secodns or leave
-            channelUpdate.Elapsed += UpdateActiveChannels;
-            channelUpdate.AutoReset = true;
-            channelUpdate.Enabled = true;
+            if (!_debug)
+            {
+                var channelUpdate = new Timer { Interval = 30000 }; //check if someone requested chinnbot to join channel every 30 secodns or leave
+                channelUpdate.Elapsed += UpdateActiveChannels;
+                channelUpdate.AutoReset = true;
+                channelUpdate.Enabled = true;
+            }
 
             var rateCheckTimer = new Timer { Interval = 300};
             rateCheckTimer.Elapsed += CheckRateAndSend;
@@ -91,7 +92,7 @@ namespace twitch_irc_bot
 
         public void CheckRateAndSend(Object source, ElapsedEventArgs e)
         {
-            Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
+            //Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
             //Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
             while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
             {
@@ -170,7 +171,6 @@ namespace twitch_irc_bot
                 {
                     AddMessagesToMessageList("Goodbye cruel world.", channel);
                     _outputStream.WriteLine("PART #" + channel);
-                    //_outputStream.Flush();
                     listOfChannelsToRemove.Add(channel);
                 }
             }
@@ -184,7 +184,6 @@ namespace twitch_irc_bot
         public void JoinChannel(string channel)
         {
             _outputStream.WriteLine("JOIN #" + channel);
-            //_outputStream.Flush();
             _listOfActiveChannels.Add(channel);
         }
 
@@ -206,7 +205,6 @@ namespace twitch_irc_bot
         public void PartChannel(string channel)
         {
             _outputStream.WriteLine("PART #" + channel);
-            //_outputStream.Flush();
             _listOfActiveChannels.Remove(channel);
         }
 
@@ -219,9 +217,8 @@ namespace twitch_irc_bot
             }
             catch (IOException)
             {
-                BlockingMessageQueue.Add(message);            
+                BlockingMessageQueue.Add(message);
             }
-            //_outputStream.Flush();
         }
 
 
@@ -262,14 +259,12 @@ namespace twitch_irc_bot
                 if (buf == null) return "";
                 if (!buf.StartsWith("PING "))
                 {
-                    //_outputStream.Flush();
                     Console.Write(buf + "\r\n");
                     return buf;
                 }
                 Console.Write(buf + "\r\n");
                 _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
                 Console.Write(buf.Replace("PING", "PONG") + "\r\n");
-                //_outputStream.Flush();
                 return buf;
             }
             catch (Exception e)

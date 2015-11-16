@@ -105,6 +105,11 @@ namespace twitch_irc_bot
                 FromChannel = m.Split('#')[1];
                 Joiner = m.Split('!')[0].Split(':')[1];
                 Joiner = Joiner.ToLower();
+                Command = "JOIN";
+                if (String.Equals(Joiner, "WEAREGROOOOT", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    Msg = "I am Groot!!!! https://www.youtube.com/watch?v=3YiIxopZKpY";
+                }
                 //if (Joiner == "dongerinouserino")
                 //{
                 //    Irc.SendChatMessage("ᕙ༼ຈل͜ຈ༽ᕗ flex your dongers ᕙ༼ຈل͜ຈ༽ᕗᕙ༼ຈل͜ຈ༽ᕗ DongerinoUserino is here ᕙ༼ຈل͜ຈ༽ᕗ ",

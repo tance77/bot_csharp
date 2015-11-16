@@ -50,6 +50,10 @@ namespace twitch_irc_bot
                     CheckCommands();
                 }
             }
+            if (Message.Command == "JOIN")
+            {
+                Irc.AddMessagesToMessageList(Message.Msg, Message.FromChannel);
+            }
         }
 
         private void kill_user(string fromChannel, string msgSender, string userType)
@@ -415,12 +419,8 @@ namespace twitch_irc_bot
                     {
                         Irc.AddMessagesToMessageList("/timeout " + Message.MsgSender + " 300", Message.FromChannel);
                         WhisperServer.AddWhisperToMessagesList(
-                            " You have been killed. You can not speak for 5 minutes.",
+                            " You have been killed. You can not speak for 5 minutes. To better simulate death the timeout has been increased from one minute to five minutes",
                             Message.FromChannel, Message.MsgSender);
-                        WhisperServer.AddWhisperToMessagesList(
-                            " To better simulate death the death timer has been increased from 1 minute to 5 minutes..",
-                            Message.FromChannel, Message.MsgSender);
-
                         Irc.AddMessagesToMessageList(Message.MsgSender + ", took a bullet to the head.",
                             Message.FromChannel);
                     }
@@ -558,7 +558,9 @@ namespace twitch_irc_bot
                     var response = _commandHelpers.SearchSong(Message.Msg, Message.MsgSender, _db,
                         Message.FromChannel);
                     response = Message.MsgSender + ", " + response;
-                    Irc.AddMessagesToMessageList(response, Message.FromChannel);
+                    WhisperServer.AddWhisperToMessagesList(response, Message.FromChannel, Message.MsgSender);
+                    Console.WriteLine(response);
+                    //Irc.AddMessagesToMessageList(response, Message.FromChannel);
                 }
                 else if (Regex.Match(Message.Msg, @"^!currentsong$").Success)
                 {
