@@ -7,8 +7,8 @@ namespace twitch_irc_bot
     {
         private static void Main(string[] args)
         {
-            var ircServer = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
-            var whisperServer = new IrcClient("199.9.253.59", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+            var ircServer = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle",false);
+            var whisperServer = new IrcClient("199.9.253.59", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle",true);
             //ircServer.JoinChannel("blackmarmalade");
             ircServer.JoinChannelStartup();
 
@@ -17,8 +17,8 @@ namespace twitch_irc_bot
                 var data = ircServer.ReadMessage();
                 if (data == null)
                 {
-                    ircServer = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
-                    whisperServer = new IrcClient("199.9.253.59", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle");
+                    ircServer = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle",false);
+                    whisperServer = new IrcClient("199.9.253.59", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle",true);
                     ircServer.JoinChannelStartup();
                     //ircServer.JoinChannel("blackmarmalade");
                 }

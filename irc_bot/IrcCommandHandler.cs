@@ -553,14 +553,18 @@ namespace twitch_irc_bot
                 }
 
                 else if (Regex.Match(Message.Msg, @"^!sr\s+").Success &&
-                         _db.CheckSongRequestStatus(Message.FromChannel) != false)
+                         _db.CheckSongRequestStatus(Message.FromChannel) )
                 {
                     var response = _commandHelpers.SearchSong(Message.Msg, Message.MsgSender, _db,
-                        Message.FromChannel);
+                        Message.FromChannel, WhisperServer);
+                    //WhisperServer.AddWhisperToMessagesList(response, Message.FromChannel, Message.MsgSender);
+                    if (response == "")
+                    {
+                        return;
+                    }
                     response = Message.MsgSender + ", " + response;
-                    WhisperServer.AddWhisperToMessagesList(response, Message.FromChannel, Message.MsgSender);
                     Console.WriteLine(response);
-                    //Irc.AddMessagesToMessageList(response, Message.FromChannel);
+                    Irc.AddMessagesToMessageList(response, Message.FromChannel);
                 }
                 else if (Regex.Match(Message.Msg, @"^!currentsong$").Success)
                 {

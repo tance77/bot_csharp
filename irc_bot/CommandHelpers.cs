@@ -454,7 +454,7 @@ namespace twitch_irc_bot
 
             var k = 0;
             foreach(var song in jsonArr){
-                if(k >=3){
+                if(k > 3){
                     break;
                 }
                 var availableMarketsAry = song.SelectToken("available_markets");
@@ -487,7 +487,6 @@ namespace twitch_irc_bot
 
                 var pair = new KeyValuePair<string, string>(songTitle, songArtists);
                 foundSongs.Add(songId, pair);
-
                 k++;
 
             }
@@ -586,7 +585,7 @@ namespace twitch_irc_bot
             
         }
 
-        public string SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel)
+        public string SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel, IrcClient whisperServer)
         {
             //Get multiple results
             //message user the results
@@ -664,15 +663,16 @@ namespace twitch_irc_bot
                     }
                     if (multipleResults.Count > 1)
                     {
-                        var results = new StringBuilder();
-                        results.Append("I found more than one result please re-submit your request. Results are: ");
-                        var j = 1;
+                            
+                         //Queue is getting locked before finshed adding songs to whisper list
+                        whisperServer.AddWhisperToMessagesList("I found more than one result please re-submit your request with the track ID. Results are: ", fromChannel, messageSender);
                         foreach (var song in multipleResults)
                         {
-                            results.Append(j + ". " + song.Value.Key + " by " + song.Value.Value + " ");
-                            j++;
+
+                            Console.WriteLine(song);
+                            whisperServer.AddWhisperToMessagesList(song.Value.Key + " by " + song.Value.Value + " Track ID => " + song.Key + " ", fromChannel, messageSender);
                         }
-                        return results.ToString();
+                        return "";
                     }
                     return AddSongById(multipleResults.First().Key, db, fromChannel, messageSender);
                 }

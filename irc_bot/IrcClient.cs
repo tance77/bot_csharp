@@ -28,13 +28,16 @@ namespace twitch_irc_bot
 
         public BlockingCollection<string> BlockingMessageQueue{ get; set; }
 
+        public bool WhisperServer { get; set; }
+
         #region Constructors
 
-        public IrcClient(string ip, int port, string userName, string oAuth)
+        public IrcClient(string ip, int port, string userName, string oAuth, bool a)
         {
             RateLimit = 0;
             BlockingMessageQueue = new BlockingCollection<string>();
 
+            WhisperServer = a;
             //_riotApi = new RiotApi(_db);
             _listOfActiveChannels = new List<string>();
             _botUserName = userName;
@@ -60,7 +63,7 @@ namespace twitch_irc_bot
                 channelUpdate.Enabled = true;
             }
 
-            var rateCheckTimer = new Timer { Interval = 300};
+            var rateCheckTimer = new Timer { Interval = 600};
             rateCheckTimer.Elapsed += CheckRateAndSend;
             rateCheckTimer.AutoReset = true;
             rateCheckTimer.Enabled = true;
@@ -92,11 +95,12 @@ namespace twitch_irc_bot
 
         public void CheckRateAndSend(Object source, ElapsedEventArgs e)
         {
-            //Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
+            Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
             //Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
             while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
             {
                 SendIrcMessage(BlockingMessageQueue.Take());
+                Thread.Sleep(600);
             }
         }
 
@@ -110,6 +114,7 @@ namespace twitch_irc_bot
                 int randomMsg = r.Next(0, item.Value.Count);
                 if (_twitchApi.StreamStatus(item.Key))
                 {
+                    if(!WhisperServer)
                     AddMessagesToMessageList(item.Value[randomMsg], item.Key);
                 }
             }
