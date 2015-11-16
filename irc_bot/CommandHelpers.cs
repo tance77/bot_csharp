@@ -454,7 +454,7 @@ namespace twitch_irc_bot
 
             var k = 0;
             foreach(var song in jsonArr){
-                if(k > 3){
+                if(k >= 3){
                     break;
                 }
                 var availableMarketsAry = song.SelectToken("available_markets");
@@ -664,13 +664,13 @@ namespace twitch_irc_bot
                     if (multipleResults.Count > 1)
                     {
                             
-                         //Queue is getting locked before finshed adding songs to whisper list
-                        whisperServer.AddWhisperToMessagesList("I found more than one result please re-submit your request with the track ID. Results are: ", fromChannel, messageSender);
+                        whisperServer.AddWhisperToMessagesList("Multiple results! What did you mean? Re-request with the track id.", fromChannel, messageSender);
                         foreach (var song in multipleResults)
                         {
-
                             Console.WriteLine(song);
-                            whisperServer.AddWhisperToMessagesList(song.Value.Key + " by " + song.Value.Value + " Track ID => " + song.Key + " ", fromChannel, messageSender);
+                            whisperServer.AddWhisperToMessagesList(song.Value.Key + " - " + song.Value.Value + "" +
+                                                                   " [Track Id]: => " + song.Key + " ",
+                                                                   fromChannel, messageSender);
                         }
                         return "";
                     }

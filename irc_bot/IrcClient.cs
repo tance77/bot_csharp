@@ -95,7 +95,7 @@ namespace twitch_irc_bot
 
         public void CheckRateAndSend(Object source, ElapsedEventArgs e)
         {
-            Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
+            //Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
             //Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
             while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
             {
@@ -230,8 +230,9 @@ namespace twitch_irc_bot
             {
                 _outputStream.WriteLine(message);
             }
-            catch (IOException)
+            catch (IOException e)
             {
+                Console.WriteLine(e);
                 BlockingMessageQueue.Add(message);
             }
         }
