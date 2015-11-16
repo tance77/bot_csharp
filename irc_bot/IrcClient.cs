@@ -114,8 +114,10 @@ namespace twitch_irc_bot
                 int randomMsg = r.Next(0, item.Value.Count);
                 if (_twitchApi.StreamStatus(item.Key))
                 {
-                    if(!WhisperServer)
-                    AddMessagesToMessageList(item.Value[randomMsg], item.Key);
+                    if (!WhisperServer)
+                    {
+                        AddMessagesToMessageList(item.Value[randomMsg], item.Key);
+                    }
                 }
             }
         }
@@ -135,7 +137,11 @@ namespace twitch_irc_bot
                 string message = _commandHelpers.AssembleFollowerList(channel, _db, _twitchApi);
                 if (message != null)
                 {
-                    AddMessagesToMessageList(message, channel);
+                    if (!WhisperServer)
+                    {
+
+                        AddMessagesToMessageList(message, channel);
+                    }
                 }
             }
         }
@@ -174,9 +180,13 @@ namespace twitch_irc_bot
                 //If our database doesn't contain a channel in the active channels list we need to part that channel
                 if (!listOfDbChannels.Contains(channel))
                 {
-                    AddMessagesToMessageList("Goodbye cruel world.", channel);
-                    _outputStream.WriteLine("PART #" + channel);
-                    listOfChannelsToRemove.Add(channel);
+
+                    if (!WhisperServer)
+                    {
+                        AddMessagesToMessageList("Goodbye cruel world.", channel);
+                        _outputStream.WriteLine("PART #" + channel);
+                        listOfChannelsToRemove.Add(channel);
+                    }
                 }
             }
             //Finally we need to remove the channels that we parted
