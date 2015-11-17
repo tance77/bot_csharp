@@ -55,39 +55,50 @@ namespace twitch_irc_bot
 
 
             #region Timers
-            if (!_debug)
+
+            if (!WhisperServer)
             {
-                var channelUpdate = new Timer { Interval = 30000 }; //check if someone requested chinnbot to join channel every 30 secodns or leave
-                channelUpdate.Elapsed += UpdateActiveChannels;
-                channelUpdate.AutoReset = true;
-                channelUpdate.Enabled = true;
+                if (!_debug)
+                {
+                    var channelUpdate = new Timer {Interval = 30000};
+                        //check if someone requested chinnbot to join channel every 30 secodns or leave
+                    channelUpdate.Elapsed += UpdateActiveChannels;
+                    channelUpdate.AutoReset = true;
+                    channelUpdate.Enabled = true;
+                }
+
+
+
+                var followerTimer = new Timer {Interval = 30000};
+                followerTimer.Elapsed += AnnounceFollowers;
+                followerTimer.AutoReset = true;
+                followerTimer.Enabled = true;
+
+                var pointsTenTimer = new Timer {Interval = 600000}; //1 coin every 10 minutes
+                //var pointsTenTimer = new Timer { Interval = 20 }; //1 coin every 10 minutes
+                pointsTenTimer.Elapsed += AddPointsTen;
+                pointsTenTimer.AutoReset = true;
+                pointsTenTimer.Enabled = true;
+
+
+
+                var advertiseTimer = new Timer {Interval = 900000};
+                    //900000 advertise timers in channels every 15 minutes
+                advertiseTimer.Elapsed += Advertise;
+                advertiseTimer.AutoReset = true;
+                advertiseTimer.Enabled = true;
             }
 
-            var rateCheckTimer = new Timer { Interval = 600};
+            var rateCheckTimer = new Timer { Interval = 600 };
             rateCheckTimer.Elapsed += CheckRateAndSend;
             rateCheckTimer.AutoReset = true;
             rateCheckTimer.Enabled = true;
-
-            var followerTimer = new Timer { Interval = 30000 };
-            followerTimer.Elapsed += AnnounceFollowers;
-            followerTimer.AutoReset = true;
-            followerTimer.Enabled = true;
-
-            var pointsTenTimer = new Timer { Interval = 600000 }; //1 coin every 10 minutes
-            //var pointsTenTimer = new Timer { Interval = 20 }; //1 coin every 10 minutes
-            pointsTenTimer.Elapsed += AddPointsTen;
-            pointsTenTimer.AutoReset = true;
-            pointsTenTimer.Enabled = true;
 
             var rateLimitTimer = new Timer { Interval = 30000 }; //20 messages every 30 seconds
             rateLimitTimer.Elapsed += ResetRateLimit;
             rateLimitTimer.AutoReset = true;
             rateLimitTimer.Enabled = true;
 
-            var advertiseTimer = new Timer { Interval = 900000 }; //900000 advertise timers in channels every 15 minutes
-            advertiseTimer.Elapsed += Advertise;
-            advertiseTimer.AutoReset = true;
-            advertiseTimer.Enabled = true;
             #endregion
         }
 
@@ -276,19 +287,47 @@ namespace twitch_irc_bot
                 if (!buf.StartsWith("PING "))
                 {
                     Console.Write(buf + "\r\n");
+                    _outputStream.Flush();
                     return buf;
                 }
                 Console.Write(buf + "\r\n");
                 _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
                 Console.Write(buf.Replace("PING", "PONG") + "\r\n");
+                _outputStream.Flush();
                 return buf;
             }
             catch (Exception e)
             {
+                    _outputStream.Flush();
                 return null;
             }
         }
+
+        public void WhisperReadMessage()
+        {
+            while (true)
+            {
+                try
+                {
+                    var buf = _inputStream.ReadLine();
+                    if (buf == null) continue;
+                    if (!buf.StartsWith("PING "))
+                    {
+                        Console.Write(buf + "\r\n");
+                        continue;
+                    }
+                    Console.Write(buf + "\r\n");
+                    _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
+                    Console.Write(buf.Replace("PING", "PONG") + "\r\n");
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        }
+
+        #endregion
+
     }
 
-    #endregion
 }
