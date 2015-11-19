@@ -10,324 +10,317 @@ using Timer = System.Timers.Timer;
 
 namespace twitch_irc_bot
 {
-    internal class IrcClient
-    {
-        private readonly string _botUserName;
-        private readonly StreamReader _inputStream;
-        private readonly StreamWriter _outputStream;
-        private List<string> _listOfActiveChannels;
-        private readonly CommandHelpers _commandHelpers = new CommandHelpers();
-        private readonly DatabaseFunctions _db = new DatabaseFunctions();
-        private readonly RiotApi _riotApi;
-        private readonly TwitchApi _twitchApi = new TwitchApi();
-        private bool _debug = false;
-        public int RateLimit { get; set; }
+	internal class IrcClient
+	{
+		public string BotUserName{ get; set; }
+		private readonly StreamReader _inputStream;
+		private readonly StreamWriter _outputStream;
+		private List<string> _listOfActiveChannels;
+		private readonly CommandHelpers _commandHelpers = new CommandHelpers();
+		private readonly DatabaseFunctions _db = new DatabaseFunctions();
+		//        private readonly RiotApi _riotApi;
+		private readonly TwitchApi _twitchApi = new TwitchApi();
+		private bool _debug = true;
+		public int RateLimit { get; set; }
 
-        public List<MessageHistory> ChannelHistory { get; set; }
-
-
-        public BlockingCollection<string> BlockingMessageQueue{ get; set; }
-
-        public bool WhisperServer { get; set; }
-
-        #region Constructors
-
-        public IrcClient(string ip, int port, string userName, string oAuth, bool a)
-        {
-            RateLimit = 0;
-            BlockingMessageQueue = new BlockingCollection<string>();
-
-            WhisperServer = a;
-            //_riotApi = new RiotApi(_db);
-            _listOfActiveChannels = new List<string>();
-            _botUserName = userName;
-            //_channelHistory = new List<Messages>();
-            var tcpClient = new TcpClient(ip, port);
-            _inputStream = new StreamReader(tcpClient.GetStream());
-            _outputStream = new StreamWriter(tcpClient.GetStream()) {AutoFlush = true};
-
-            _outputStream.WriteLine("PASS " + oAuth);
-            _outputStream.WriteLine("NICK " + userName);
-            _outputStream.WriteLine("CAP REQ :twitch.tv/membership");
-            _outputStream.WriteLine("CAP REQ :twitch.tv/tags");
-            _outputStream.WriteLine("CAP REQ :twitch.tv/commands");
-            ChannelHistory = new List<MessageHistory>();
+		public List<MessageHistory> ChannelHistory { get; set; }
 
 
-            #region Timers
+		public BlockingCollection<string> BlockingMessageQueue{ get; set; }
+		public BlockingCollection<string> BlockingWhisperQueue{ get; set; }
 
-            if (!WhisperServer)
-            {
-                if (!_debug)
-                {
-                    var channelUpdate = new Timer {Interval = 30000};
-                        //check if someone requested chinnbot to join channel every 30 secodns or leave
-                    channelUpdate.Elapsed += UpdateActiveChannels;
-                    channelUpdate.AutoReset = true;
-                    channelUpdate.Enabled = true;
-                }
+		public bool WhisperServer { get; set; }
 
+		#region Constructors
 
+		public IrcClient(string ip, int port, string userName, string oAuth, bool a)
+		{
+			RateLimit = 0;
 
-                var followerTimer = new Timer {Interval = 30000};
-                followerTimer.Elapsed += AnnounceFollowers;
-                followerTimer.AutoReset = true;
-                followerTimer.Enabled = true;
+			WhisperServer = a;
+			_listOfActiveChannels = new List<string>();
+			BotUserName = userName;
+			var tcpClient = new TcpClient(ip, port);
+			_inputStream = new StreamReader(tcpClient.GetStream());
+			_outputStream = new StreamWriter(tcpClient.GetStream()) {AutoFlush = true};
 
-                var pointsTenTimer = new Timer {Interval = 600000}; //1 coin every 10 minutes
-                //var pointsTenTimer = new Timer { Interval = 20 }; //1 coin every 10 minutes
-                pointsTenTimer.Elapsed += AddPointsTen;
-                pointsTenTimer.AutoReset = true;
-                pointsTenTimer.Enabled = true;
-
-
-
-                var advertiseTimer = new Timer {Interval = 900000};
-                    //900000 advertise timers in channels every 15 minutes
-                advertiseTimer.Elapsed += Advertise;
-                advertiseTimer.AutoReset = true;
-                advertiseTimer.Enabled = true;
-            }
-
-            var rateCheckTimer = new Timer { Interval = 600 };
-            rateCheckTimer.Elapsed += CheckRateAndSend;
-            rateCheckTimer.AutoReset = true;
-            rateCheckTimer.Enabled = true;
-
-            var rateLimitTimer = new Timer { Interval = 30000 }; //20 messages every 30 seconds
-            rateLimitTimer.Elapsed += ResetRateLimit;
-            rateLimitTimer.AutoReset = true;
-            rateLimitTimer.Enabled = true;
-
-            #endregion
-        }
-
-        #endregion
-
-        public void CheckRateAndSend(Object source, ElapsedEventArgs e)
-        {
-            //Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
-            //Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
-            while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
-            {
-                SendIrcMessage(BlockingMessageQueue.Take());
-                Thread.Sleep(600);
-            }
-        }
-
-        private void Advertise(Object source, ElapsedEventArgs e)
-        {
-            Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimmedMessages();
-            if (timmedMessagesDict == null) return;
-            foreach (var item in timmedMessagesDict)
-            {
-                var r = new Random();
-                int randomMsg = r.Next(0, item.Value.Count);
-                if (_twitchApi.StreamStatus(item.Key))
-                {
-                    if (!WhisperServer)
-                    {
-                        AddMessagesToMessageList(item.Value[randomMsg], item.Key);
-                    }
-                }
-            }
-        }
-
-        private void ResetRateLimit(Object source, ElapsedEventArgs e)
-        {
-            RateLimit = 0;
-        }
+			_outputStream.WriteLine("PASS " + oAuth);
+			_outputStream.WriteLine("NICK " + userName);
+			_outputStream.WriteLine("CAP REQ :twitch.tv/membership");
+			_outputStream.WriteLine("CAP REQ :twitch.tv/tags");
+			_outputStream.WriteLine("CAP REQ :twitch.tv/commands");
+			ChannelHistory = new List<MessageHistory>();
+			BlockingMessageQueue = new BlockingCollection<string> ();
+			BlockingWhisperQueue = new BlockingCollection<string> ();
 
 
-        public void AnnounceFollowers(Object source, ElapsedEventArgs e)
-        {
-            List<string> channelList = _db.GetListOfChannels();
-            if (channelList == null) return;
-            foreach (string channel in channelList)
-            {
-                string message = _commandHelpers.AssembleFollowerList(channel, _db, _twitchApi);
-                if (message != null)
-                {
-                    if (!WhisperServer)
-                    {
+			#region Timers
 
-                        AddMessagesToMessageList(message, channel);
-                    }
-                }
-            }
-        }
+			if (!WhisperServer)
+			{
+				if (!_debug)
+				{
+					var channelUpdate = new Timer {Interval = 30000};
+					//check if someone requested chinnbot to join channel every 30 secodns or leave
+					channelUpdate.Elapsed += UpdateActiveChannels;
+					channelUpdate.AutoReset = true;
+					channelUpdate.Enabled = true;
 
-        public void AddPointsTen(Object source, ElapsedEventArgs e)
-        {
-            List<string> channelList = _db.GetListOfChannels();
-            if (channelList == null) return;
-            foreach (string channel in channelList)
-            {
-                string response = _twitchApi.GetStreamUptime(channel);
-                if (response == "Stream is offline." || response == "Could not reach Twitch API")
-                continue; //continue the loop
-                List<string> userList = _twitchApi.GetActiveUsers(channel);
-                _db.AddCoins(1, channel, userList);
-            }
-        }
+				}
+				var followerTimer = new Timer {Interval = 30000};
+				followerTimer.Elapsed += AnnounceFollowers;
+				followerTimer.AutoReset = true;
+				followerTimer.Enabled = true;
 
-        #region Methods
+				var pointsTenTimer = new Timer {Interval = 600000}; //1 coin every 10 minutes
+				//var pointsTenTimer = new Timer { Interval = 20 }; //1 coin every 10 minutes
+				pointsTenTimer.Elapsed += AddPointsTen;
+				pointsTenTimer.AutoReset = true;
+				pointsTenTimer.Enabled = true;
 
-        public void UpdateActiveChannels(Object source, ElapsedEventArgs e)
-        {
-            List<string> listOfDbChannels = _db.GetListOfActiveChannels();
-            if (listOfDbChannels == null) return;
-            var listOfChannelsToRemove = new List<string>();
-            foreach (var channel in listOfDbChannels)
-            {
-                //If our active channels doesn't contain the channels in our DB we need to join that channel
-                if (!_listOfActiveChannels.Contains(channel))
-                {
-                    JoinChannel(channel);
-                }
-            }
-            foreach (var channel in _listOfActiveChannels)
-            {
-                //If our database doesn't contain a channel in the active channels list we need to part that channel
-                if (!listOfDbChannels.Contains(channel))
-                {
+				var advertiseTimer = new Timer {Interval = 900000};
+				//900000 advertise timers in channels every 15 minutes
+				advertiseTimer.Elapsed += Advertise;
+				advertiseTimer.AutoReset = true;
+				advertiseTimer.Enabled = true;
 
-                    if (!WhisperServer)
-                    {
-                        AddMessagesToMessageList("Goodbye cruel world.", channel);
-                        _outputStream.WriteLine("PART #" + channel);
-                        listOfChannelsToRemove.Add(channel);
-                    }
-                }
-            }
-            //Finally we need to remove the channels that we parted
-            foreach (var channel in listOfChannelsToRemove)
-            {
-                _listOfActiveChannels.Remove(channel);
-            }
-        }
+			}
 
-        public void JoinChannel(string channel)
-        {
-            _outputStream.WriteLine("JOIN #" + channel);
-            _listOfActiveChannels.Add(channel);
-        }
+			var rateCheckTimer = new Timer { Interval = 600 };
+			rateCheckTimer.Elapsed += CheckRateAndSend;
+			rateCheckTimer.AutoReset = true;
+			rateCheckTimer.Enabled = true;
 
+			var rateLimitTimer = new Timer { Interval = 30000 }; //20 messages every 30 seconds
+			rateLimitTimer.Elapsed += ResetRateLimit;
+			rateLimitTimer.AutoReset = true;
+			rateLimitTimer.Enabled = true;
 
-        public void JoinChannelStartup()
-        {
-            Console.Write(
-            "-------------------------------- Loading Channels to Join ------------------------------- \r\n");
-            List<string> channelsToJoin = _db.JoinChannels();
-            foreach (string channel in channelsToJoin)
-            {
-                JoinChannel(channel);
-                Console.Write("Joining Channel " + channel + "\r\n");
-            }
-            Console.Write(
-            "-------------------------------- Finished Loading Channels ------------------------------- \r\n");
-        }
+			#endregion
+		}
 
-        public void PartChannel(string channel)
-        {
-            _outputStream.WriteLine("PART #" + channel);
-            _listOfActiveChannels.Remove(channel);
-        }
+		#endregion
 
-        private void SendIrcMessage(string message)
-        {
-            RateLimit += 1;
-            try
-            {
-                _outputStream.WriteLine(message);
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine(e);
-                BlockingMessageQueue.Add(message);
-            }
-        }
+		public void CheckRateAndSend(Object source, ElapsedEventArgs e)
+		{
+			//Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
+			//Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
+			while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
+			{
+				SendIrcMessage(BlockingMessageQueue.Take());
+				Thread.Sleep(600);
+			}
+		}
+
+		private void Advertise(Object source, ElapsedEventArgs e)
+		{
+			Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimmedMessages();
+			if (timmedMessagesDict == null) return;
+			foreach (var item in timmedMessagesDict)
+			{
+				var r = new Random();
+				int randomMsg = r.Next(0, item.Value.Count);
+				if (_twitchApi.StreamStatus(item.Key))
+				{
+					if (!WhisperServer)
+					{
+						AddPrivMsgToQueue(item.Value[randomMsg], item.Key);
+					}
+				}
+			}
+		}
+
+		private void ResetRateLimit(Object source, ElapsedEventArgs e)
+		{
+			RateLimit = 0;
+		}
 
 
-        public void AddLobbyMessageToMessageList(string message)
-        {
-            if (message == null)
-            {
-                return;
-            }
-            BlockingMessageQueue.Add(":" + _botUserName + "!" + _botUserName + "@"
-            + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
-        }
+		public void AnnounceFollowers(Object source, ElapsedEventArgs e)
+		{
+			List<string> channelList = _db.GetListOfChannels();
+			if (channelList == null) return;
+			foreach (string channel in channelList)
+			{
+				string message = _commandHelpers.AssembleFollowerList(channel, _db, _twitchApi);
+				if (message != null)
+				{
+					if (!WhisperServer)
+					{
 
-        public void AddWhisperToMessagesList(string message, string channelName, string msgSender)
-        {
-            if (message == null)
-            {
-                return;
-            }
-            BlockingMessageQueue.Add("PRIVMSG #jtv :/w " + msgSender + " " + message);
-        }
+						AddPrivMsgToQueue(message, channel);
+					}
+				}
+			}
+		}
 
-        public void AddMessagesToMessageList(string message, string channelName)
-        {
-            if (message == null)
-            {
-                return;
-            }
-            BlockingMessageQueue.Add(":" + _botUserName + "!" + _botUserName + "@"
-            + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
-        }
+		public void AddPointsTen(Object source, ElapsedEventArgs e)
+		{
+			List<string> channelList = _db.GetListOfChannels();
+			if (channelList == null) return;
+			foreach (string channel in channelList)
+			{
+				string response = _twitchApi.GetStreamUptime(channel);
+				if (response == "Stream is offline." || response == "Could not reach Twitch API")
+					continue; //continue the loop
+				List<string> userList = _twitchApi.GetActiveUsers(channel);
+				_db.AddCoins(1, channel, userList);
+			}
+		}
 
-        public string ReadMessage()
-        {
-            try
-            {
-                var buf = _inputStream.ReadLine();
-                if (buf == null) return "";
-                if (!buf.StartsWith("PING "))
-                {
-                    Console.Write(buf + "\r\n");
-                    _outputStream.Flush();
-                    return buf;
-                }
-                Console.Write(buf + "\r\n");
-                _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
-                Console.Write(buf.Replace("PING", "PONG") + "\r\n");
-                _outputStream.Flush();
-                return buf;
-            }
-            catch (Exception e)
-            {
-                    _outputStream.Flush();
-                return null;
-            }
-        }
 
-        public void WhisperReadMessage()
-        {
-            while (true)
-            {
-                try
-                {
-                    var buf = _inputStream.ReadLine();
-                    if (buf == null) continue;
-                    if (!buf.StartsWith("PING "))
-                    {
-                        Console.Write(buf + "\r\n");
-                        continue;
-                    }
-                    Console.Write(buf + "\r\n");
-                    _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
-                    Console.Write(buf.Replace("PING", "PONG") + "\r\n");
-                }
-                catch (Exception e)
-                {
-                }
-            }
-        }
 
-        #endregion
 
-    }
+		public void UpdateActiveChannels(Object source, ElapsedEventArgs e)
+		{
+			List<string> listOfDbChannels = _db.GetListOfActiveChannels();
+			if (listOfDbChannels == null) return;
+			var listOfChannelsToRemove = new List<string>();
+			foreach (var channel in listOfDbChannels)
+			{
+				//If our active channels doesn't contain the channels in our DB we need to join that channel
+				if (!_listOfActiveChannels.Contains(channel))
+				{
+					JoinChannel(channel);
+				}
+			}
+			foreach (var channel in _listOfActiveChannels)
+			{
+				//If our database doesn't contain a channel in the active channels list we need to part that channel
+				if (!listOfDbChannels.Contains(channel))
+				{
+
+					if (!WhisperServer)
+					{
+						AddPrivMsgToQueue("Goodbye cruel world.", channel);
+						_outputStream.WriteLine("PART #" + channel);
+						listOfChannelsToRemove.Add(channel);
+					}
+				}
+			}
+			//Finally we need to remove the channels that we parted
+			foreach (var channel in listOfChannelsToRemove)
+			{
+				_listOfActiveChannels.Remove(channel);
+			}
+		}
+		#region Methods
+
+		public void AddPrivMsgToQueue(string message, string fromChannel)
+		{
+			if (message == null)
+			{
+				return;
+			}
+			BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
+				+ BotUserName + ".tmi.twitch.tv PRIVMSG #" + fromChannel + " :" + message);
+		}
+
+
+
+		public void AddLobbyPrivMsgToQueue(string message)
+		{
+			if (message == null)
+			{
+				return;
+			}
+			BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
+				+ BotUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
+		}
+
+		public void AddWhisperToQueue(string message, string messageSender)
+		{
+			if (message == null)
+			{
+				return;
+			}
+			BlockingWhisperQueue.Add("PRIVMSG #jtv :/w " + messageSender + " " + message);
+		}
+
+
+		public void JoinChannel(string channel)
+		{
+			_outputStream.WriteLine("JOIN #" + channel);
+			_listOfActiveChannels.Add(channel);
+		}
+
+
+		public void JoinChannelStartup()
+		{
+			Console.Write(
+				"-------------------------------- Loading Channels to Join ------------------------------- \r\n");
+			List<string> channelsToJoin = _db.JoinChannels();
+			foreach (string channel in channelsToJoin)
+			{
+				JoinChannel(channel);
+				Console.Write("Joining Channel " + channel + "\r\n");
+			}
+			Console.Write(
+				"-------------------------------- Finished Loading Channels ------------------------------- \r\n");
+		}
+
+		public void PartChannel(string channel)
+		{
+			_outputStream.WriteLine("PART #" + channel);
+			_listOfActiveChannels.Remove(channel);
+		}
+
+		private void SendIrcMessage(string message)
+		{
+			RateLimit += 1;
+			try
+			{
+				_outputStream.WriteLine(message);
+			}
+			catch (IOException e)
+			{
+				Console.WriteLine(e);
+				BlockingMessageQueue.Add(message);
+			}
+		}
+
+
+
+
+
+
+		public string ReadMessage(ref BlockingCollection<string> q, ref BlockingCollection<string> wq)
+		{
+			BlockingMessageQueue = q;
+			BlockingWhisperQueue = wq;
+			while (true) {
+				try {
+					var buf = _inputStream.ReadLine ();
+					if (buf == null)
+						continue;
+					if (!buf.StartsWith ("PING ")) { //If its not ping lets treat it as another message
+						Console.Write (buf + "\r\n");
+						_outputStream.Flush ();
+						if (WhisperServer) {
+							continue;
+						} else {
+							var twitchMessage = new TwitchMessage (buf);
+							var handler = new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
+							handler.Run ();
+							continue;
+
+						}
+					}
+					Console.Write (buf + "\r\n");
+					_outputStream.Write (buf.Replace ("PING", "PONG") + "\r\n");
+					Console.Write (buf.Replace ("PING", "PONG") + "\r\n");
+					_outputStream.Flush ();
+
+				} catch (Exception e) {
+					Console.WriteLine (e);
+
+				}
+			}
+		}
+
+
+		#endregion
+
+	}
 
 }
