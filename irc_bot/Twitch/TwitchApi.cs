@@ -79,7 +79,7 @@ namespace twitch_irc_bot
             var userList = new List<string>();
             string url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
             string jsonString = RequestJson(url);
-            if(jsonString == null) return false;
+            if(jsonString == null) return null;
 
             //Line  87 is equivalent to line 89
             //JToken modsaksjdlsakd = JObject.Parse(jsonString)["chatters"]["moderators"];
