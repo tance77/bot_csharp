@@ -22,8 +22,7 @@ namespace twitch_irc_bot
             string url = "https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId + "/masteries?api_key=" +
                 _apiKey;
             string jsonString = RequestJson(url);
-            if (jsonString == "400" || jsonString == "401" || jsonString == "404" || jsonString == "429" ||
-                    jsonString == "500" || jsonString == "503")
+            if (jsonString == null)
             {
                 return null;
             }
@@ -79,8 +78,7 @@ namespace twitch_irc_bot
             string url = "https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/" + summonerName + "?api_key=" +
                 _apiKey;
             string jsonString = RequestJson(url);
-            if (jsonString == "400" || jsonString == "401" || jsonString == "404" || jsonString == "429" ||
-                    jsonString == "500" || jsonString == "503")
+            if (jsonString == null)
             {
                 return jsonString;
             }
@@ -96,8 +94,7 @@ namespace twitch_irc_bot
             if (summonerId == null) return null;
             string url = "https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId + "/runes?api_key=" + _apiKey;
             string jsonString = RequestJson(url);
-            if (jsonString == "400" || jsonString == "401" || jsonString == "404" || jsonString == "429" ||
-                    jsonString == "500" || jsonString == "503")
+            if (jsonString == null)
             {
                 return null;
             }
@@ -140,8 +137,7 @@ namespace twitch_irc_bot
             string url = "https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/" + summonerId + "/entry?api_key=" +
                 _apiKey;
             string jsonString = RequestJson(url);
-            if (jsonString == "400" || jsonString == "401" || jsonString == "404" || jsonString == "429" ||
-                    jsonString == "500" || jsonString == "503")
+            if (jsonString == null)
             {
                 return jsonString;
             }
