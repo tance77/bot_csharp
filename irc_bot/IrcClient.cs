@@ -239,11 +239,23 @@ namespace twitch_irc_bot
             RateLimit += 1;
             try
             {
+                if (WhisperServer)
+                {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                }
+                Console.WriteLine(message);
+                Console.ForegroundColor = ConsoleColor.White;
                 _outputStream.WriteLine(message);
             }
             catch (IOException e)
             {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine(e);
+                Console.ForegroundColor = ConsoleColor.White;
                 BlockingMessageQueue.Add(message);
             }
         }
@@ -290,10 +302,12 @@ namespace twitch_irc_bot
                     _outputStream.Flush();
                     return buf;
                 }
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.Write(buf + "\r\n");
                 _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
                 Console.Write(buf.Replace("PING", "PONG") + "\r\n");
                 _outputStream.Flush();
+                Console.ForegroundColor = ConsoleColor.White;
                 return buf;
             }
             catch (Exception e)
@@ -316,9 +330,11 @@ namespace twitch_irc_bot
                         Console.Write(buf + "\r\n");
                         continue;
                     }
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
                     Console.Write(buf + "\r\n");
                     _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
                     Console.Write(buf.Replace("PING", "PONG") + "\r\n");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 catch (Exception e)
                 {
