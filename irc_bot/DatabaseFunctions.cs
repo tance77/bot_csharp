@@ -8,18 +8,18 @@ namespace twitch_irc_bot
     internal class DatabaseFunctions
     {
         private const string ConnectionString =
-        "Persist Security Info=False;" +
-        "Server=192.241.219.172;" +
-        "Port=3306;" +
-        "Database=chinnbot;" +
-        "Uid=me;" +
-        "Pwd=GUM5fLtzuHPq;";
+            "Persist Security Info=False;" +
+            "Server=192.241.219.172;" +
+            "Port=3306;" +
+            "Database=chinnbot;" +
+            "Uid=me;" +
+            "Pwd=GUM5fLtzuHPq;";
 
         public string DateTimeSqLite(DateTime datetime)
         {
             const string dateTimeFormat = "{0}-{1}-{2} {3}:{4}:{5}.{6}";
             return string.Format(dateTimeFormat, datetime.Year, datetime.Month, datetime.Day, datetime.Hour,
-            datetime.Minute, datetime.Second, datetime.Millisecond);
+                    datetime.Minute, datetime.Second, datetime.Millisecond);
         }
 
         public List<string> JoinChannels()
@@ -31,13 +31,13 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM Channels GROUP BY channel_name",
-                    dbConnection))
+                            var command = new MySqlCommand("SELECT * FROM Channels GROUP BY channel_name",
+                                dbConnection))
                     {
                         using (MySqlDataReader dr = command.ExecuteReader())
                         {
                             while (dr.Read())
-                            channelsToJoin.Add(dr.GetValue(0).ToString());
+                                channelsToJoin.Add(dr.GetValue(0).ToString());
                         }
                         GC.Collect();
                         return channelsToJoin;
@@ -45,11 +45,11 @@ namespace twitch_irc_bot
                 }
             }
             catch
-            (MySqlException e)
-            {
-                Console.Write(e + "\r\n");
-                return channelsToJoin;
-            }
+                (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return channelsToJoin;
+                }
         }
 
 
@@ -61,8 +61,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var inDb = new MySqlCommand("select * from Channels where channel_name=@channel", dbConnection)
-                    )
+                            var inDb = new MySqlCommand("select * from Channels where channel_name=@channel", dbConnection)
+                          )
                     {
                         inDb.Parameters.AddWithValue("@channel", channel);
                         using (MySqlDataReader reader = inDb.ExecuteReader())
@@ -75,9 +75,9 @@ namespace twitch_irc_bot
                         GC.Collect();
                     }
                     using (var cmd =
-                    new MySqlCommand(
-                    "INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,song_request,gameq)VALUES(@channel,@urls,@dicksize,@gg,@song_request,@gameq)",
-                    dbConnection))
+                            new MySqlCommand(
+                                "INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,song_request,gameq)VALUES(@channel,@urls,@dicksize,@gg,@song_request,@gameq)",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.Parameters.AddWithValue("@urls", true);
@@ -89,9 +89,9 @@ namespace twitch_irc_bot
                     }
 
                     using (var cmd =
-                    new MySqlCommand(
-                    "INSERT INTO League(channel_name,summoner_name,summoner_id)VALUES(@channel,@summoner,@summoner_id)",
-                    dbConnection))
+                            new MySqlCommand(
+                                "INSERT INTO League(channel_name,summoner_name,summoner_id)VALUES(@channel,@summoner,@summoner_id)",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.Parameters.AddWithValue("@summoner", null);
@@ -113,11 +113,11 @@ namespace twitch_irc_bot
             try
             {
                 using (
-                var dbConnection = new MySqlConnection(ConnectionString))
+                        var dbConnection = new MySqlConnection(ConnectionString))
                 {
                     dbConnection.Open();
                     using (
-                    var inDb = new MySqlCommand("select * from Channels where channel_name=@channel", dbConnection))
+                            var inDb = new MySqlCommand("select * from Channels where channel_name=@channel", dbConnection))
                     {
                         inDb.Parameters.AddWithValue("@channel", channel);
                         using (MySqlDataReader reader = inDb.ExecuteReader())
@@ -130,20 +130,20 @@ namespace twitch_irc_bot
                         GC.Collect();
                     }
                     using (
-                    var cmd = new MySqlCommand("delete from Channels where channel_name=@channel", dbConnection)
-                    )
+                            var cmd = new MySqlCommand("delete from Channels where channel_name=@channel", dbConnection)
+                          )
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.ExecuteNonQuery();
                     }
                     using (
-                    var cmd = new MySqlCommand("delete from Spotify where channel_name=@channel", dbConnection))
+                            var cmd = new MySqlCommand("delete from Spotify where channel_name=@channel", dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.ExecuteNonQuery();
                     }
                     using (
-                    var cmd = new MySqlCommand("delete from League WHERE channel_name=@channel", dbConnection))
+                            var cmd = new MySqlCommand("delete from League WHERE channel_name=@channel", dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.ExecuteNonQuery();
@@ -166,12 +166,12 @@ namespace twitch_irc_bot
             try
             {
                 using (
-                var dbConnection = new MySqlConnection(ConnectionString))
+                        var dbConnection = new MySqlConnection(ConnectionString))
                 {
                     dbConnection.Open();
                     using (
-                    var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
-                    dbConnection))
+                            var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -206,8 +206,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
-                    dbConnection))
+                            var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -237,8 +237,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
-                    dbConnection))
+                            var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -254,9 +254,9 @@ namespace twitch_irc_bot
                         GC.Collect();
                     }
                     using (var cmd =
-                    new MySqlCommand(
-                    "INSERT INTO Commands(channel_name, description, command, to_user)VALUES(@channel, @description, @command, @to_user)",
-                    dbConnection))
+                            new MySqlCommand(
+                                "INSERT INTO Commands(channel_name, description, command, to_user)VALUES(@channel, @description, @command, @to_user)",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.Parameters.AddWithValue("@description", commandDescription);
@@ -279,12 +279,12 @@ namespace twitch_irc_bot
             try
             {
                 using (
-                var dbConnection = new MySqlConnection(ConnectionString))
+                        var dbConnection = new MySqlConnection(ConnectionString))
                 {
                     dbConnection.Open();
                     using (
-                    var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
-                    dbConnection))
+                            var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         bool okToEdit = false;
@@ -305,9 +305,9 @@ namespace twitch_irc_bot
                         }
                     }
                     using (var cmd =
-                    new MySqlCommand(
-                    "UPDATE Commands SET channel_name=@channel, description=@description, to_user=@to_user WHERE channel_name=@channel AND command=@command",
-                    dbConnection))
+                            new MySqlCommand(
+                                "UPDATE Commands SET channel_name=@channel, description=@description, to_user=@to_user WHERE channel_name=@channel AND command=@command",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.Parameters.AddWithValue("@description", commandDescription);
@@ -320,11 +320,11 @@ namespace twitch_irc_bot
                 }
             }
             catch
-            (MySqlException e)
-            {
-                Console.Write(e + "\r\n");
-                return false;
-            }
+                (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
             catch (Exception e)
             {
                 Console.Write(e + "\r\n");
@@ -340,8 +340,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
-                    dbConnection))
+                            var cmd = new MySqlCommand("SELECT * FROM Commands WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         bool okToDelete = false;
@@ -361,9 +361,9 @@ namespace twitch_irc_bot
                         }
                     }
                     using (var cmd =
-                    new MySqlCommand(
-                    "DELETE FROM Commands WHERE channel_name=@channel and command=@command",
-                    dbConnection))
+                            new MySqlCommand(
+                                "DELETE FROM Commands WHERE channel_name=@channel and command=@command",
+                                dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.Parameters.AddWithValue("@command", command);
@@ -390,9 +390,9 @@ namespace twitch_irc_bot
             {
                 dbConnection.Open();
                 using (
-                var command =
-                new MySqlCommand("UPDATE Channels SET dicksize=@dick_size WHERE channel_name=@channel",
-                dbConnection))
+                        var command =
+                        new MySqlCommand("UPDATE Channels SET dicksize=@dick_size WHERE channel_name=@channel",
+                            dbConnection))
                 {
                     try
                     {
@@ -417,8 +417,8 @@ namespace twitch_irc_bot
             {
                 dbConnection.Open();
                 using (
-                var command = new MySqlCommand("UPDATE Channels SET allow_urls=@urls WHERE channel_name=@channel",
-                dbConnection))
+                        var command = new MySqlCommand("UPDATE Channels SET allow_urls=@urls WHERE channel_name=@channel",
+                            dbConnection))
                 {
                     try
                     {
@@ -445,8 +445,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
-                    dbConnection))
+                            var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", channel);
                         bool result = false;
@@ -463,11 +463,11 @@ namespace twitch_irc_bot
                 }
             }
             catch
-            (MySqlException e)
-            {
-                Console.Write(e + "\r\n");
-                return false;
-            }
+                (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return false;
+                }
         }
 
         public string SummonerStatus(string channel)
@@ -478,9 +478,9 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM League WHERE channel_name=@channel",
-                    dbConnection)
-                    )
+                            var command = new MySqlCommand("SELECT * FROM League WHERE channel_name=@channel",
+                                dbConnection)
+                          )
                     {
                         command.Parameters.AddWithValue("@channel", channel);
                         string result = null;
@@ -497,11 +497,11 @@ namespace twitch_irc_bot
                 }
             }
             catch
-            (MySqlException e)
-            {
-                Console.Write(e + "\r\n");
-                return null;
-            }
+                (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
         }
 
         public bool SetSummonerName(string channel, string summonerName)
@@ -512,9 +512,9 @@ namespace twitch_irc_bot
                 dbConnection.Open();
 
                 using (
-                var command =
-                new MySqlCommand("UPDATE League SET summoner_name=@summoner_name WHERE channel_name=@channel",
-                dbConnection))
+                        var command =
+                        new MySqlCommand("UPDATE League SET summoner_name=@summoner_name WHERE channel_name=@channel",
+                            dbConnection))
                 {
                     try
                     {
@@ -540,9 +540,9 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM League WHERE channel_name=@channel",
-                    dbConnection)
-                    )
+                            var command = new MySqlCommand("SELECT * FROM League WHERE channel_name=@channel",
+                                dbConnection)
+                          )
                     {
                         command.Parameters.AddWithValue("@channel", channel);
                         string summonerId = "";
@@ -559,11 +559,11 @@ namespace twitch_irc_bot
                 }
             }
             catch
-            (MySqlException e)
-            {
-                Console.Write(e + "\r\n");
-                return null;
-            }
+                (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
         }
 
         public bool SetSummonerId(string channel, string summonerId)
@@ -572,9 +572,9 @@ namespace twitch_irc_bot
             {
                 dbConnection.Open();
                 using (
-                var command =
-                new MySqlCommand("UPDATE League SET summoner_id=@summoner_id WHERE channel_name=@channel",
-                dbConnection))
+                        var command =
+                        new MySqlCommand("UPDATE League SET summoner_id=@summoner_id WHERE channel_name=@channel",
+                            dbConnection))
                 {
                     try
                     {
@@ -601,8 +601,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
-                    dbConnection))
+                            var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", channel);
                         using (MySqlDataReader reader = command.ExecuteReader())
@@ -625,8 +625,8 @@ namespace twitch_irc_bot
             {
                 dbConnection.Open();
                 using (
-                var command = new MySqlCommand("UPDATE Channels SET gg=@gg WHERE channel_name=@channel",
-                dbConnection))
+                        var command = new MySqlCommand("UPDATE Channels SET gg=@gg WHERE channel_name=@channel",
+                            dbConnection))
                 {
                     try
                     {
@@ -650,8 +650,8 @@ namespace twitch_irc_bot
             {
                 dbConnection.Open();
                 using (
-                var command = new MySqlCommand("UPDATE Channels SET song_request=@sr WHERE channel_name=@channel",
-                dbConnection))
+                        var command = new MySqlCommand("UPDATE Channels SET song_request=@sr WHERE channel_name=@channel",
+                            dbConnection))
                 {
                     try
                     {
@@ -679,8 +679,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
-                    dbConnection))
+                            var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", channel);
                         using (MySqlDataReader reader = command.ExecuteReader())
@@ -694,15 +694,15 @@ namespace twitch_irc_bot
                     }
                     var listOfResponses = new List<String>();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM Dicksizes", dbConnection))
+                            var command = new MySqlCommand("SELECT * FROM Dicksizes", dbConnection))
                     {
                         using (MySqlDataReader reader = command.ExecuteReader())
                         {
                             while (reader.Read())
-                            if (reader.Read())
-                            {
-                                listOfResponses.Add(reader.GetString(0));
-                            }
+                                if (reader.Read())
+                                {
+                                    listOfResponses.Add(reader.GetString(0));
+                                }
                         }
                         GC.Collect();
                         int randOne = randRange.Next(1, listOfResponses.Count);
@@ -712,15 +712,15 @@ namespace twitch_irc_bot
                 }
             }
             catch
-            (MySqlException e)
-            {
-                Console.Write(e + "\r\n");
-                return null;
-            }
+                (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
         }
 
         public bool CheckPermitStatus(string fromChannel, string user)
-        //Checks to see if the permit is still valid in the given time period
+            //Checks to see if the permit is still valid in the given time period
         {
             user = user.ToLower();
             user = user.Trim(' ');
@@ -732,10 +732,10 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command =
-                    new MySqlCommand(
-                    "SELECT * FROM ChannelUsers WHERE channel_name=@channel and user=@msg_sender",
-                    dbConnection))
+                            var command =
+                            new MySqlCommand(
+                                "SELECT * FROM ChannelUsers WHERE channel_name=@channel and user=@msg_sender",
+                                dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", fromChannel);
                         command.Parameters.AddWithValue("@msg_sender", user);
@@ -782,15 +782,15 @@ namespace twitch_irc_bot
             try
             {
                 using (
-                var dbConnection =
-                new MySqlConnection(ConnectionString))
+                        var dbConnection =
+                        new MySqlConnection(ConnectionString))
                 {
                     dbConnection.Open();
                     using (
-                    var command =
-                    new MySqlCommand(
-                    "SELECT * FROM ChannelUsers WHERE channel_name=@channel and user=@msg_sender",
-                    dbConnection))
+                            var command =
+                            new MySqlCommand(
+                                "SELECT * FROM ChannelUsers WHERE channel_name=@channel and user=@msg_sender",
+                                dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", fromChannel);
                         command.Parameters.AddWithValue("@msg_sender", user);
@@ -818,10 +818,10 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command =
-                    new MySqlCommand(
-                    "INSERT INTO ChannelUsers(channel_name, user, permitted_at, permit_expires_at)VALUES(@channel, @user, @permit, @expires)",
-                    dbConnection))
+                            var command =
+                            new MySqlCommand(
+                                "INSERT INTO ChannelUsers(channel_name, user, permitted_at, permit_expires_at)VALUES(@channel, @user, @permit, @expires)",
+                                dbConnection))
                     {
                         string permit = DateTimeSqLite(DateTime.Now);
                         string expires = DateTimeSqLite((DateTime.Now.AddMinutes(3)));
@@ -849,9 +849,9 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command =
-                    new MySqlCommand(
-                    "delete from ChannelUsers where channel_name=@channel AND user=@user", dbConnection))
+                            var command =
+                            new MySqlCommand(
+                                "delete from ChannelUsers where channel_name=@channel AND user=@user", dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", fromChannel);
                         command.Parameters.AddWithValue("@user", user);
@@ -874,8 +874,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command =
-                    new MySqlCommand("SELECT * FROM TimedMessages", dbConnection))
+                            var command =
+                            new MySqlCommand("SELECT * FROM TimedMessages", dbConnection))
                     {
                         using (MySqlDataReader reader = command.ExecuteReader())
                         {
@@ -918,7 +918,7 @@ namespace twitch_irc_bot
                         foreach (var follower in followersDictionary)
                         {
                             using (
-                                var command =
+                                    var command =
                                     new MySqlCommand(
                                         "SELECT * FROM Followers WHERE follower_name=@follower and channel_name=@channel",
                                         dbConnection))
@@ -935,11 +935,11 @@ namespace twitch_irc_bot
                             }
                             GC.Collect();
                             using (
-                                var command =
+                                    var command =
                                     new MySqlCommand(
                                         "INSERT INTO Followers(channel_name,follower_name,follow_date)VALUES(@channel,@follower,@date)",
                                         dbConnection)
-                                )
+                                  )
                             {
                                 command.Parameters.AddWithValue("@channel", fromChannel);
                                 command.Parameters.AddWithValue("@follower", follower.Key);
@@ -954,10 +954,10 @@ namespace twitch_irc_bot
                 }
                 catch
                     (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return null;
-                }
+                    {
+                        Console.Write(e + "\r\n");
+                        return null;
+                    }
                 catch (TimeoutException e)
                 {
                     Console.Write(e + "\r\n");
@@ -994,11 +994,11 @@ namespace twitch_irc_bot
                 }
             }
             catch
-            (MySqlException e)
-            {
-                Console.Write(e + "\r\n");
-                return null;
-            }
+                (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
         }
 
         public void AddCoins(int numberOfCoins, string channel, List<string> userList)
@@ -1017,8 +1017,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM ChinnCoins WHERE channel_name=@channel",
-                    dbConnection))
+                            var command = new MySqlCommand("SELECT * FROM ChinnCoins WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", channel);
                         using (MySqlDataReader reader = command.ExecuteReader())
@@ -1040,10 +1040,10 @@ namespace twitch_irc_bot
                     foreach (string person in insertList)
                     {
                         using (
-                        var command =
-                        new MySqlCommand(
-                        "INSERT INTO ChinnCoins(channel_name,user,chinn_coins)VALUES(@channel,@user,@chinn_coins)",
-                        dbConnection))
+                                var command =
+                                new MySqlCommand(
+                                    "INSERT INTO ChinnCoins(channel_name,user,chinn_coins)VALUES(@channel,@user,@chinn_coins)",
+                                    dbConnection))
                         {
                             command.Parameters.AddWithValue("@channel", channel);
                             command.Parameters.AddWithValue("@user", person);
@@ -1055,10 +1055,10 @@ namespace twitch_irc_bot
                     foreach (string person in updateList)
                     {
                         using (
-                        var command =
-                        new MySqlCommand(
-                        "UPDATE ChinnCoins SET channel_name=@channel, user=@user, chinn_coins = chinn_coins + @chinn_coins WHERE channel_name=@channel AND user=@user",
-                        dbConnection))
+                                var command =
+                                new MySqlCommand(
+                                    "UPDATE ChinnCoins SET channel_name=@channel, user=@user, chinn_coins = chinn_coins + @chinn_coins WHERE channel_name=@channel AND user=@user",
+                                    dbConnection))
                         {
                             command.Parameters.AddWithValue("@channel", channel);
                             command.Parameters.AddWithValue("@user", person);
@@ -1083,10 +1083,10 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command =
-                    new MySqlCommand(
-                    "INSERT INTO TimedMessages(channel_name,message)VALUES(@channel, @msg)",
-                    dbConnection))
+                            var command =
+                            new MySqlCommand(
+                                "INSERT INTO TimedMessages(channel_name,message)VALUES(@channel, @msg)",
+                                dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", fromChannel);
                         command.Parameters.AddWithValue("@msg", message);
@@ -1112,8 +1112,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM TimedMessages WHERE channel_name=@channel",
-                    dbConnection))
+                            var command = new MySqlCommand("SELECT * FROM TimedMessages WHERE channel_name=@channel",
+                                dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", fromChannel);
                         using (MySqlDataReader reader = command.ExecuteReader())
@@ -1140,8 +1140,8 @@ namespace twitch_irc_bot
             {
                 dbConnection.Open();
                 using (
-                var command = new MySqlCommand("Select * From Channels WHERE channel_name=@channel",
-                dbConnection))
+                        var command = new MySqlCommand("Select * From Channels WHERE channel_name=@channel",
+                            dbConnection))
                 {
                     try
                     {
@@ -1168,7 +1168,7 @@ namespace twitch_irc_bot
         //1 of the same song check to see if the same sone exists before adding Lets avoid dupilcates
 
         public bool AddSong(string channelName, string requestedBy, string songId, string duration, string artist,
-        string title, string url, string albumUrl)
+                string title, string url, string albumUrl)
         {
             var exists = false;
             try
@@ -1196,10 +1196,10 @@ namespace twitch_irc_bot
                     if (!exists)
                     {
                         using (
-                        var command =
-                        new MySqlCommand(
-                        "insert into Songs (channel_name,requested_by,song_id,duration,artist,title,url, album_url) Values(@c, @rb, @s, @d, @a, @t, @u, @au)",
-                        dbConnection))
+                                var command =
+                                new MySqlCommand(
+                                    "insert into Songs (channel_name,requested_by,song_id,duration,artist,title,url, album_url) Values(@c, @rb, @s, @d, @a, @t, @u, @au)",
+                                    dbConnection))
                         {
                             command.Parameters.AddWithValue("@c", channelName);
                             command.Parameters.AddWithValue("@rb", requestedBy);
@@ -1234,14 +1234,14 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM Songs Where channel_name=@channel LIMIT 1",
-                    dbConnection))
+                            var command = new MySqlCommand("SELECT * FROM Songs Where channel_name=@channel LIMIT 1",
+                                dbConnection))
                     {
                         command.Parameters.AddWithValue("@channel", channel);
                         using (MySqlDataReader dr = command.ExecuteReader())
                         {
                             while (dr.Read())
-                            song += dr.GetString(6) + " - " + dr.GetString(5);
+                                song += dr.GetString(6) + " - " + dr.GetString(5);
                         }
                         GC.Collect();
                         return song;
@@ -1249,11 +1249,11 @@ namespace twitch_irc_bot
                 }
             }
             catch
-            (MySqlException e)
-            {
-                Console.Write(e + "\r\n");
-                return song;
-            }
+                (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return song;
+                }
         }
         public List<string> GetListOfActiveChannels()
         {
@@ -1264,8 +1264,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                    var command = new MySqlCommand("SELECT * FROM Channels",
-                    dbConnection))
+                            var command = new MySqlCommand("SELECT * FROM Channels",
+                                dbConnection))
                     {
                         using (MySqlDataReader dr = command.ExecuteReader())
                         {
@@ -1279,11 +1279,11 @@ namespace twitch_irc_bot
                 }
             }
             catch
-            (MySqlException e)
-            {
-                Console.Write(e + "\r\n");
-                return null;
-            }
+                (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
             return listOfActiveChannels;
         }
 
