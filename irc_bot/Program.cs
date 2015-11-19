@@ -17,11 +17,70 @@ namespace twitch_irc_bot
             var BlockingMessageQueue = new BlockingCollection<string>();
             var BlockingWhisperQueue = new BlockingCollection<string>();
 
+<<<<<<< Updated upstream
 			var whisperThread = new Thread (() => whisperServer.ReadMessage (ref BlockingMessageQueue, ref BlockingWhisperQueue));
 			whisperThread.Start ();
 
 			ircServer.ReadMessage (ref BlockingMessageQueue, ref BlockingWhisperQueue);
         
+=======
+<<<<<<< HEAD
+            var whisperThread = new Thread (() => whisperServer.ReadMessage (ref BlockingMessageQueue, ref BlockingWhisperQueue));
+            whisperThread.Start ();
+
+			Thread.Sleep (1000);
+
+			ircServer.ReadMessage (ref BlockingMessageQueue, ref BlockingWhisperQueue);
+
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> parent of 581e2cf... Removed some comments in main
+
+
+
+                // if (command != null && command == "PRIVMSG")
+                // {
+                // var handledMessage = new TwitchMessageHandler(twitchMessage, irc, whisper_server);
+                // if (CheckSpam()) continue;
+                // handledMessage.CheckCommands();
+                // }
+                // else if (command != null && command == "CLEARCHAT")
+                // {
+                //     var path = "C:\\Users\\Lance\\Documents\\GitHub\\bot_csharp\\fembot\\irc_bot\\Bad Phrases\\Bad Phrases.txt";
+                //     var goodPath = "C:\\Users\\Lance\\Documents\\GitHub\\bot_csharp\\fembot\\irc_bot\\Bad Phrases\\Good Phrases.txt";
+                //
+                //     var a = irc.ChannelHistory;
+                //     foreach(var person in a){
+                //         Console.Write(twitchMessage.Msg.Split(':')[1] + "\r\n");
+                //         if (person.GetSender() == twitchMessage.Msg.Split(':')[1])
+                //         {
+                //             string toBeWritten = ":" + person.GetSender();
+                //             foreach (var dict in person.GetMessagesWithTimes())
+                //             {
+                //                 using (StreamWriter sw = File.AppendText(path))
+                //                 {
+                //                     sw.WriteLine(toBeWritten + " :" + dict.Value + " :" + dict.Key);
+                //                 }
+                //             }
+                //         }
+                //         else
+                //         {
+                //             string toBeWritten = ":" + person.GetSender();
+                //             foreach (var dict in person.GetMessagesWithTimes())
+                //             {
+                //                 using (StreamWriter sw = File.AppendText(goodPath))
+                //                 {
+                //                     sw.WriteLine(toBeWritten + " :" + dict.Value + " :" + dict.Key);
+                //                 }
+                //             }
+                //         }
+                //     }
+                //     irc.ChannelHistory.Clear();
+                // }
+            }
+>>>>>>> master
+>>>>>>> Stashed changes
         }
     }
 }
