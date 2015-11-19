@@ -596,6 +596,7 @@ namespace twitch_irc_bot
 					//AddWhisperToQueue(response, Message.FromChannel, Message.MsgSender);
 					if (response.Count > 1)
 					{
+						Console.WriteLine(response.Count);
 						AddWhisperToQueue("Multiple results! What did you mean? Re-request with the track id.", Message.MsgSender);
 						foreach(var song in response){
 							AddWhisperToQueue(song, Message.MsgSender);

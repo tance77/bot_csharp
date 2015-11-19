@@ -105,11 +105,21 @@ namespace twitch_irc_bot
 		{
 			//Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
 			//Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
+			if (WhisperServer) {
+				while (RateLimit < 20 && BlockingWhisperQueue.Count > 0) {
+					lock (BlockingWhisperQueue) {
+						SendIrcMessage (BlockingWhisperQueue.Take ());
+						Thread.Sleep (600);
+					}
+				}
+			}
+				else{
 			while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
 			{
 				SendIrcMessage(BlockingMessageQueue.Take());
 				Thread.Sleep(600);
 			}
+				}
 		}
 
 		private void Advertise(Object source, ElapsedEventArgs e)
@@ -270,11 +280,23 @@ namespace twitch_irc_bot
 			RateLimit += 1;
 			try
 			{
+				if(WhisperServer)
+				{
+					Console.ForegroundColor = ConsoleColor.Magenta;
+				}
+				else{
+					Console.ForegroundColor = ConsoleColor.Cyan;
+				}
+				Console.WriteLine(message);
 				_outputStream.WriteLine(message);
+					Console.ForegroundColor = ConsoleColor.White;
 			}
 			catch (IOException e)
 			{
+				Console.ForegroundColor = ConsoleColor.Red;
 				Console.WriteLine(e);
+				Console.ForegroundColor = ConsoleColor.White;
+				Console.WriteLine("**************");
 				BlockingMessageQueue.Add(message);
 			}
 		}
@@ -294,17 +316,25 @@ namespace twitch_irc_bot
 					if (buf == null)
 						continue;
 					if (!buf.StartsWith ("PING ")) { //If its not ping lets treat it as another message
-						Console.Write (buf + "\r\n");
-						_outputStream.Flush ();
 						if (WhisperServer) {
+						Console.ForegroundColor = ConsoleColor.Blue;
+						Console.WriteLine("Whisper Server");
+						Console.Write (buf + "\r\n");
+						Console.ForegroundColor = ConsoleColor.White;
 							continue;
 						} else {
+							Console.ForegroundColor = ConsoleColor.DarkBlue;
+						Console.Write (buf + "\r\n");
+							Console.ForegroundColor = ConsoleColor.White;
 							var twitchMessage = new TwitchMessage (buf);
 							var handler = new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
 							handler.Run ();
 							continue;
 
 						}
+					}
+					if(WhisperServer){
+						Console.WriteLine("Whisper Server");
 					}
 					Console.Write (buf + "\r\n");
 					_outputStream.Write (buf.Replace ("PING", "PONG") + "\r\n");
