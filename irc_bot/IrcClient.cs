@@ -86,7 +86,7 @@ namespace twitch_irc_bot
 
 			}
 
-			var rateCheckTimer = new Timer { Interval = 600 };
+			var rateCheckTimer = new Timer { Interval = 1000 };
 			rateCheckTimer.Elapsed += CheckRateAndSend;
 			rateCheckTimer.AutoReset = true;
 			rateCheckTimer.Enabled = true;
@@ -107,17 +107,15 @@ namespace twitch_irc_bot
 			//Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
 			if (WhisperServer) {
 				while (RateLimit < 20 && BlockingWhisperQueue.Count > 0) {
-					lock (BlockingWhisperQueue) {
 						SendIrcMessage (BlockingWhisperQueue.Take ());
-						Thread.Sleep (600);
-					}
+						Thread.Sleep (1000);
 				}
 			}
 				else{
 			while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
 			{
 				SendIrcMessage(BlockingMessageQueue.Take());
-				Thread.Sleep(600);
+				Thread.Sleep(1000);
 			}
 				}
 		}
@@ -318,7 +316,6 @@ namespace twitch_irc_bot
 					if (!buf.StartsWith ("PING ")) { //If its not ping lets treat it as another message
 						if (WhisperServer) {
 						Console.ForegroundColor = ConsoleColor.Blue;
-						Console.WriteLine("Whisper Server");
 						Console.Write (buf + "\r\n");
 						Console.ForegroundColor = ConsoleColor.White;
 							continue;

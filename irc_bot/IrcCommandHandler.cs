@@ -593,7 +593,6 @@ namespace twitch_irc_bot
 				{
 					var response = _commandHelpers.SearchSong(Message.Msg, Message.MsgSender, _db,
 						Message.FromChannel);
-					//AddWhisperToQueue(response, Message.FromChannel, Message.MsgSender);
 					if (response.Count > 1)
 					{
 						Console.WriteLine(response.Count);

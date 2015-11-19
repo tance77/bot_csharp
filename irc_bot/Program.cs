@@ -20,6 +20,8 @@ namespace twitch_irc_bot
 			var whisperThread = new Thread (() => whisperServer.ReadMessage (ref BlockingMessageQueue, ref BlockingWhisperQueue));
 			whisperThread.Start ();
 
+			Thread.Sleep (1000);
+
 			ircServer.ReadMessage (ref BlockingMessageQueue, ref BlockingWhisperQueue);
 
 		}
