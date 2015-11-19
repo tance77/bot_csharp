@@ -285,7 +285,7 @@ namespace twitch_irc_bot
 					Console.ForegroundColor = ConsoleColor.Magenta;
 				}
 				else{
-					Console.ForegroundColor = ConsoleColor.Cyan;
+					Console.ForegroundColor = ConsoleColor.DarkYellow;
 				}
 				Console.WriteLine(message);
 				_outputStream.WriteLine(message);
@@ -327,8 +327,7 @@ namespace twitch_irc_bot
 						Console.Write (buf + "\r\n");
 							Console.ForegroundColor = ConsoleColor.White;
 							var twitchMessage = new TwitchMessage (buf);
-							var handler = new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
-							handler.Run ();
+							new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
 							continue;
 
 						}
