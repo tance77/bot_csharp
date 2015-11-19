@@ -202,7 +202,7 @@ namespace twitch_irc_bot
 
                     if (!WhisperServer)
                     {
-                        AddPrivMsgToQueue("Goodbye cruel world.", channel);
+                        AddPrivMsgToQueue("Master, what have I done to deserve this?!", channel);
                         _outputStream.WriteLine("PART #" + channel);
                         listOfChannelsToRemove.Add(channel);
                     }
@@ -296,7 +296,6 @@ namespace twitch_irc_bot
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(e);
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("**************");
                 BlockingMessageQueue.Add(message);
             }
         }
@@ -318,7 +317,6 @@ namespace twitch_irc_bot
                     if (!buf.StartsWith ("PING ")) { //If its not ping lets treat it as another message
                         if (WhisperServer) {
                             Console.ForegroundColor = ConsoleColor.Blue;
-                            Console.WriteLine("Whisper Server");
                             Console.Write (buf + "\r\n");
                             Console.ForegroundColor = ConsoleColor.White;
                             continue;

@@ -81,18 +81,12 @@ namespace twitch_irc_bot
             if (summonerName == "") return "No Summoner Name";
             string summonerId = riotApi.GetSummonerId(summonerName);
             //GetRunes(summonerId);
-            if (summonerId == "400" || summonerId == "401" || summonerId == "404" || summonerId == "429" ||
-                    summonerId == "500" || summonerId == "503") // Invalid summoner name
-            {
-                return summonerId;
-            }
+            //
+            if(summonderId == null) return null;
             if (!db.SetSummonerId(fromChannel, summonerId)) return "ERR Summoner ID";
             string rank = riotApi.GetRank(summonerId);
-            if (rank == "400" || rank == "401" || rank == "404" || rank == "429" || rank == "500" || rank == "503")
                 // Invalid summoner name
-            {
-                return rank;
-            }
+            if(rank == null) return null;
             return rank;
         }
 
