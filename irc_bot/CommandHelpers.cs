@@ -563,16 +563,6 @@ namespace twitch_irc_bot
             songId = jsonArr.SelectToken("id").ToString();
             songTitle = jsonArr.SelectToken("name").ToString();
 
-<<<<<<< HEAD
-            Console.Write("\r\n" +
-                    "ID " + songId + "\r\n" +
-                    "Title " + songTitle + "\r\n" +
-                    "Artists " + songArtists + "\r\n" +
-                    "Album Url " + songAlbumUrl + "\r\n" +
-                    "Duration " + songDuration + "\r\n" +
-                    "Song Url " + songUrl + "\r\n" + "\r\n");
-            foundSong = songTitle + " by " + songArtists + " was added to the playlist";
-=======
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.Write("\r\n" +
                               "ID " + songId + "\r\n" +
@@ -583,7 +573,6 @@ namespace twitch_irc_bot
                               "Song Url " + songUrl + "\r\n" + "\r\n");
                 foundSong = songTitle + " by " + songArtists + " was added to the playlist";
                 Console.ForegroundColor = ConsoleColor.White;
->>>>>>> master
             var succuess = db.AddSong(fromChannel, messageSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
             if (succuess)
             {
