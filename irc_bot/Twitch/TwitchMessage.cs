@@ -14,6 +14,7 @@ namespace twitch_irc_bot
     {
 #region Constructors
 
+
         public TwitchMessage(string data)
         {
             Command = null;
@@ -66,8 +67,6 @@ namespace twitch_irc_bot
         public bool Subscriber { get; set; }
 
         public bool Turbo { get; set; }
-
-        public IrcClient Irc { get; set; }
 
         public int UserId {get; set; }
 

@@ -12,21 +12,22 @@ namespace twitch_irc_bot
 {
     internal class IrcClient
     {
-        private readonly string _botUserName;
+		public string BotUserName{ get; set; }
         private readonly StreamReader _inputStream;
         private readonly StreamWriter _outputStream;
         private List<string> _listOfActiveChannels;
         private readonly CommandHelpers _commandHelpers = new CommandHelpers();
         private readonly DatabaseFunctions _db = new DatabaseFunctions();
-        private readonly RiotApi _riotApi;
+//        private readonly RiotApi _riotApi;
         private readonly TwitchApi _twitchApi = new TwitchApi();
-        private bool _debug = false;
+        private bool _debug = true;
         public int RateLimit { get; set; }
 
         public List<MessageHistory> ChannelHistory { get; set; }
 
 
         public BlockingCollection<string> BlockingMessageQueue{ get; set; }
+		public BlockingCollection<string> BlockingWhisperQueue{ get; set; }
 
         public bool WhisperServer { get; set; }
 
@@ -35,13 +36,10 @@ namespace twitch_irc_bot
         public IrcClient(string ip, int port, string userName, string oAuth, bool a)
         {
             RateLimit = 0;
-            BlockingMessageQueue = new BlockingCollection<string>();
 
             WhisperServer = a;
-            //_riotApi = new RiotApi(_db);
             _listOfActiveChannels = new List<string>();
-            _botUserName = userName;
-            //_channelHistory = new List<Messages>();
+            BotUserName = userName;
             var tcpClient = new TcpClient(ip, port);
             _inputStream = new StreamReader(tcpClient.GetStream());
             _outputStream = new StreamWriter(tcpClient.GetStream()) {AutoFlush = true};
@@ -52,6 +50,8 @@ namespace twitch_irc_bot
             _outputStream.WriteLine("CAP REQ :twitch.tv/tags");
             _outputStream.WriteLine("CAP REQ :twitch.tv/commands");
             ChannelHistory = new List<MessageHistory>();
+			BlockingMessageQueue = new BlockingCollection<string> ();
+			BlockingWhisperQueue = new BlockingCollection<string> ();
 
 
             #region Timers
@@ -65,28 +65,25 @@ namespace twitch_irc_bot
                     channelUpdate.Elapsed += UpdateActiveChannels;
                     channelUpdate.AutoReset = true;
                     channelUpdate.Enabled = true;
+
                 }
+				var followerTimer = new Timer {Interval = 30000};
+				followerTimer.Elapsed += AnnounceFollowers;
+				followerTimer.AutoReset = true;
+				followerTimer.Enabled = true;
 
+				var pointsTenTimer = new Timer {Interval = 600000}; //1 coin every 10 minutes
+				//var pointsTenTimer = new Timer { Interval = 20 }; //1 coin every 10 minutes
+				pointsTenTimer.Elapsed += AddPointsTen;
+				pointsTenTimer.AutoReset = true;
+				pointsTenTimer.Enabled = true;
 
+				var advertiseTimer = new Timer {Interval = 900000};
+				//900000 advertise timers in channels every 15 minutes
+				advertiseTimer.Elapsed += Advertise;
+				advertiseTimer.AutoReset = true;
+				advertiseTimer.Enabled = true;
 
-                var followerTimer = new Timer {Interval = 30000};
-                followerTimer.Elapsed += AnnounceFollowers;
-                followerTimer.AutoReset = true;
-                followerTimer.Enabled = true;
-
-                var pointsTenTimer = new Timer {Interval = 600000}; //1 coin every 10 minutes
-                //var pointsTenTimer = new Timer { Interval = 20 }; //1 coin every 10 minutes
-                pointsTenTimer.Elapsed += AddPointsTen;
-                pointsTenTimer.AutoReset = true;
-                pointsTenTimer.Enabled = true;
-
-
-
-                var advertiseTimer = new Timer {Interval = 900000};
-                    //900000 advertise timers in channels every 15 minutes
-                advertiseTimer.Elapsed += Advertise;
-                advertiseTimer.AutoReset = true;
-                advertiseTimer.Enabled = true;
             }
 
             var rateCheckTimer = new Timer { Interval = 600 };
@@ -127,7 +124,7 @@ namespace twitch_irc_bot
                 {
                     if (!WhisperServer)
                     {
-                        AddMessagesToMessageList(item.Value[randomMsg], item.Key);
+						AddPrivMsgToQueue(item.Value[randomMsg], item.Key);
                     }
                 }
             }
@@ -151,7 +148,7 @@ namespace twitch_irc_bot
                     if (!WhisperServer)
                     {
 
-                        AddMessagesToMessageList(message, channel);
+						AddPrivMsgToQueue(message, channel);
                     }
                 }
             }
@@ -171,7 +168,8 @@ namespace twitch_irc_bot
             }
         }
 
-        #region Methods
+  
+
 
         public void UpdateActiveChannels(Object source, ElapsedEventArgs e)
         {
@@ -194,7 +192,7 @@ namespace twitch_irc_bot
 
                     if (!WhisperServer)
                     {
-                        AddMessagesToMessageList("Goodbye cruel world.", channel);
+						AddPrivMsgToQueue("Goodbye cruel world.", channel);
                         _outputStream.WriteLine("PART #" + channel);
                         listOfChannelsToRemove.Add(channel);
                     }
@@ -206,6 +204,39 @@ namespace twitch_irc_bot
                 _listOfActiveChannels.Remove(channel);
             }
         }
+		#region Methods
+
+		public void AddPrivMsgToQueue(string message, string fromChannel)
+		{
+			if (message == null)
+			{
+				return;
+			}
+			BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
+				+ BotUserName + ".tmi.twitch.tv PRIVMSG #" + fromChannel + " :" + message);
+		}
+
+	
+
+		public void AddLobbyPrivMsgToQueue(string message)
+		{
+			if (message == null)
+			{
+				return;
+			}
+			BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
+				+ BotUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
+		}
+
+		public void AddWhisperToQueue(string message, string messageSender)
+		{
+			if (message == null)
+			{
+				return;
+			}
+			BlockingWhisperQueue.Add("PRIVMSG #jtv :/w " + messageSender + " " + message);
+		}
+
 
         public void JoinChannel(string channel)
         {
@@ -249,82 +280,44 @@ namespace twitch_irc_bot
         }
 
 
-        public void AddLobbyMessageToMessageList(string message)
-        {
-            if (message == null)
-            {
-                return;
-            }
-            BlockingMessageQueue.Add(":" + _botUserName + "!" + _botUserName + "@"
-            + _botUserName + ".tmi.twitch.tv PRIVMSG #chinnbot :" + message);
-        }
 
-        public void AddWhisperToMessagesList(string message, string channelName, string msgSender)
-        {
-            if (message == null)
-            {
-                return;
-            }
-            BlockingMessageQueue.Add("PRIVMSG #jtv :/w " + msgSender + " " + message);
-        }
 
-        public void AddMessagesToMessageList(string message, string channelName)
-        {
-            if (message == null)
-            {
-                return;
-            }
-            BlockingMessageQueue.Add(":" + _botUserName + "!" + _botUserName + "@"
-            + _botUserName + ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + message);
-        }
 
-        public string ReadMessage()
-        {
-            try
-            {
-                var buf = _inputStream.ReadLine();
-                if (buf == null) return "";
-                if (!buf.StartsWith("PING "))
-                {
-                    Console.Write(buf + "\r\n");
-                    _outputStream.Flush();
-                    return buf;
-                }
-                Console.Write(buf + "\r\n");
-                _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
-                Console.Write(buf.Replace("PING", "PONG") + "\r\n");
-                _outputStream.Flush();
-                return buf;
-            }
-            catch (Exception e)
-            {
-                    _outputStream.Flush();
-                return null;
-            }
-        }
 
-        public void WhisperReadMessage()
-        {
-            while (true)
-            {
-                try
-                {
-                    var buf = _inputStream.ReadLine();
-                    if (buf == null) continue;
-                    if (!buf.StartsWith("PING "))
-                    {
-                        Console.Write(buf + "\r\n");
-                        continue;
-                    }
-                    Console.Write(buf + "\r\n");
-                    _outputStream.Write(buf.Replace("PING", "PONG") + "\r\n");
-                    Console.Write(buf.Replace("PING", "PONG") + "\r\n");
-                }
-                catch (Exception e)
-                {
-                }
-            }
-        }
+        public string ReadMessage(ref BlockingCollection<string> q, ref BlockingCollection<string> wq)
+		{
+			BlockingMessageQueue = q;
+			BlockingWhisperQueue = wq;
+			while (true) {
+				try {
+					var buf = _inputStream.ReadLine ();
+					if (buf == null)
+						continue;
+					if (!buf.StartsWith ("PING ")) { //If its not ping lets treat it as another message
+						Console.Write (buf + "\r\n");
+						_outputStream.Flush ();
+						if (WhisperServer) {
+							continue;
+						} else {
+							var twitchMessage = new TwitchMessage (buf);
+							var handler = new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
+							handler.Run ();
+							continue;
+
+						}
+					}
+					Console.Write (buf + "\r\n");
+					_outputStream.Write (buf.Replace ("PING", "PONG") + "\r\n");
+					Console.Write (buf.Replace ("PING", "PONG") + "\r\n");
+					_outputStream.Flush ();
+
+				} catch (Exception e) {
+					Console.WriteLine (e);
+				
+				}
+			}
+		}
+
 
         #endregion
 

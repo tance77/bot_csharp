@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -433,7 +434,7 @@ namespace twitch_irc_bot
             var songId = "";
             var songTitle = "";
 
-            var foundSongs = new Dictionary<string, KeyValuePair<string,string>>() ; 
+            var foundSongs = new Dictionary<string, KeyValuePair<string,string>>() ;
 
             Console.WriteLine(queryString);
 
@@ -582,10 +583,10 @@ namespace twitch_irc_bot
                 return foundSong;
             }
             return "song already exists or something went wrong on my end.";
-            
+
         }
 
-        public string SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel, IrcClient whisperServer)
+        public List<string> SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel)
         {
             //Get multiple results
             //message user the results
@@ -601,6 +602,7 @@ namespace twitch_irc_bot
             var songUrl = "";
             var songId = "";
             var songTitle = "";
+			var songList = new List<string>();
             if (message.StartsWith("!songrequest ") || message.StartsWith("!sr "))
             {
                 var msgAry = message.Split(' ');
@@ -629,15 +631,17 @@ namespace twitch_irc_bot
                 if (queryString.Length == 36 && queryString.Contains("spotify:album:") ||
                 Regex.Match(message, @"^https:\/\/.*com\/album\/").Success)
                 {
-                    return "sorry you can't request a whole album.";
-                }
+					songList.Add("sorry you can't request a whole album.");
+					return songList;
+				}
 
                 //don't allow request by artist
                 if (queryString.Length == 37 && queryString.Contains("spotify:artist:") ||
                 Regex.Match(message, @"^https:\/\/.*com\/artist\/").Success)
                 {
-                    return "Sorry you can't request an artist";
-                }
+					songList.Add("Sorry you can't request an artist");
+					return songList;
+				}
 
                 //don't allow youtube requests
                 const string pattern =
@@ -645,43 +649,49 @@ namespace twitch_irc_bot
 
                 if (Regex.Match(message, pattern).Success)
                 {
-                    return "sorry we are using Spotify not YouTube.";
-                }
+					songList.Add("sorry we are using Spotify not YouTube.");
+					return songList;
+				}
 
                 //track ID only look up by track id
                 if (!queryString.Contains(" ") && queryString.Length == 22)
                 {
-                    return AddSongById(queryString, db, fromChannel, messageSender);
-                }
+					songList.Add(AddSongById(queryString, db, fromChannel, messageSender));
+					return songList;
+				}
                     //If we are searching for a track with words do below
 
                     string requestUrl = baseUrl + "/search?type=track&offset=0&limit=20&market=US&q=" + queryString;
                     var multipleResults = SearchSongByName(requestUrl);
                     if (multipleResults == null || multipleResults.Count == 0)
                     {
-                        return "Song not found.";
-                    }
+					songList.Add("Song not found.");
+					return songList;    
+				}
+
                     if (multipleResults.Count > 1)
                     {
-                            
-                        whisperServer.AddWhisperToMessagesList("Multiple results! What did you mean? Re-request with the track id.", fromChannel, messageSender);
+
+
                         foreach (var song in multipleResults)
                         {
                             Console.WriteLine(song);
-                            whisperServer.AddWhisperToMessagesList(song.Value.Key + " - " + song.Value.Value + "" +
-                                                                   " [Track Id]: => " + song.Key + " ",
-                                                                   fromChannel, messageSender);
+						songList.Add(song.Value.Key + " - " + song.Value.Value + "" +
+							" [Track Id]: => " + song.Key);
                         }
-                        return "";
+                        return songList;
                     }
-                    return AddSongById(multipleResults.First().Key, db, fromChannel, messageSender);
-                }
+				songList.Add(AddSongById(multipleResults.First().Key, db, fromChannel, messageSender));
+				return songList;    
+			}
             var succuess = db.AddSong(fromChannel, messageSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
             if (succuess)
             {
-                return foundSong;
-            }
-            return "song already exists or something went wrong on my end.";
-        }
+				songList.Add(foundSong);
+				return songList;
+			}
+			songList.Add("song already exists or something went wrong on my end.");
+			return songList;
+		}
     }
 }

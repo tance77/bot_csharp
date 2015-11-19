@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 
@@ -10,27 +12,16 @@ namespace twitch_irc_bot
         {
             var ircServer = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle",false);
             var whisperServer = new IrcClient("192.16.64.212", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle", true);
-            whisperServer.JoinChannel("blackmarmalade");
-            ircServer.JoinChannelStartup();
+			ircServer.JoinChannel("blackmarmalade");
+//            ircServer.JoinChannelStartup();
+            var BlockingMessageQueue = new BlockingCollection<string>();
+            var BlockingWhisperQueue = new BlockingCollection<string>();
 
-            new Thread(whisperServer.WhisperReadMessage).Start();
-            while (true)
-            {
-                var data = ircServer.ReadMessage();
-                if (data == null)
-                {
-                    ircServer = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle",false);
-                    ircServer.JoinChannelStartup();
-                    //ircServer.JoinChannel("blackmarmalade");
-                }
+			var whisperThread = new Thread (() => whisperServer.ReadMessage (ref BlockingMessageQueue, ref BlockingWhisperQueue));
+			whisperThread.Start ();
 
-                if (string.IsNullOrEmpty(data)) continue;
-
-                var twitchMessage = new TwitchMessage(data);
-                var commandHandler = new IrcCommandHandler(twitchMessage, ircServer, whisperServer);
-                commandHandler.Run();
-
-            }
+			ircServer.ReadMessage (ref BlockingMessageQueue, ref BlockingWhisperQueue);
+        
         }
     }
 }
