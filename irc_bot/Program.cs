@@ -12,8 +12,8 @@ namespace twitch_irc_bot
         {
             var ircServer = new IrcClient("irc.twitch.tv", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle",false);
             var whisperServer = new IrcClient("192.16.64.212", 443, "chinnbot", "oauth:88bwsy5w33ue5ogyj5g90m8qkpmvle", true);
-            ircServer.JoinChannel("blackmarmalade");
-            //            ircServer.JoinChannelStartup();
+            //ircServer.JoinChannel("blackmarmalade");
+            ircServer.JoinChannelStartup();
             var BlockingMessageQueue = new BlockingCollection<string>();
             var BlockingWhisperQueue = new BlockingCollection<string>();
 

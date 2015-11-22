@@ -76,7 +76,7 @@ namespace twitch_irc_bot
                     }
                     using (var cmd =
                             new MySqlCommand(
-                                "INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,song_request,gameq)VALUES(@channel,@urls,@dicksize,@gg,@song_request,@gameq)",
+                                "INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,song_request,gameq, ascii_count, emote_count)VALUES(@channel,@urls,@dicksize,@gg,@song_request,@gameq, @ascii, @emote)",
                                 dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
@@ -85,6 +85,8 @@ namespace twitch_irc_bot
                         cmd.Parameters.AddWithValue("@gg", false);
                         cmd.Parameters.AddWithValue("@song_request", false);
                         cmd.Parameters.AddWithValue("@gameq", false);
+                        cmd.Parameters.AddWithValue("@ascii", 10);
+                        cmd.Parameters.AddWithValue("@emote", 10);
                         cmd.ExecuteNonQuery();
                     }
 
@@ -590,6 +592,33 @@ namespace twitch_irc_bot
                         return false;
                     }
                 }
+            }
+        }
+
+        public int CheckAsciiCount(string channel)
+        {
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                            var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
+                                dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            reader.Read();
+                            return reader.GetInt32(6);
+                        }
+                    }
+                }
+            }
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return 0;
             }
         }
 

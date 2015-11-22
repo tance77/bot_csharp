@@ -103,8 +103,6 @@ namespace twitch_irc_bot
 
 		public void CheckRateAndSend(Object source, ElapsedEventArgs e)
 		{
-			//Console.Write("Rate Limit = " + RateLimit + " *********** \r\n");
-			//Console.Write("Message Queue Size = " + MessageQueue.Count + " ~~~~~~ \r\n");
 			if (WhisperServer) {
 				while (RateLimit < 20 && BlockingWhisperQueue.Count > 0) {
 						SendIrcMessage (BlockingWhisperQueue.Take ());
@@ -294,7 +292,6 @@ namespace twitch_irc_bot
 				Console.ForegroundColor = ConsoleColor.Red;
 				Console.WriteLine(e);
 				Console.ForegroundColor = ConsoleColor.White;
-				Console.WriteLine("**************");
 				BlockingMessageQueue.Add(message);
 			}
 		}
@@ -315,25 +312,22 @@ namespace twitch_irc_bot
 						continue;
 					if (!buf.StartsWith ("PING ")) { //If its not ping lets treat it as another message
 						if (WhisperServer) {
-						Console.ForegroundColor = ConsoleColor.Blue;
 						Console.Write (buf + "\r\n");
-						Console.ForegroundColor = ConsoleColor.White;
 							continue;
-						} else {
-							Console.ForegroundColor = ConsoleColor.DarkBlue;
+						} 
 						Console.Write (buf + "\r\n");
-							Console.ForegroundColor = ConsoleColor.White;
 							var twitchMessage = new TwitchMessage (buf);
 							new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
 							continue;
 
-						}
 					}
 					if(WhisperServer){
 						Console.WriteLine("Whisper Server");
 					}
+					Console.ForegroundColor = ConsoleColor.DarkYellow;
 					Console.Write (buf + "\r\n");
 					_outputStream.Write (buf.Replace ("PING", "PONG") + "\r\n");
+				    Console.ForegroundColor = ConsoleColor.White;
 					Console.Write (buf.Replace ("PING", "PONG") + "\r\n");
 					_outputStream.Flush ();
 

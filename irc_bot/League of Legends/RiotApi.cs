@@ -78,10 +78,7 @@ namespace twitch_irc_bot
             string url = "https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/" + summonerName + "?api_key=" +
                 _apiKey;
             string jsonString = RequestJson(url);
-            if (jsonString == null)
-            {
-                return jsonString;
-            }
+            if (jsonString == null) return null;
             summonerName = summonerName.Replace(" ", "").ToLower();
             //gets rids of spaces for json string riot removes spaces
             return (JObject.Parse(jsonString).SelectToken(summonerName).SelectToken("id")).ToString();

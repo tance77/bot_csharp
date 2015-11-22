@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace twitch_irc_bot
 {
@@ -94,105 +92,129 @@ namespace twitch_irc_bot
 
 		#region Spam Filters
 
-		private bool CheckSpam(string message, string fromChannel, string msgSender, string userType)
+		private bool CheckSpam(TwitchMessage msg)
 		{
-			if (Regex.Match(message, @".*?I just got championship riven skin from here.*?").Success ||
-				Regex.Match(message, @".*?I just got championship riven skin code.*?").Success ||
-				Regex.Match(message, @".*?OMG I just won an Iphone 6.*?").Success ||
-				Regex.Match(message, @".*?I am a 15 year old Rhinoceros.*?").Success ||
-				Regex.Match(message, @".*?sexually Identify as*?").Success ||
-				Regex.Match(message, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
-				Regex.Match(message, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success ||
-				Regex.Match(message, @".*?v=IacCuPMkdXk.*?").Success ||
-				Regex.Match(message, @".*?articles4daily\.com.*?").Success ||
-				Regex.Match(message, @".*?com.*?.php\?.*?id.*?id.*?umk.*?").Success ||
-				Regex.Match(message,
+			if (Regex.Match(msg.Msg, @".*?I just got championship riven skin from here.*?").Success ||
+				Regex.Match(msg.Msg, @".*?I just got championship riven skin code.*?").Success ||
+				Regex.Match(msg.Msg, @".*?OMG I just won an Iphone 6.*?").Success ||
+				Regex.Match(msg.Msg, @".*?I am a 15 year old Rhinoceros.*?").Success ||
+				Regex.Match(msg.Msg, @".*?sexually Identify as*?").Success ||
+				Regex.Match(msg.Msg, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
+				Regex.Match(msg.Msg, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success ||
+				Regex.Match(msg.Msg, @".*?v=IacCuPMkdXk.*?").Success ||
+				Regex.Match(msg.Msg, @".*?articles4daily\.com.*?").Success ||
+				Regex.Match(msg.Msg, @".*?com.*?.php\?.*?id.*?id.*?umk.*?").Success ||
+				Regex.Match(msg.Msg,
 					@".*?[Gg][Rr][Ee][Yy].*?[Ww][Aa][Rr][Ww][Ii][Cc][Kk].*?[Mm][Ee][Dd][Ii][Ee][Vv][Aa][Ll].*?[Tt][Ww][Ii][Tt][Cc][Hh].*?[Aa][Nn][Dd].*?\d*.*?\d*.*?[Ii][]Pp].*?")
 				.Success ||
-				Regex.Match(message, @"\$50 prepaid riot points from here").Success ||
-				Regex.Match(message,
+				Regex.Match(msg.Msg, @"\$50 prepaid riot points from here").Success ||
+				Regex.Match(msg.Msg,
 					@"I just got \$50 prepaid riot points from here its legit xD!!! http:\/\/getriotpointscodes\.com\/")
 				.Success ||
-				Regex.Match(message, @"http:\/\/bit\.ly\/").Success ||
-				Regex.Match(message, @".*?ddns.*?").Success ||
-				Regex.Match(message, @".*?testmuk.*?").Success ||
-				Regex.Match(message, @".*?traffic\.php.*?").Success ||
-				Regex.Match(message, @".*?\/ow\.ly\/.*?").Success ||
-				Regex.Match(message, @".*?testmuk.*?").Success ||
-				Regex.Match(message, @".*?myvnc.*?").Success ||
-				Regex.Match(message, @".*?ulirate.*?").Success ||
-				Regex.Match(message, @".*?uslada\..*?").Success ||
-				Regex.Match(message, @".*?bounceme\..*?").Success ||
-				Regex.Match(message, @".*?serveblog\..*?").Success ||
-				Regex.Match(message, @".*?oeptmf\..*?").Success ||
-				Regex.Match(message, @".*?servebeer\..*?").Success
+				Regex.Match(msg.Msg, @"http:\/\/bit\.ly\/").Success ||
+				Regex.Match(msg.Msg, @".*?ddns.*?").Success ||
+				Regex.Match(msg.Msg, @".*?testmuk.*?").Success ||
+				Regex.Match(msg.Msg, @".*?traffic\.php.*?").Success ||
+				Regex.Match(msg.Msg, @".*?\/ow\.ly\/.*?").Success ||
+				Regex.Match(msg.Msg, @".*?testmuk.*?").Success ||
+				Regex.Match(msg.Msg, @".*?myvnc.*?").Success ||
+				Regex.Match(msg.Msg, @".*?ulirate.*?").Success ||
+				Regex.Match(msg.Msg, @".*?uslada\..*?").Success ||
+				Regex.Match(msg.Msg, @".*?bounceme\..*?").Success ||
+				Regex.Match(msg.Msg, @".*?serveblog\..*?").Success ||
+				Regex.Match(msg.Msg, @".*?oeptmf\..*?").Success ||
+				Regex.Match(msg.Msg, @".*?servebeer\..*?").Success
 			)
 			{
-				if (userType == "mod") return false; //your a mod no timeout
-				Thread.Sleep(400);
-				AddPrivMsgToQueue(msgSender + ", [Ban]", fromChannel);
-				AddPrivMsgToQueue("/timeout " + msgSender + " 120", fromChannel);
+				if (msg.UserType == "mod") return false; //your a mod no timeout
+				AddPrivMsgToQueue(msg.MsgSender + ", [Ban]", msg.FromChannel);
+				AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 120", msg.FromChannel);
 				AddWhisperToQueue("You have been banned from chatting in " +
 					"'s channel. If you think you have been wrongly banned whisper a mod or message the channel owner.",
-					msgSender);
-				Thread.Sleep(400);
-				AddPrivMsgToQueue("/timeout " + msgSender + " 120", fromChannel);
-				AddPrivMsgToQueue("/timeout " + msgSender + " 120", fromChannel);
-				Thread.Sleep(400);
-				AddPrivMsgToQueue("/ban " + msgSender, fromChannel);
+					msg.MsgSender);
+				AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 120", msg.FromChannel);
+				AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 120", msg.FromChannel);
+				AddPrivMsgToQueue("/ban " + msg.MsgSender, msg.FromChannel);
 				return true;
 			}
 			return false; //no spam in message
 		}
 
-		public bool CheckUrls(string message, string fromChannel, string sender, string userType)
+	    public bool CheckAscii(TwitchMessage msg)
+	    {
+	        if (msg.UserType == "mod")
+	        {
+                //Console.Write("I'm a mod**************************");
+	            return false;
+	        }
+	        var count = 0;
+	        foreach (char c in msg.Msg)
+	        {
+	            if (c > 127)
+	            {
+	                count ++;
+	            }
+	        }
+            //If the ascii count in this message was greater than the channel count time that user out
+		    if (count > _db.CheckAsciiCount(Message.FromChannel))
+		    {
+                AddPrivMsgToQueue(msg.MsgSender + ", [Warning]", msg.FromChannel);
+                AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 120", msg.FromChannel);
+                AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 120", msg.FromChannel);
+                AddWhisperToQueue("You have been timed out for 2 minutes for excessive use of ascii symbols.", msg.MsgSender);
+		        return true;
+		    }
+	        return false;
+	    }
+
+	    public bool CheckUrls(TwitchMessage msg)
 		{
-			if (_db.UrlStatus(fromChannel)) return false;
-			if (!Regex.Match(message, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)")
-				.Success || userType == "mod") return false;
-			if (_db.PermitExist(fromChannel, sender) && _db.CheckPermitStatus(fromChannel, sender))
+			if (_db.UrlStatus(msg.FromChannel)) return false;
+			if (!Regex.Match(msg.Msg, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)")
+				.Success || msg.UserType == "mod") return false;
+			if (_db.PermitExist(msg.FromChannel, msg.MsgSender) && _db.CheckPermitStatus(msg.FromChannel, msg.MsgSender))
 				//if they exist in permit and if permit has not expired
 				//if it got here that means it was a url and they were permitted
 			{
-				_db.RemovePermit(fromChannel, sender);
+				_db.RemovePermit(msg.FromChannel, msg.MsgSender);
 				return false;
 			}
 			//Otherwise your not a mod or you are posting a link
 			Thread.Sleep(400);
-			AddPrivMsgToQueue(sender + ", you need permission before posting a link. [Warning]", fromChannel);
+			AddPrivMsgToQueue(msg.MsgSender + ", you need permission before posting a link. [Warning]", msg.FromChannel);
 			AddWhisperToQueue(
-				"You can't post links in " + fromChannel +
-				"'s channel. You have been timed out for 10 seconds.", sender);
-			AddPrivMsgToQueue("/timeout " + sender + " 10", fromChannel);
-			AddPrivMsgToQueue("/timeout " + sender + " 10", fromChannel);
-			AddPrivMsgToQueue("/timeout " + sender + " 10", fromChannel);
+				"You can't post links in " + msg.FromChannel +
+				"'s channel. You have been timed out for 10 seconds.", msg.MsgSender);
+			AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 10", msg.FromChannel);
+			AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 10", msg.FromChannel);
+			AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 10", msg.FromChannel);
 			return true;
 		}
 
-		public bool CheckAccountCreation(string msg, string fromChannel, string msgSender, string userType)
+		public bool CheckAccountCreation(TwitchMessage msg)
 		{
-			var result = _twitchApi.CheckAccountCreation(msgSender);
+			var result = _twitchApi.CheckAccountCreation(msg.MsgSender);
 			//New Account less than a day old
 			if (result)
 			{
 				//if they exist in permit and if permit has not expired
 				//if it got here that means it was a url and they were permitted
-				if (_db.PermitExist(fromChannel, msgSender) && _db.CheckPermitStatus(fromChannel, msgSender))
+				if (_db.PermitExist(msg.FromChannel, msg.MsgSender) && _db.CheckPermitStatus(msg.FromChannel, msg.MsgSender))
 				{
-					_db.RemovePermit(fromChannel, msgSender);
+					_db.RemovePermit(msg.FromChannel, msg.MsgSender);
 					return true;
 				}
 				//match url
 				if (
-					Regex.Match(msg, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)")
+					Regex.Match(msg.Msg, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)")
 					.Success)
 				{
-					AddPrivMsgToQueue("/timeout " + msgSender + " 1", fromChannel);
-					AddPrivMsgToQueue("/timeout " + msgSender + " 1", fromChannel);
-					AddPrivMsgToQueue("/timeout " + msgSender + " 1", fromChannel);
-					AddPrivMsgToQueue("/timeout " + msgSender + " 1", fromChannel);
-					AddPrivMsgToQueue(msgSender + " You're account is to new to be posting links.",
-						fromChannel);
+					AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 1", msg.FromChannel);
+                    AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 1", msg.FromChannel);
+					AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 1", msg.FromChannel);
+					AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 1", msg.FromChannel);
+					AddPrivMsgToQueue(msg.MsgSender + " You're account is to new to be posting links.",
+						msg.FromChannel);
 					return true;
 				}
 			}
@@ -274,15 +296,20 @@ namespace twitch_irc_bot
 		{
 			//Adds message to user message history
 			AddUserMessageHistory(Message.FromChannel, Message.MsgSender, Message.Msg);
-			if (CheckAccountCreation(Message.Msg, Message.FromChannel, Message.MsgSender, Message.UserType))
+
+		    if (CheckAscii(Message))
+		    {
+		        return true;
+		    }
+			if (CheckAccountCreation(Message))
 			{
 				return true;
 			}
-			if (CheckUrls(Message.Msg, Message.FromChannel, Message.MsgSender, Message.UserType))
+			if (CheckUrls(Message))
 			{
 				return true;
 			}
-			if (CheckSpam(Message.Msg, Message.FromChannel, Message.MsgSender, Message.UserType))
+			if (CheckSpam(Message))
 			{
 				return true;
 			}

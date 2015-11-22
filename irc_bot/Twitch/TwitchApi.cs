@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using RestSharp.Extensions;
+using SpotifyAPI.Web.Models;
 
 namespace twitch_irc_bot
 {
@@ -35,10 +37,14 @@ namespace twitch_irc_bot
         //Returns weather the stream is online or not
         public bool StreamStatus(string fromChannel)
         {
-            string url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
-            string jsonString = RequestJson(url);
-
-            if(jsonString == null) 
+            var url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
+            var jsonString = RequestJson(url);
+            if (jsonString == null)
+            {
+                return false;
+            }
+            var tokenArry = JObject.Parse(jsonString).SelectToken("stream");
+            if (!tokenArry.ToString().HasValue())
             {
                 return false;
             }
