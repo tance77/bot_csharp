@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Sockets;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Timers;
 using Timer = System.Timers.Timer;
@@ -18,10 +17,9 @@ namespace twitch_irc_bot
 		private List<string> _listOfActiveChannels;
 		private readonly CommandHelpers _commandHelpers = new CommandHelpers();
 		private readonly DatabaseFunctions _db = new DatabaseFunctions();
-		//        private readonly RiotApi _riotApi;
 		private readonly TwitchApi _twitchApi = new TwitchApi();
-		private bool _debug = true;
-		public int RateLimit { get; set; }
+	    private const bool Debug = false;
+	    public int RateLimit { get; set; }
 
 		public List<MessageHistory> ChannelHistory { get; set; }
 
@@ -58,7 +56,7 @@ namespace twitch_irc_bot
 
 			if (!WhisperServer)
 			{
-				if (!_debug)
+				if (!Debug)
 				{
 					var channelUpdate = new Timer {Interval = 30000};
 					//check if someone requested chinnbot to join channel every 30 secodns or leave
@@ -314,11 +312,11 @@ namespace twitch_irc_bot
 						if (WhisperServer) {
 						Console.Write (buf + "\r\n");
 							continue;
-						} 
-						Console.Write (buf + "\r\n");
-							var twitchMessage = new TwitchMessage (buf);
-							new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
-							continue;
+						}
+                        Console.Write(buf + "\r\n");
+						var twitchMessage = new TwitchMessage (buf);
+                        new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
+						continue;
 
 					}
 					if(WhisperServer){

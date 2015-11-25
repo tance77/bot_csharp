@@ -391,7 +391,9 @@ namespace twitch_irc_bot
             var message = "/me ";
             if (followersList.Count == 1)
             {
-                message += followersList.First() + " thanks for following!";
+                //message += followersList.First() + " thanks for following!";
+                message += "A new follower approaches " + followersList.First() + "!";
+
             }
             else
             {
@@ -399,11 +401,13 @@ namespace twitch_irc_bot
                 {
                     if (item == followersList.Last())
                     {
-                        message += "and " + item + ", thank you for following!";
+                        //message += "and " + item + ", thank you for following!";
+                        message += "and " + item + "!";
                     }
                     else
                     {
-                        message += item + ", ";
+                        //message += item + ", ";
+                        message += "Multiple followers have appeared " + item + ", ";
                     }
                 }
             }
