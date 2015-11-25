@@ -140,11 +140,46 @@ namespace twitch_irc_bot
 			return false; //no spam in message
 		}
 
+	    public bool CheckEmotes(TwitchMessage msg, IrcClient ircServer)
+	    {
+            if (msg.UserType == "mod")
+            {
+                //Console.Write("I'm a mod**************************");
+                return false;
+            }
+            if (_db.EmoteStatus(msg.FromChannel))
+            {
+                return false;
+            }
+	        var count = 0;
+	        var matchedEmoted = new Dictionary<string, int>();
+	        var msgArr = msg.Msg.Split(' ');
+	        foreach (var m in msgArr)
+	        {
+	            if (ircServer.EmoteList.Contains(m))
+	            {
+	                count++;
+	            }
+	        }
+	        if (count > _db.CheckEmoteCount(msg.FromChannel))
+	        {
+                AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 10", msg.FromChannel);
+                AddWhisperToQueue("You are using to many emotes in your messages. [WARNING]", msg.MsgSender);
+                AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 10", msg.FromChannel);
+	            return true;
+	        }
+	        return false;
+	    }
+
 	    public bool CheckAscii(TwitchMessage msg)
 	    {
 	        if (msg.UserType == "mod")
 	        {
                 //Console.Write("I'm a mod**************************");
+	            return false;
+	        }
+	        if (_db.AsciiStatus(msg.FromChannel))
+	        {
 	            return false;
 	        }
 	        var count = 0;
@@ -298,6 +333,10 @@ namespace twitch_irc_bot
 			AddUserMessageHistory(Message.FromChannel, Message.MsgSender, Message.Msg);
 
 		    if (CheckAscii(Message))
+		    {
+		        return true;
+		    }
+		    if (CheckEmotes(Message, Irc))
 		    {
 		        return true;
 		    }
@@ -614,6 +653,26 @@ namespace twitch_irc_bot
 					AddPrivMsgToQueue(
 						_commandHelpers.SongRequestToggle(Message.FromChannel, false, _db), Message.FromChannel);
 				}
+				else if (Regex.Match(Message.Msg, @"!allowascii\son").Success && Message.UserType == "mod")
+				{
+				    AddPrivMsgToQueue(
+                        _commandHelpers.AsciiToggle(Message.FromChannel, true, _db), Message.FromChannel);
+				}
+                else if (Regex.Match(Message.Msg, @"!allowascii\soff").Success && Message.UserType == "mod")
+                {
+                    AddPrivMsgToQueue(
+                        _commandHelpers.AsciiToggle(Message.FromChannel, false, _db), Message.FromChannel);
+                }
+                else if (Regex.Match(Message.Msg, @"!allowemotes\son").Success && Message.UserType == "mod")
+                {
+                    AddPrivMsgToQueue(
+                        _commandHelpers.EmoteToggle(Message.FromChannel, true, _db), Message.FromChannel);
+                }
+                else if (Regex.Match(Message.Msg, @"!allowemotes\soff").Success && Message.UserType == "mod")
+                {
+                    AddPrivMsgToQueue(
+                        _commandHelpers.EmoteToggle(Message.FromChannel, false, _db), Message.FromChannel);
+                }
 
 				else if (Regex.Match(Message.Msg, @"^!sr\s+").Success &&
 					_db.CheckSongRequestStatus(Message.FromChannel) )

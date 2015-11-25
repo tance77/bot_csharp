@@ -5,11 +5,12 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Timers;
+using Newtonsoft.Json.Linq;
 using Timer = System.Timers.Timer;
 
 namespace twitch_irc_bot
 {
-	internal class IrcClient
+    internal class IrcClient : WebFunctions
 	{
 		public string BotUserName{ get; set; }
 		private readonly StreamReader _inputStream;
@@ -24,6 +25,7 @@ namespace twitch_irc_bot
 		public List<MessageHistory> ChannelHistory { get; set; }
 
 
+        public List<string> EmoteList { get; set; } 
 		public BlockingCollection<string> BlockingMessageQueue{ get; set; }
 		public BlockingCollection<string> BlockingWhisperQueue{ get; set; }
 
@@ -36,7 +38,8 @@ namespace twitch_irc_bot
 			RateLimit = 0;
 
 			WhisperServer = a;
-			_listOfActiveChannels = new List<string>();
+		    EmoteList = GetGlobalEmotes();
+		    _listOfActiveChannels = new List<string>();
 			BotUserName = userName;
 			var tcpClient = new TcpClient(ip, port);
 			_inputStream = new StreamReader(tcpClient.GetStream());
@@ -50,6 +53,9 @@ namespace twitch_irc_bot
 			ChannelHistory = new List<MessageHistory>();
 			BlockingMessageQueue = new BlockingCollection<string> ();
 			BlockingWhisperQueue = new BlockingCollection<string> ();
+
+		    GetGlobalEmotes();
+            
 
 
 			#region Timers
@@ -95,11 +101,15 @@ namespace twitch_irc_bot
 			rateLimitTimer.Enabled = true;
 
 			#endregion
+
 		}
 
 		#endregion
 
-		public void CheckRateAndSend(Object source, ElapsedEventArgs e)
+
+        #region Timer_Inizialization
+
+        public void CheckRateAndSend(Object source, ElapsedEventArgs e)
 		{
 			if (WhisperServer) {
 				while (RateLimit < 20 && BlockingWhisperQueue.Count > 0) {
@@ -208,9 +218,13 @@ namespace twitch_irc_bot
 				_listOfActiveChannels.Remove(channel);
 			}
 		}
-		#region Methods
+        #endregion
 
-		public void AddPrivMsgToQueue(string message, string fromChannel)
+        #region Methods
+
+
+
+        public void AddPrivMsgToQueue(string message, string fromChannel)
 		{
 			if (message == null)
 			{

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using Newtonsoft.Json.Linq;
+using NUnit.Framework;
 
 namespace twitch_irc_bot
 {
@@ -30,6 +33,21 @@ namespace twitch_irc_bot
                     Console.Write(e + "\r\n");
                     return null;
                 }
+        }
+        public List<string> GetGlobalEmotes()
+        {
+            var emoteList = new List<string>();
+            var response = RequestJson("http://twitchemotes.com/api_cache/v2/global.json");
+            if (response == null)
+            {
+                return null;
+            }
+            var jsonArr = JObject.Parse(response).SelectToken("emotes");
+            foreach (var emote in jsonArr)
+            {
+                emoteList.Add(emote.ToString().Split('"')[1]);
+            }
+            return emoteList;
         }
     }
 }

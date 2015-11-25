@@ -322,12 +322,35 @@ namespace twitch_irc_bot
             }
             return "Something went wrong on my end.";
         }
+
+
+        public string EmoteToggle(string channel, bool toggle, DatabaseFunctions db)
+        {
+            bool success = db.EmoteToggle(channel, toggle);
+            if (success)
+            {
+                return toggle ? "Spam away emotes are fair game." : "Excessive emotes will be purged.";
+            }
+            return "Something went wrong on my end.";
+        }
+
+        public string AsciiToggle(string channel, bool toggle, DatabaseFunctions db)
+        {
+            bool success = db.AsciiToggle(channel, toggle);
+            if (success)
+            {
+                return toggle ? "Spam away ascii's are fair game." : "Excessive ascii characters will be purged";
+            }
+            return "Something went wrong on my end.";
+        }
+
+
         public string SongRequestToggle(string channel, bool toggle, DatabaseFunctions db)
         {
             bool success = db.SongRequestToggle(channel, toggle);
             if (success)
             {
-                return toggle ? "Song Request is now on." : "Songrequest is now off.";
+                return toggle ? "Song Requests a now on." : "Song requests are now off.";
             }
             return "Something went wrong on my end.";
         }
@@ -438,8 +461,7 @@ namespace twitch_irc_bot
 
 
             var response = RequestJson(queryString);
-            if (response == "400" || response == "401" || response == "404" || response == "429" ||
-                    response == "500" || response == "503")
+            if (response == null)
             {
                 return null;
             }

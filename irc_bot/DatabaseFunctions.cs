@@ -413,6 +413,64 @@ namespace twitch_irc_bot
             }
         }
 
+
+        public bool AsciiToggle(string channel, bool toggle)
+        {
+            using (var dbConnection = new MySqlConnection(ConnectionString))
+            {
+                dbConnection.Open();
+                using (
+                    var command =
+                        new MySqlCommand("UPDATE Channels SET ascii_status=@a WHERE channel_name=@channel",
+                            dbConnection))
+                {
+                    try
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        command.Parameters.AddWithValue("@a", toggle);
+                        command.ExecuteNonQuery();
+
+                        return true;
+                    }
+                    catch (MySqlException e)
+                    {
+                        Console.Write(e + "\r\n");
+                        return false;
+                    }
+                }
+            }
+        }
+
+        public bool EmoteToggle(string channel, bool toggle)
+        {
+            using (var dbConnection = new MySqlConnection(ConnectionString))
+            {
+                dbConnection.Open();
+                using (
+                    var command =
+                        new MySqlCommand("UPDATE Channels SET emote_status=@e WHERE channel_name=@channel",
+                            dbConnection))
+                {
+                    try
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        command.Parameters.AddWithValue("@e", toggle);
+                        command.ExecuteNonQuery();
+
+                        return true;
+                    }
+                    catch (MySqlException e)
+                    {
+                        Console.Write(e + "\r\n");
+                        return false;
+                    }
+                }
+            }
+        }
+
+
+
+
         public bool UrlToggle(string channel, bool toggle)
         {
             using (var dbConnection = new MySqlConnection(ConnectionString))
@@ -471,6 +529,74 @@ namespace twitch_irc_bot
                     return false;
                 }
         }
+
+        public bool AsciiStatus(string channel)
+        {
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                            var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
+                                dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        bool result = false;
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                result = reader.GetBoolean(8);
+                            }
+                        }
+                        GC.Collect();
+                        return result;
+                    }
+                }
+            }
+            catch
+                (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+            }
+        }
+
+
+        public bool EmoteStatus(string channel)
+        {
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                            var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
+                                dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        bool result = false;
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                result = reader.GetBoolean(9);
+                            }
+                        }
+                        GC.Collect();
+                        return result;
+                    }
+                }
+            }
+            catch
+                (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+            }
+        }
+
 
         public string SummonerStatus(string channel)
         {
@@ -621,6 +747,34 @@ namespace twitch_irc_bot
                 return 0;
             }
         }
+
+        public int CheckEmoteCount(string channel)
+        {
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                        var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
+                            dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            reader.Read();
+                            return reader.GetInt32(7);
+                        }
+                    }
+                }
+            }
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return 0;
+            }
+        }
+
 
         public bool GgStatus(string channel)
         {
