@@ -1348,6 +1348,138 @@ namespace twitch_irc_bot
             }
         }
 
+
+        public bool AddRegular(string channelName, string userToAdd)
+        {
+            var exists = false;
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+
+                    using (var command = new MySqlCommand("SELECT * FROM RegularList WHERE ChannelName=@c AND User=@u", dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", channelName);
+                        command.Parameters.AddWithValue("@u", userToAdd);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            // if we found a value that means it exits and we don't want ot add a duplicate
+                            while (reader.Read())
+                            {
+                                exists = true;
+                                break;
+                            }
+                        }
+                    }
+                    GC.Collect();
+
+                    if (!exists)
+                    {
+                        using (
+                                var command =
+                                new MySqlCommand(
+                                    "insert into RegularList (ChannelName, User) Values(@c, @u)",
+                                    dbConnection))
+                        {
+                            command.Parameters.AddWithValue("@c", channelName);
+                            command.Parameters.AddWithValue("@u", userToAdd);
+                            command.ExecuteNonQuery();
+                        }
+                        GC.Collect();
+                        return true;
+                    }
+                }
+                return false;
+            }
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+
+            }
+        }
+
+
+        public bool RemoveRegular(string fromChannel, string userToRemove)
+        {
+            try
+            {
+                using (
+                        var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                            var inDb = new MySqlCommand("select * from RegularList where ChannelName=@c and User=@u", dbConnection))
+                    {
+                        inDb.Parameters.AddWithValue("@c", fromChannel);
+                        inDb.Parameters.AddWithValue("@u", userToRemove);
+                        using (MySqlDataReader reader = inDb.ExecuteReader())
+                        {
+                            if (!reader.Read())
+                            {
+                                return false;
+                            }
+                        }
+                        GC.Collect();
+                    }
+                    using (
+                        var cmd = new MySqlCommand("delete from RegularList where ChannelName=@c and User=@u", dbConnection)
+                        )
+                    {
+                        cmd.Parameters.AddWithValue("@c", fromChannel);
+                        cmd.Parameters.AddWithValue("@u", userToRemove);
+                        cmd.ExecuteNonQuery();
+                    }
+                    GC.Collect();
+                    return true;
+                }
+            }
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+            }
+        }
+
+
+        public bool RegularExist(string channelName, string userToAdd)
+        {
+            var exists = false;
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+
+                    using (
+                        var command = new MySqlCommand("SELECT * FROM RegularList WHERE ChannelName=@c AND User=@u",
+                            dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", channelName);
+                        command.Parameters.AddWithValue("@u", userToAdd);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            // if we found a value that means it exits and we don't want ot add a duplicate
+                            while (reader.Read())
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                    GC.Collect();
+                }
+                return false;
+            }
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+
+            }
+        }
+
+
         //1 of the same song check to see if the same sone exists before adding Lets avoid dupilcates
 
         public bool AddSong(string channelName, string requestedBy, string songId, string duration, string artist,

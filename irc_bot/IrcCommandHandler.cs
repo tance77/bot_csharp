@@ -147,7 +147,7 @@ namespace twitch_irc_bot
                 //Console.Write("I'm a mod**************************");
                 return false;
             }
-            if (_db.EmoteStatus(msg.FromChannel))
+            if (_db.EmoteStatus(msg.FromChannel) || _db.RegularExist(msg.FromChannel, msg.MsgSender))
             {
                 return false;
             }
@@ -203,8 +203,8 @@ namespace twitch_irc_bot
 	    }
 
 	    public bool CheckUrls(TwitchMessage msg)
-		{
-			if (_db.UrlStatus(msg.FromChannel)) return false;
+	    {
+	        if (_db.UrlStatus(msg.FromChannel) || _db.RegularExist(msg.FromChannel, msg.MsgSender)) return false;
 			if (!Regex.Match(msg.Msg, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)")
 				.Success || msg.UserType == "mod") return false;
 			if (_db.PermitExist(msg.FromChannel, msg.MsgSender) && _db.CheckPermitStatus(msg.FromChannel, msg.MsgSender))
@@ -230,7 +230,7 @@ namespace twitch_irc_bot
 		{
 			var result = _twitchApi.CheckAccountCreation(msg.MsgSender);
 			//New Account less than a day old
-			if (result)
+			if (!result)
 			{
 				//if they exist in permit and if permit has not expired
 				//if it got here that means it was a url and they were permitted
@@ -615,6 +615,17 @@ namespace twitch_irc_bot
 						}
 					}
 				}
+                else if (Regex.Match(Message.Msg, @"^!regular\sadd\s").Success || Regex.Match(Message.Msg, @"!reg\sadd\s").Success)
+                {
+                    if (Message.UserType != "mod") return;
+                    _commandHelpers.AddRegular(Message, _db, Irc);
+                }
+                else if (Regex.Match(Message.Msg, @"^!regular\sdelete\s").Success || Regex.Match(Message.Msg, @"!reg\sdel\s").Success ||
+                    Regex.Match(Message.Msg, @"^!regular\sremove\s").Success || Regex.Match(Message.Msg, @"^!reg\srem\s").Success)
+                {
+                    if (Message.UserType != "mod") return;
+                    _commandHelpers.RemoveRegular(Message, _db, Irc);
+                }
 				//else if (Regex.Match(message, @"!timer").Success)
 				//{
 				//    if (_commandHelpers.AddTimer(_db, message, FromChannel)) //Everything worked
@@ -678,7 +689,8 @@ namespace twitch_irc_bot
 					_db.CheckSongRequestStatus(Message.FromChannel) )
 				{
 					var response = _commandHelpers.SearchSong(Message.Msg, Message.MsgSender, _db,
-						Message.FromChannel);
+						Message.FromChannel, Message.UserType);
+				    if (response.Count == 0) return;
 					if (response.Count > 1)
 					{
 						Console.WriteLine(response.Count);

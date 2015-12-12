@@ -19,7 +19,7 @@ namespace twitch_irc_bot
 		private readonly CommandHelpers _commandHelpers = new CommandHelpers();
 		private readonly DatabaseFunctions _db = new DatabaseFunctions();
 		private readonly TwitchApi _twitchApi = new TwitchApi();
-	    private const bool Debug = false;
+	    private const bool Debug = true;
 	    public int RateLimit { get; set; }
 
 		public List<MessageHistory> ChannelHistory { get; set; }

@@ -411,7 +411,7 @@ namespace twitch_irc_bot
         {
             List<string> followersList = db.ParseRecentFollowers(fromChannel, twitchApi);
             if (followersList == null) return null;
-            var message = "/me ";
+            var message = "";
             if (followersList.Count == 1)
             {
                 //message += followersList.First() + " thanks for following!";
@@ -434,7 +434,7 @@ namespace twitch_irc_bot
                     }
                 }
             }
-            return message == "/me " ? null : message;
+            return message == "" ? null : message;
         }
 
         public void JoinAssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
@@ -513,6 +513,28 @@ namespace twitch_irc_bot
             }
 
             return foundSongs;
+        }
+
+        public void AddRegular(TwitchMessage Message, DatabaseFunctions db, IrcClient irc)
+        {
+            if (irc.WhisperServer) return;
+            var userToAdd = Message.Msg.Split(' ')[2];
+            var success = db.AddRegular(Message.FromChannel, userToAdd);
+            if (success)
+            {
+                irc.AddPrivMsgToQueue(userToAdd + " " + "was added to the regular list by " + Message.MsgSender, Message.FromChannel);
+            }
+        }
+
+        public void RemoveRegular(TwitchMessage Message, DatabaseFunctions db, IrcClient irc)
+        {
+            if (irc.WhisperServer) return;
+            var userToRemove = Message.Msg.Split(' ')[2];
+            var success = db.RemoveRegular(Message.FromChannel, userToRemove);
+            if (success)
+            {
+                irc.AddPrivMsgToQueue(userToRemove + " " + "is no longer a regular", Message.FromChannel);
+            }
         }
 
         public string AddSongById(string songId, DatabaseFunctions db, string fromChannel, string messageSender)
@@ -608,7 +630,7 @@ namespace twitch_irc_bot
 
         }
 
-        public List<string> SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel)
+        public List<string> SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel, string userType)
         {
             //Get multiple results
             //message user the results
@@ -627,6 +649,10 @@ namespace twitch_irc_bot
             var songList = new List<string>();
             if (message.StartsWith("!songrequest ") || message.StartsWith("!sr "))
             {
+                if (userType != "mod")
+                {
+                    if (!db.RegularExist(fromChannel, messageSender)) return songList;
+                }
                 var msgAry = message.Split(' ');
                 var queryString = "";
 
