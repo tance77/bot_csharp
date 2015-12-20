@@ -53,16 +53,16 @@ namespace twitch_irc_bot
                     "?masteryData=masteryTree&api_key=" + _apiKey;
                 string masteryJson = RequestJson(url2);
                 string masteryTree = JObject.Parse(masteryJson).SelectToken("masteryTree").ToString();
-                if (masteryTree == "Offense")
+                if (masteryTree == "Ferocity")
                 {
                     masterDictionary["Ferocity"] += masteryId.Value;
                     
                 }
-                if (masteryTree == "Utility")
+                if (masteryTree == "Resolve")
                 {
                     masterDictionary["Resolve"] += masteryId.Value;
                 }
-                if (masteryTree == "Defense")
+                if (masteryTree == "Cunning")
                 {
                     masterDictionary["Cunning"] += masteryId.Value;
                 }

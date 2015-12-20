@@ -79,6 +79,33 @@ namespace twitch_irc_bot
             return followsDictionary;
         }
 
+        public Dictionary<string, DateTime> GetFirstHundredFollowers(string fromChannel)
+        {
+            string url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=100";
+            string jsonString = RequestJson(url);
+            var followsDictionary = new Dictionary<string, DateTime>();
+            if (jsonString == null) return null;
+            if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
+            {
+                return null;
+            }
+            JToken jsonArr = JObject.Parse(jsonString).SelectToken("follows");
+            foreach (JToken item in jsonArr)
+            {
+                string createdAt = JObject.Parse(item.ToString()).SelectToken("created_at").ToString();
+                DateTime followDate;
+                if (!DateTime.TryParse(createdAt, out followDate))
+                {
+                    return null;
+                }
+                string displayName =
+                    JObject.Parse(item.ToString()).SelectToken("user").SelectToken("display_name").ToString();
+                followsDictionary.Add(displayName, followDate);
+            }
+            return followsDictionary;
+        }
+
+
 
         public List<string> GetActiveUsers(string fromChannel) //via chatters json deprecated
         {

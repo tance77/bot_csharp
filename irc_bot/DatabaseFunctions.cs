@@ -46,10 +46,10 @@ namespace twitch_irc_bot
             }
             catch
                 (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return channelsToJoin;
-                }
+            {
+                Console.Write(e + "\r\n");
+                return channelsToJoin;
+            }
         }
 
 
@@ -323,10 +323,10 @@ namespace twitch_irc_bot
             }
             catch
                 (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return false;
-                }
+            {
+                Console.Write(e + "\r\n");
+                return false;
+            }
             catch (Exception e)
             {
                 Console.Write(e + "\r\n");
@@ -524,10 +524,10 @@ namespace twitch_irc_bot
             }
             catch
                 (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return false;
-                }
+            {
+                Console.Write(e + "\r\n");
+                return false;
+            }
         }
 
         public bool AsciiStatus(string channel)
@@ -626,10 +626,10 @@ namespace twitch_irc_bot
             }
             catch
                 (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return null;
-                }
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
         }
 
         public bool SetSummonerName(string channel, string summonerName)
@@ -688,10 +688,10 @@ namespace twitch_irc_bot
             }
             catch
                 (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return null;
-                }
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
         }
 
         public bool SetSummonerId(string channel, string summonerId)
@@ -896,14 +896,14 @@ namespace twitch_irc_bot
             }
             catch
                 (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return null;
-                }
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
         }
 
         public bool CheckPermitStatus(string fromChannel, string user)
-            //Checks to see if the permit is still valid in the given time period
+        //Checks to see if the permit is still valid in the given time period
         {
             user = user.ToLower();
             user = user.Trim(' ');
@@ -1087,6 +1087,70 @@ namespace twitch_irc_bot
             }
         }
 
+
+        public List<string> ParseFirstHundredFollowers(string fromChannel, TwitchApi twitchApi)
+        {
+            var followersList = new List<string>();
+            Dictionary<string, DateTime> followersDictionary = twitchApi.GetFirstHundredFollowers(fromChannel);
+            if (followersDictionary != null)
+            {
+                try
+                {
+                    using (var dbConnection = new MySqlConnection(ConnectionString))
+                    {
+                        dbConnection.Open();
+                        foreach (var follower in followersDictionary)
+                        {
+                            using (
+                                    var command =
+                                    new MySqlCommand(
+                                        "SELECT * FROM Followers WHERE follower_name=@follower and channel_name=@channel",
+                                        dbConnection))
+                            {
+                                command.Parameters.AddWithValue("@channel", fromChannel);
+                                command.Parameters.AddWithValue("@follower", follower.Key);
+                                using (MySqlDataReader reader = command.ExecuteReader())
+                                {
+                                    if (reader.Read())
+                                    {
+                                        continue;
+                                    }
+                                }
+                            }
+                            GC.Collect();
+                            using (
+                                    var command =
+                                    new MySqlCommand(
+                                        "INSERT INTO Followers(channel_name,follower_name,follow_date)VALUES(@channel,@follower,@date)",
+                                        dbConnection)
+                                  )
+                            {
+                                command.Parameters.AddWithValue("@channel", fromChannel);
+                                command.Parameters.AddWithValue("@follower", follower.Key);
+                                command.Parameters.AddWithValue("@date", follower.Value.ToUniversalTime());
+                                command.ExecuteNonQuery();
+                                followersList.Add(follower.Key);
+                            }
+                        }
+                    }
+                    //Console.Write(followersList + "\r\n");
+                    return followersList;
+                }
+                catch
+                    (MySqlException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
+                catch (TimeoutException e)
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
+            }
+            return null;
+        }
+
         public List<string> ParseRecentFollowers(string fromChannel, TwitchApi twitchApi)
         {
             var followersList = new List<string>();
@@ -1137,10 +1201,10 @@ namespace twitch_irc_bot
                 }
                 catch
                     (MySqlException e)
-                    {
-                        Console.Write(e + "\r\n");
-                        return null;
-                    }
+                {
+                    Console.Write(e + "\r\n");
+                    return null;
+                }
                 catch (TimeoutException e)
                 {
                     Console.Write(e + "\r\n");
@@ -1178,10 +1242,10 @@ namespace twitch_irc_bot
             }
             catch
                 (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return null;
-                }
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
         }
 
         public void AddCoins(int numberOfCoins, string channel, List<string> userList)
@@ -1318,7 +1382,8 @@ namespace twitch_irc_bot
             }
         }
 
-        public bool CheckSongRequestStatus(string channelName){
+        public bool CheckSongRequestStatus(string channelName)
+        {
             using (var dbConnection = new MySqlConnection(ConnectionString))
             {
                 dbConnection.Open();
@@ -1565,10 +1630,10 @@ namespace twitch_irc_bot
             }
             catch
                 (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return song;
-                }
+            {
+                Console.Write(e + "\r\n");
+                return song;
+            }
         }
         public List<string> GetListOfActiveChannels()
         {
@@ -1595,12 +1660,178 @@ namespace twitch_irc_bot
             }
             catch
                 (MySqlException e)
-                {
-                    Console.Write(e + "\r\n");
-                    return null;
-                }
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
             return listOfActiveChannels;
         }
+
+
+        public List<string> AddToQueue(TwitchMessage msg, string leagueName)
+        {
+            var leagueQueue = new List<string>();
+            var update = false;
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (var command = new MySqlCommand("Select * From LeagueQueue WHERE channelName=@c AND twitchName=@t", dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", msg.FromChannel);
+                        command.Parameters.AddWithValue("@t", msg.MsgSender);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                update = true;
+                            }
+                        }
+                    }
+                    GC.Collect();
+                    if (update)
+                    {
+                        using (var command = new MySqlCommand("UPDATE LeagueQueue SET leagueName=@l WHERE channelName=@c", dbConnection))
+                        {
+                            command.Parameters.AddWithValue("@c", msg.FromChannel);
+                            command.Parameters.AddWithValue("@l", leagueName);
+                            command.ExecuteNonQuery();
+                        }
+                        GC.Collect();
+                    }
+                    else
+                    {
+                        using (
+                                var command =
+                                new MySqlCommand(
+                                    "INSERT INTO LeagueQueue(channelName,twitchName, leagueName)VALUES(@c, @t, @l);",
+                                    dbConnection))
+                        {
+                            command.Parameters.AddWithValue("@c", msg.FromChannel);
+                            command.Parameters.AddWithValue("@t", msg.MsgSender);
+                            command.Parameters.AddWithValue("@l", leagueName);
+                            command.ExecuteNonQuery();
+                        }
+
+                        GC.Collect();
+                    }
+                    using (var command = new MySqlCommand("select * From LeagueQueue WHERE channelName=@c", dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", msg.FromChannel);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                leagueQueue.Add(reader.GetString(2));
+                            }
+                        }
+
+                    }
+
+                }
+                GC.Collect();
+                return leagueQueue;
+            }
+
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
+        }
+
+
+        public List<string> GetQueuePostion(TwitchMessage msg)
+        {
+            var leagueQueue = new List<string>();
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (var command = new MySqlCommand("select * From LeagueQueue WHERE channelName=@c", dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", msg.FromChannel);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                leagueQueue.Add(reader.GetString(2));
+                            }
+                        }
+
+                    }
+
+                }
+                GC.Collect();
+                return leagueQueue;
+            }
+
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
+        }
+
+
+
+
+        public bool RemovePersonFromQueue(string fromChannel, string userToRemove)
+        {
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                            var cmd = new MySqlCommand("SELECT * FROM LeagueQueue WHERE channelName=@c and twitchName=@t",
+                                dbConnection))
+                    {
+                        cmd.Parameters.AddWithValue("@c", fromChannel);
+                        cmd.Parameters.AddWithValue("@t", userToRemove);
+                        bool okToDelete = false;
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                if (userToRemove != reader.GetString(2)) continue;
+                                okToDelete = true;
+                                break;
+                            }
+                        }
+                        GC.Collect();
+                        if (!okToDelete)
+                        {
+                            return false;
+                        }
+                    }
+                    using (var cmd =
+                            new MySqlCommand(
+                                "DELETE FROM LeagueQueue WHERE channelName=@c AND twitchName=@t",
+                                dbConnection))
+                    {
+                        cmd.Parameters.AddWithValue("@c", fromChannel);
+                        cmd.Parameters.AddWithValue("@t", userToRemove);
+                        cmd.ExecuteNonQuery();
+                    }
+                    return true;
+                }
+            }
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+            }
+        }
+
+
 
     }
 }

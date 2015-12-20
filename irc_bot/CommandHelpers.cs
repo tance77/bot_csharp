@@ -407,6 +407,12 @@ namespace twitch_irc_bot
             return null;
         }
 
+
+    public void GetFollowers(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi){
+       List<string> followersList = db.ParseFirstHundredFollowers(fromChannel, twitchApi);
+    }
+
+
         public string AssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
         {
             List<string> followersList = db.ParseRecentFollowers(fromChannel, twitchApi);
@@ -663,6 +669,17 @@ namespace twitch_irc_bot
                 }
                 queryString = queryString.Trim(' ');
 
+
+                //don't allow youtube requests
+                const string pattern =
+                    @"https:\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-]+)(&(amp;)?[\w\?=]*)?";
+
+                if (Regex.Match(message, pattern).Success)
+                {
+                    songList.Add("sorry we are using Spotify not YouTube.");
+                    return songList;
+                }
+
                 //song track URL
                 if (Regex.Match(queryString, @"^https:\/\/.*com\/track\/").Success)
                 {
@@ -670,13 +687,13 @@ namespace twitch_irc_bot
                 }
 
                 //song URI Request
-                if (queryString.Length == 36 && queryString.Contains("spotify:track:"))
+                else if (queryString.Length == 36 && queryString.Contains("spotify:track:"))
                 {
                     queryString = queryString.Split(':')[2];
                 }
 
                 //don't allow request by album
-                if (queryString.Length == 36 && queryString.Contains("spotify:album:") ||
+                else if (queryString.Length == 36 && queryString.Contains("spotify:album:") ||
                         Regex.Match(message, @"^https:\/\/.*com\/album\/").Success)
                 {
                     songList.Add("sorry you can't request a whole album.");
@@ -684,22 +701,14 @@ namespace twitch_irc_bot
                 }
 
                 //don't allow request by artist
-                if (queryString.Length == 37 && queryString.Contains("spotify:artist:") ||
+                else if (queryString.Length == 37 && queryString.Contains("spotify:artist:") ||
                         Regex.Match(message, @"^https:\/\/.*com\/artist\/").Success)
                 {
                     songList.Add("Sorry you can't request an artist");
                     return songList;
                 }
 
-                //don't allow youtube requests
-                const string pattern =
-                    @"^(?:https?:\/\/|\/\/)?(?:www\.|m\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})(?![\w-])";
 
-                if (Regex.Match(message, pattern).Success)
-                {
-                    songList.Add("sorry we are using Spotify not YouTube.");
-                    return songList;
-                }
 
                 //track ID only look up by track id
                 if (!queryString.Contains(" ") && queryString.Length == 22)
@@ -741,5 +750,48 @@ namespace twitch_irc_bot
             songList.Add("song already exists or something went wrong on my end.");
             return songList;
         }
+
+        public string AddToQueue(TwitchMessage msg, RiotApi riotApi, DatabaseFunctions db)
+        {
+            var summonerName = msg.Msg.Split(' ')[1];
+            var postion = 1;
+            if (riotApi.GetSummonerId(summonerName) == null) return null;
+            var leagueQueue = db.AddToQueue(msg, summonerName);
+            if(leagueQueue != null)
+            {
+                var currentCount = leagueQueue.Count;
+                foreach (var person in leagueQueue)
+                {
+                    if (person == msg.MsgSender)
+                    {
+                        break;
+                    }
+                    postion++;
+                }
+                return msg.MsgSender + " you have been added to the queue. Your position in the queue is " + postion + ".";
+            }
+            return "Could not reach database please try again.";
+        }
+
+        public string CheckPostion(TwitchMessage msg, DatabaseFunctions db)
+        {
+            var leagueQueue = db.GetQueuePostion(msg);
+            var postion = 1;
+            if (leagueQueue != null && leagueQueue.Count != 0)
+            {
+                var currentCount = leagueQueue.Count;
+                foreach (var person in leagueQueue)
+                {
+                    if (person == msg.MsgSender)
+                    {
+                        break;
+                    }
+                    postion++;
+                }
+                return msg.MsgSender + " you are number " + postion + " in queue.";
+            }
+            return null;
+        }
+
     }
 }

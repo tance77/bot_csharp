@@ -19,7 +19,7 @@ namespace twitch_irc_bot
 		private readonly CommandHelpers _commandHelpers = new CommandHelpers();
 		private readonly DatabaseFunctions _db = new DatabaseFunctions();
 		private readonly TwitchApi _twitchApi = new TwitchApi();
-	    private const bool Debug = true;
+	    private const bool Debug = false;
 	    public int RateLimit { get; set; }
 
 		public List<MessageHistory> ChannelHistory { get; set; }
@@ -195,6 +195,7 @@ namespace twitch_irc_bot
 				//If our active channels doesn't contain the channels in our DB we need to join that channel
 				if (!_listOfActiveChannels.Contains(channel))
 				{
+                    _commandHelpers.GetFollowers(channel, _db, _twitchApi);
 					JoinChannel(channel);
 				}
 			}

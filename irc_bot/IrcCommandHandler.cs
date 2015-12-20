@@ -83,11 +83,8 @@ namespace twitch_irc_bot
 				AddPrivMsgToQueue(commandFound.Item1, fromChannel);
 				return true;
 			}
-			else
-			{
-				AddPrivMsgToQueue(sender + ", " + commandFound.Item1, fromChannel);
-				return true;
-			}
+		    AddPrivMsgToQueue(sender + ", " + commandFound.Item1, fromChannel);
+		    return true;
 		}
 
 		#region Spam Filters
@@ -709,15 +706,44 @@ namespace twitch_irc_bot
 					var song = _db.GetCurrentSong(Message.FromChannel);
 					AddPrivMsgToQueue(song, Message.FromChannel);
 				}
-				else if (Regex.Match(Message.Msg, @"!songlist").Success ||
+				else if ((Regex.Match(Message.Msg, @"!songlist").Success ||
 					Regex.Match(Message.Msg, @"!sl").Success ||
-					Regex.Match(Message.Msg, @"!playlist").Success)
+					Regex.Match(Message.Msg, @"!playlist").Success) 
+                    && _db.CheckSongRequestStatus(Message.FromChannel))
 				{
 					AddPrivMsgToQueue(
 						Message.MsgSender +
 						" the playlist can be found here http://chinnbot.tv/songlist?user=" +
 						Message.FromChannel, Message.FromChannel);
 				}
+                else if (Regex.Match(Message.Msg, @"^!queue\s").Success || Regex.Match(Message.Msg, @"^!que\s").Success)
+                {
+                    var queueStatus = _commandHelpers.AddToQueue(Message, _riotApi, _db);
+                    if(queueStatus == null)
+                    {
+                        AddPrivMsgToQueue("Summoner name invalid.", Message.FromChannel);
+                    }
+                    else
+                    {
+                        AddPrivMsgToQueue(queueStatus, Message.FromChannel);
+                    }
+                }
+                else if (Regex.Match(Message.Msg, @"^!qleave").Success || Regex.Match(Message.Msg, @"^!leaveq").Success)
+                {
+                    if (_db.RemovePersonFromQueue(Message.FromChannel, Message.MsgSender))
+                    {
+                        AddPrivMsgToQueue(Message.MsgSender + " you have been taken out of the queue", Message.FromChannel);
+                    }
+                }
+                else if (Regex.Match(Message.Msg, @"^!qpos").Success || Regex.Match(Message.Msg, @"^!qpostion").Success || Regex.Match(Message.Msg, @"^!qspot").Success)
+                {
+                    var msgToBeSent = _commandHelpers.CheckPostion(Message, _db);
+                    if (msgToBeSent != null)
+                    {
+                        AddPrivMsgToQueue(msgToBeSent, Message.FromChannel);
+                    }
+
+                }
 
 				//else if (Regex.Match(message, @"!addquote").Success)
 				//{
