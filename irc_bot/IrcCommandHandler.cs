@@ -716,6 +716,11 @@ namespace twitch_irc_bot
 						" the playlist can be found here http://chinnbot.tv/songlist?user=" +
 						Message.FromChannel, Message.FromChannel);
 				}
+
+                else if (Regex.Match(Message.Msg, @"^!queue$").Success)
+                {
+                    AddPrivMsgToQueue(Message.MsgSender + " to join the queue type !queue (summoner_name) . To see the current queue click this link http://chinnbot.tv/guest_player_queue?user=" + Message.FromChannel, Message.FromChannel);
+                }
                 else if (Regex.Match(Message.Msg, @"^!queue\s").Success || Regex.Match(Message.Msg, @"^!que\s").Success)
                 {
                     var queueStatus = _commandHelpers.AddToQueue(Message, _riotApi, _db);

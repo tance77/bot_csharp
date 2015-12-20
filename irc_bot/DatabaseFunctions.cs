@@ -1692,10 +1692,11 @@ namespace twitch_irc_bot
                     GC.Collect();
                     if (update)
                     {
-                        using (var command = new MySqlCommand("UPDATE LeagueQueue SET leagueName=@l WHERE channelName=@c", dbConnection))
+                        using (var command = new MySqlCommand("UPDATE LeagueQueue SET leagueName=@l WHERE channelName=@c and twitchName=@t", dbConnection))
                         {
                             command.Parameters.AddWithValue("@c", msg.FromChannel);
                             command.Parameters.AddWithValue("@l", leagueName);
+                            command.Parameters.AddWithValue("@t", msg.MsgSender);
                             command.ExecuteNonQuery();
                         }
                         GC.Collect();
