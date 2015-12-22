@@ -579,6 +579,7 @@ namespace twitch_irc_bot
 				}
 				else if (Regex.Match(Message.Msg, @"^!uptime$").Success)
 				{
+				    if (Message.FromChannel == "sophiabot") return;
 					AddPrivMsgToQueue(_twitchApi.GetStreamUptime(Message.FromChannel),
 						Message.FromChannel);
 				}
@@ -615,12 +616,14 @@ namespace twitch_irc_bot
                 else if (Regex.Match(Message.Msg, @"^!regular\sadd\s").Success || Regex.Match(Message.Msg, @"!reg\sadd\s").Success)
                 {
                     if (Message.UserType != "mod") return;
+                    if (_db.GetRegularStatus(Message) == false) return;
                     _commandHelpers.AddRegular(Message, _db, Irc);
                 }
                 else if (Regex.Match(Message.Msg, @"^!regular\sdelete\s").Success || Regex.Match(Message.Msg, @"!reg\sdel\s").Success ||
                     Regex.Match(Message.Msg, @"^!regular\sremove\s").Success || Regex.Match(Message.Msg, @"^!reg\srem\s").Success)
                 {
                     if (Message.UserType != "mod") return;
+                    if (_db.GetRegularStatus(Message) == false) return;
                     _commandHelpers.RemoveRegular(Message, _db, Irc);
                 }
 				//else if (Regex.Match(message, @"!timer").Success)
@@ -650,13 +653,23 @@ namespace twitch_irc_bot
 				//    AddMessageToMessageList("Timer added", FromChannel);
 				//    GC.KeepAlive(mytimer);
 				//}
+				else if (Regex.Match(Message.Msg, @"^!regon$").Success && Message.UserType == "mod")
+				{
+					AddPrivMsgToQueue(
+						_commandHelpers.RegToggle(Message, true, _db), Message.FromChannel);
+				}
+				else if (Regex.Match(Message.Msg, @"^!regoff$").Success && Message.UserType == "mod")
+				{
+					AddPrivMsgToQueue(
+						_commandHelpers.RegToggle(Message, false, _db), Message.FromChannel);
+				}
 
-				else if (Regex.Match(Message.Msg, @"!sron").Success && Message.UserType == "mod")
+				else if (Regex.Match(Message.Msg, @"^!sron$").Success && Message.UserType == "mod")
 				{
 					AddPrivMsgToQueue(
 						_commandHelpers.SongRequestToggle(Message.FromChannel, true, _db), Message.FromChannel);
 				}
-				else if (Regex.Match(Message.Msg, @"!sroff").Success && Message.UserType == "mod")
+				else if (Regex.Match(Message.Msg, @"^!sroff$").Success && Message.UserType == "mod")
 				{
 					AddPrivMsgToQueue(
 						_commandHelpers.SongRequestToggle(Message.FromChannel, false, _db), Message.FromChannel);
@@ -686,7 +699,7 @@ namespace twitch_irc_bot
 					_db.CheckSongRequestStatus(Message.FromChannel) )
 				{
 					var response = _commandHelpers.SearchSong(Message.Msg, Message.MsgSender, _db,
-						Message.FromChannel, Message.UserType);
+						Message.FromChannel, Message.UserType, Message);
 				    if (response.Count == 0) return;
 					if (response.Count > 1)
 					{
@@ -717,7 +730,7 @@ namespace twitch_irc_bot
 						Message.FromChannel, Message.FromChannel);
 				}
 
-                else if (Regex.Match(Message.Msg, @"^!queue$").Success)
+                else if (Regex.Match(Message.Msg, @"^!queue$").Success || Regex.Match(Message.Msg, @"^!que$").Success)
                 {
                     AddPrivMsgToQueue(Message.MsgSender + " to join the queue type !queue (summoner_name) . To see the current queue click this link http://chinnbot.tv/guest_player_queue?user=" + Message.FromChannel, Message.FromChannel);
                 }
@@ -726,27 +739,31 @@ namespace twitch_irc_bot
                     var queueStatus = _commandHelpers.AddToQueue(Message, _riotApi, _db);
                     if(queueStatus == null)
                     {
-                        AddPrivMsgToQueue("Summoner name invalid.", Message.FromChannel);
+                        AddWhisperToQueue("Summoner name invalid.", Message.MsgSender);
                     }
                     else
                     {
                         AddPrivMsgToQueue(queueStatus, Message.FromChannel);
                     }
                 }
-                else if (Regex.Match(Message.Msg, @"^!qleave").Success || Regex.Match(Message.Msg, @"^!leaveq").Success)
+                else if (Regex.Match(Message.Msg, @"^!qleave$").Success || Regex.Match(Message.Msg, @"^!leaveq$").Success || Regex.Match(Message.Msg, @"^!queueleave$").Success || Regex.Match(Message.Msg, @"^!queleave$").Success)
                 {
                     if (_db.RemovePersonFromQueue(Message.FromChannel, Message.MsgSender))
                     {
-                        AddPrivMsgToQueue(Message.MsgSender + " you have been taken out of the queue", Message.FromChannel);
+                        AddWhisperToQueue("You have been taken out of the queue", Message.MsgSender);
+                        return;
                     }
+                        AddWhisperToQueue("You are not in the queue type \"!queue summoner_name\" to join the queue.", Message.MsgSender);
                 }
-                else if (Regex.Match(Message.Msg, @"^!qpos").Success || Regex.Match(Message.Msg, @"^!qpostion").Success || Regex.Match(Message.Msg, @"^!qspot").Success)
+                else if (Regex.Match(Message.Msg, @"^!qpos$").Success || Regex.Match(Message.Msg, @"^!qpostion$").Success || Regex.Match(Message.Msg, @"^!qspot$").Success)
                 {
                     var msgToBeSent = _commandHelpers.CheckPostion(Message, _db);
                     if (msgToBeSent != null)
                     {
-                        AddPrivMsgToQueue(msgToBeSent, Message.FromChannel);
+                        AddWhisperToQueue(msgToBeSent, Message.MsgSender);
+                        return;
                     }
+                        AddWhisperToQueue("You are not in the queue type \"!queue summoner_name\" to join the queue.", Message.MsgSender);
 
                 }
 

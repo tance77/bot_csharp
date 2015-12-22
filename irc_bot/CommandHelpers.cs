@@ -323,6 +323,16 @@ namespace twitch_irc_bot
             return "Something went wrong on my end.";
         }
 
+        public string RegToggle(TwitchMessage message, bool toggle, DatabaseFunctions db)
+        {
+            bool success = db.ToggleRegularOnOff(message, toggle);
+            if (success)
+            {
+                return toggle ? "Regulars are now on." : "Regulars are now off.";
+            }
+            return "Something went wrong on my end.";
+        }
+
 
         public string EmoteToggle(string channel, bool toggle, DatabaseFunctions db)
         {
@@ -420,8 +430,8 @@ namespace twitch_irc_bot
             var message = "";
             if (followersList.Count == 1)
             {
-                //message += followersList.First() + " thanks for following!";
-                message += "A new follower approaches " + followersList.First() + "!";
+                message += followersList.First() + " thanks for following!";
+                //message += "A new follower approaches " + followersList.First() + "!";
 
             }
             else
@@ -430,13 +440,13 @@ namespace twitch_irc_bot
                 {
                     if (item == followersList.Last())
                     {
-                        //message += "and " + item + ", thank you for following!";
-                        message += "and " + item + "!";
+                        message += "and " + item + ", thank you for following!";
+                        //message += "and " + item + "!";
                     }
                     else
                     {
-                        //message += item + ", ";
-                        message += "Multiple followers have appeared " + item + ", ";
+                        message += item + ", ";
+                        //message += "Multiple followers have appeared " + item + ", ";
                     }
                 }
             }
@@ -636,7 +646,7 @@ namespace twitch_irc_bot
 
         }
 
-        public List<string> SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel, string userType)
+        public List<string> SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel, string userType, TwitchMessage msg)
         {
             //Get multiple results
             //message user the results
@@ -657,7 +667,10 @@ namespace twitch_irc_bot
             {
                 if (userType != "mod")
                 {
-                    if (!db.RegularExist(fromChannel, messageSender)) return songList;
+                    if (db.GetRegularStatus(msg))
+                    {
+                        if (!db.RegularExist(fromChannel, messageSender)) return songList;
+                    }
                 }
                 var msgAry = message.Split(' ');
                 var queryString = "";
@@ -777,18 +790,23 @@ namespace twitch_irc_bot
         {
             var leagueQueue = db.GetQueuePostion(msg);
             var postion = 1;
+            var exists = false;
             if (leagueQueue != null && leagueQueue.Count != 0)
             {
-                var currentCount = leagueQueue.Count;
                 foreach (var person in leagueQueue)
                 {
                     if (person == msg.MsgSender)
                     {
+                        exists = true;
                         break;
                     }
                     postion++;
                 }
-                return msg.MsgSender + " you are number " + postion + " in queue.";
+                if (exists)
+                {
+                    return msg.MsgSender + " you are number " + postion + " in queue.";
+                }
+                return msg.MsgSender + " you are not in the queue type \"!queue summonername\" to join the queue"; 
             }
             return null;
         }

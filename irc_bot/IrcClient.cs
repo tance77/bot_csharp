@@ -82,8 +82,8 @@ namespace twitch_irc_bot
 				pointsTenTimer.AutoReset = true;
 				pointsTenTimer.Enabled = true;
 
-				var advertiseTimer = new Timer {Interval = 900000};
-				//900000 advertise timers in channels every 15 minutes
+                var advertiseTimer = new Timer { Interval = 1800000};
+				//900000 advertise timers in channels every 30 minutes
 				advertiseTimer.Elapsed += Advertise;
 				advertiseTimer.AutoReset = true;
 				advertiseTimer.Enabled = true;

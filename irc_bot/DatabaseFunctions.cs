@@ -1776,9 +1776,6 @@ namespace twitch_irc_bot
             }
         }
 
-
-
-
         public bool RemovePersonFromQueue(string fromChannel, string userToRemove)
         {
             try
@@ -1831,6 +1828,70 @@ namespace twitch_irc_bot
                 return false;
             }
         }
+
+        public bool GetRegularStatus(TwitchMessage msg)
+        {
+            var regularStatus = false;
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                        var command = new MySqlCommand("select * From Channels WHERE channel_name=@c", dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", msg.FromChannel);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                regularStatus = reader.GetBoolean(10);
+                            }
+                        }
+
+                    }
+
+                }
+                GC.Collect();
+                return regularStatus;
+            }
+
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n Error in Get Regular Status");
+                return false;
+            }
+
+        }
+        public bool ToggleRegularOnOff(TwitchMessage msg, bool toggle)
+        {
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                        var command = new MySqlCommand("UPDATE Channels SET reg_status=@r WHERE channel_name=@c", dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", msg.FromChannel);
+                        command.Parameters.AddWithValue("@r", toggle);
+                        command.ExecuteNonQuery();
+
+                    }
+
+                }
+                GC.Collect();
+                return true;
+            }
+
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n Error in Get Toggling Regular On Off");
+                return false;
+            }
+
+        }
+
 
 
 
