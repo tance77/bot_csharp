@@ -664,12 +664,12 @@ namespace twitch_irc_bot
 						_commandHelpers.RegToggle(Message, false, _db), Message.FromChannel);
 				}
 
-				else if (Regex.Match(Message.Msg, @"^!sron$").Success && Message.UserType == "mod")
+				else if (Regex.Match(Message.Msg, @"^!sr\son$").Success && Message.UserType == "mod")
 				{
 					AddPrivMsgToQueue(
 						_commandHelpers.SongRequestToggle(Message.FromChannel, true, _db), Message.FromChannel);
 				}
-				else if (Regex.Match(Message.Msg, @"^!sroff$").Success && Message.UserType == "mod")
+				else if (Regex.Match(Message.Msg, @"^!sr\soff$").Success && Message.UserType == "mod")
 				{
 					AddPrivMsgToQueue(
 						_commandHelpers.SongRequestToggle(Message.FromChannel, false, _db), Message.FromChannel);
