@@ -653,12 +653,12 @@ namespace twitch_irc_bot
 				//    AddMessageToMessageList("Timer added", FromChannel);
 				//    GC.KeepAlive(mytimer);
 				//}
-				else if (Regex.Match(Message.Msg, @"^!regon$").Success && Message.UserType == "mod")
+				else if (Regex.Match(Message.Msg, @"^!reg\son$").Success && Message.UserType == "mod")
 				{
 					AddPrivMsgToQueue(
 						_commandHelpers.RegToggle(Message, true, _db), Message.FromChannel);
 				}
-				else if (Regex.Match(Message.Msg, @"^!regoff$").Success && Message.UserType == "mod")
+				else if (Regex.Match(Message.Msg, @"^!reg\soff$").Success && Message.UserType == "mod")
 				{
 					AddPrivMsgToQueue(
 						_commandHelpers.RegToggle(Message, false, _db), Message.FromChannel);
