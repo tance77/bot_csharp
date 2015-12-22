@@ -674,22 +674,22 @@ namespace twitch_irc_bot
 					AddPrivMsgToQueue(
 						_commandHelpers.SongRequestToggle(Message.FromChannel, false, _db), Message.FromChannel);
 				}
-				else if (Regex.Match(Message.Msg, @"!allowascii\son").Success && Message.UserType == "mod")
+				else if (Regex.Match(Message.Msg, @"^!allowascii\son$").Success && Message.UserType == "mod")
 				{
 				    AddPrivMsgToQueue(
                         _commandHelpers.AsciiToggle(Message.FromChannel, true, _db), Message.FromChannel);
 				}
-                else if (Regex.Match(Message.Msg, @"!allowascii\soff").Success && Message.UserType == "mod")
+                else if (Regex.Match(Message.Msg, @"^!allowascii\soff$").Success && Message.UserType == "mod")
                 {
                     AddPrivMsgToQueue(
                         _commandHelpers.AsciiToggle(Message.FromChannel, false, _db), Message.FromChannel);
                 }
-                else if (Regex.Match(Message.Msg, @"!allowemotes\son").Success && Message.UserType == "mod")
+                else if (Regex.Match(Message.Msg, @"^!allowemotes\son$").Success && Message.UserType == "mod")
                 {
                     AddPrivMsgToQueue(
                         _commandHelpers.EmoteToggle(Message.FromChannel, true, _db), Message.FromChannel);
                 }
-                else if (Regex.Match(Message.Msg, @"!allowemotes\soff").Success && Message.UserType == "mod")
+                else if (Regex.Match(Message.Msg, @"^!allowemotes\soff$").Success && Message.UserType == "mod")
                 {
                     AddPrivMsgToQueue(
                         _commandHelpers.EmoteToggle(Message.FromChannel, false, _db), Message.FromChannel);
@@ -714,6 +714,19 @@ namespace twitch_irc_bot
 					Console.WriteLine(response.First());
 					AddPrivMsgToQueue(response.First(), Message.FromChannel);
 				}
+                else if (Regex.Match(Message.Msg, @"^!msr\s+").Success  &&
+					_db.CheckSongRequestStatus(Message.FromChannel) )
+                {
+                    var response = _commandHelpers.MobileSearchSong(Message, _db);
+                    if (!string.IsNullOrEmpty(response))
+                    {
+                        AddPrivMsgToQueue(Message.MsgSender + " " + response, Message.FromChannel);
+                    }
+                    else
+                    {
+                        AddPrivMsgToQueue(Message.MsgSender + "Song not Found", Message.FromChannel);
+                    }
+                }
 				else if (Regex.Match(Message.Msg, @"^!currentsong$").Success)
 				{
 					var song = _db.GetCurrentSong(Message.FromChannel);

@@ -646,6 +646,120 @@ namespace twitch_irc_bot
 
         }
 
+
+        public string MobileSearchSong(TwitchMessage msg, DatabaseFunctions db)
+        {
+            const string baseUrl = "https://api.spotify.com/v1";
+            var foundSong = "";
+            var songDuration = "";
+            var songAlbumUrl = "";
+            var songArtists = "";
+            var songUrl = "";
+            var songId = "";
+            var songTitle = "";
+            if (msg.Msg.StartsWith("!msr"))
+            {
+                if (msg.UserType != "mod")
+                {
+                    if (db.GetRegularStatus(msg))
+                    {
+                        if (!db.RegularExist(msg.FromChannel, msg.MsgSender)) return null;
+                    }
+                }
+                var msgAry = msg.Msg.Split(' ');
+                var queryString = "";
+
+
+                for (var i = 1; i < msgAry.Length; i++)
+                {
+                    queryString += msgAry[i] + " ";
+                }
+                queryString = queryString.Trim(' ');
+
+                //If we are searching for a track with words do below
+
+                    string requestUrl = baseUrl + "/search?type=track&offset=0&limit=20&market=US&q=" + queryString;
+
+
+                    var response = RequestJson(requestUrl);
+                    if (response == "400" || response == "401" || response == "404" || response == "429" ||
+                        response == "500" || response == "503")
+                    {
+                        return "song not found.";
+                    }
+
+                    JToken jsonArr = JObject.Parse(response).SelectToken("tracks").SelectToken("items");
+
+                    //grab the first result
+
+                    if (!jsonArr.HasValues)
+                        return "song not found.";
+
+                    var availableMarketsAry = jsonArr[0].SelectToken("available_markets");
+                    var validCountry = false;
+                    foreach (var country in availableMarketsAry)
+                    {
+                        if (country.ToString() != "US") continue;
+                        validCountry = true;
+                        break;
+                    }
+                    //not playable in us
+                    if (!validCountry) return "song not found.";
+
+                    songAlbumUrl =
+                        (jsonArr[0].SelectToken("album").SelectToken("images")[0].SelectToken("url")).ToString();
+                    var artistAry = jsonArr[0].SelectToken("artists").ToArray();
+                    songArtists = "";
+
+                    for (var i = 0; i < artistAry.Length; i++)
+                    {
+                        if (i == artistAry.Length - 1)
+                        {
+                            songArtists += artistAry[i].SelectToken("name");
+                        }
+                        else
+                        {
+                            songArtists += artistAry[i].SelectToken("name") + " and ";
+                        }
+                    }
+                    var miliseconds = Int32.Parse(jsonArr[0].SelectToken("duration_ms").ToString());
+
+                    var a = miliseconds/1000;
+                    var minutes = a/60;
+                    a = a%60;
+
+                    var seconds = a.ToString();
+
+                    if (a < 10)
+                    {
+                        seconds = "0" + a;
+                    }
+
+                    songDuration = minutes + ":" + seconds;
+
+                    songUrl = jsonArr[0].SelectToken("external_urls").SelectToken("spotify").ToString();
+                    songId = jsonArr[0].SelectToken("id").ToString();
+                    songTitle = jsonArr[0].SelectToken("name").ToString();
+
+                    foundSong = songTitle + " by " + songArtists + " was added to the playlist";
+                    Console.Write("\r\n" +
+                                  "ID " + songId + "\r\n" +
+                                  "Title " + songTitle + "\r\n" +
+                                  "Artists " + songArtists + "\r\n" +
+                                  "Album Url " + songAlbumUrl + "\r\n" +
+                                  "Duration " + songDuration + "\r\n" +
+                                  "Song Url " + songUrl + "\r\n" + "\r\n");
+
+                AddSongById(songId, db, msg.FromChannel, msg.MsgSender);
+
+                    return foundSong;
+        
+
+            }
+            return null;
+        }
+
+
         public List<string> SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel, string userType, TwitchMessage msg)
         {
             //Get multiple results
