@@ -407,6 +407,7 @@ namespace twitch_irc_bot
 
 				if (Regex.Match(Message.Msg, @"!commands").Success)
 				{
+				    if (Message.FromChannel == "sophiabot") return;
 					AddPrivMsgToQueue(
 						Message.MsgSender +
 						", the commands for this channel can be found here http://chinnbot.tv/commands?user=" +
@@ -481,6 +482,7 @@ namespace twitch_irc_bot
 				}
 				else if (Regex.Match(Message.Msg, @"!addcom").Success)
 				{
+                    if (Message.FromChannel == "sophiabot") return;
 					if (Message.UserType == "mod")
 					{
 						string response = _commandHelpers.AddCommand(Message.FromChannel, Message.Msg, _db);
@@ -492,6 +494,7 @@ namespace twitch_irc_bot
 				}
 				else if (Regex.Match(Message.Msg, @"!editcom").Success)
 				{
+                    if (Message.FromChannel == "sophiabot") return;
 					if (Message.UserType == "mod")
 					{
 						string response = _commandHelpers.EditCommand(Message.FromChannel, Message.Msg, _db);
@@ -503,6 +506,7 @@ namespace twitch_irc_bot
 				}
 				else if (Regex.Match(Message.Msg, @"!removecom").Success || Regex.Match(Message.Msg, @"!delcom").Success)
 				{
+                    if (Message.FromChannel == "sophiabot") return;
 					if (Message.UserType == "mod")
 					{
 						string response = _commandHelpers.RemoveCommand(Message.FromChannel, Message.Msg, _db);
@@ -698,12 +702,12 @@ namespace twitch_irc_bot
 				else if (Regex.Match(Message.Msg, @"^!sr\s+").Success &&
 					_db.CheckSongRequestStatus(Message.FromChannel) )
 				{
-					var response = _commandHelpers.SearchSong(Message.Msg, Message.MsgSender, _db,
-						Message.FromChannel, Message.UserType, Message);
+					var response = _commandHelpers.SearchSong(_db, Message, BlockingMessageQueue, BlockingWhisperQueue);
 				    if (response.Count == 0) return;
 					if (response.Count > 1)
 					{
-						Console.WriteLine(response.Count);
+                        //Console.WriteLine(response.Count);
+                        AddWhisperToQueue("______________________________", Message.MsgSender);
 						AddWhisperToQueue("Multiple results! What did you mean? Re-request with the track id.", Message.MsgSender);
 						foreach(var song in response){
 							AddWhisperToQueue(song, Message.MsgSender);

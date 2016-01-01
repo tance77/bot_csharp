@@ -436,7 +436,7 @@ namespace twitch_irc_bot
             }
             else
             {
-                foreach (string item in followersList)
+                foreach (var item in followersList)
                 {
                     if (item == followersList.Last())
                     {
@@ -465,20 +465,17 @@ namespace twitch_irc_bot
             return a == 0;
         }
 
-        public Dictionary<string, KeyValuePair<string,string>> SearchSongByName(string queryString)
+        public Dictionary<string, KeyValuePair<string,string>> SearchSongByName(string queryString, TwitchMessage message, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue )
         {
-            var songArtists = "";
-            var songId = "";
-            var songTitle = "";
-
             var foundSongs = new Dictionary<string, KeyValuePair<string,string>>() ;
 
-            Console.WriteLine(queryString);
+            //Console.WriteLine(queryString);
 
 
             var response = RequestJson(queryString);
             if (response == null)
             {
+                BlockingWhisperQueue.Add("PRIVMSG #jtv :/w " + message.MsgSender + " Spotify API is down please try again in a few minutes.");
                 return null;
             }
 
@@ -487,7 +484,10 @@ namespace twitch_irc_bot
             //grab the first result
 
             if (!jsonArr.HasValues)
+            {
+                BlockingWhisperQueue.Add("PRIVMSG #jtv :/w " + message.MsgSender + ", this song is not on Spotify.");
                 return null;
+            }
 
             var k = 0;
             foreach(var song in jsonArr){
@@ -503,11 +503,15 @@ namespace twitch_irc_bot
                     break;
                 }
                 //not playable in us
-                if (!validCountry) return null;
+                if (!validCountry)
+                {
+                    BlockingWhisperQueue.Add("PRIVMSG #jtv :/w " + message.MsgSender + " , this song is not available in the US.");
+                    return null;
+                }
 
-                songTitle = song.SelectToken("name").ToString();
-                songId = song.SelectToken("id").ToString();
-                songArtists = "";
+                var songTitle = song.SelectToken("name").ToString();
+                var songId = song.SelectToken("id").ToString();
+                var songArtists = "";
                 var artistAry = song.SelectToken("artists").ToArray();
 
                 for (var i = 0; i < artistAry.Length; i++)
@@ -542,14 +546,14 @@ namespace twitch_irc_bot
             }
         }
 
-        public void RemoveRegular(TwitchMessage Message, DatabaseFunctions db, IrcClient irc)
+        public void RemoveRegular(TwitchMessage message, DatabaseFunctions db, IrcClient irc)
         {
             if (irc.WhisperServer) return;
-            var userToRemove = Message.Msg.Split(' ')[2];
-            var success = db.RemoveRegular(Message.FromChannel, userToRemove);
+            var userToRemove = message.Msg.Split(' ')[2];
+            var success = db.RemoveRegular(message.FromChannel, userToRemove);
             if (success)
             {
-                irc.AddPrivMsgToQueue(userToRemove + " " + "is no longer a regular", Message.FromChannel);
+                irc.AddPrivMsgToQueue(userToRemove + " " + "is no longer a regular", message.FromChannel);
             }
         }
 
@@ -574,12 +578,12 @@ namespace twitch_irc_bot
             if (response == "400" || response == "401" || response == "404" || response == "429" ||
                     response == "500" || response == "503")
             {
-                return "song not found.";
+                return "Spotify API is down please try again in a few minutes.";
             }
             JToken jsonArr = JObject.Parse(response);
             if (!jsonArr.HasValues)
             {
-                return "song not found.";
+                return ", Song not found on Spotify.";
             }
 
             var availableMarketsAry = jsonArr.SelectToken("available_markets");
@@ -591,7 +595,7 @@ namespace twitch_irc_bot
                 break;
             }
             //not playable in us
-            if (!validCountry) return "song not found.";
+            if (!validCountry) return ", this song is not available in the US.";
 
             songAlbumUrl = jsonArr.SelectToken("album").SelectToken("images")[0].SelectToken("url").ToString();
             var artistAry = jsonArr.SelectToken("artists").ToArray();
@@ -627,14 +631,14 @@ namespace twitch_irc_bot
             songId = jsonArr.SelectToken("id").ToString();
             songTitle = jsonArr.SelectToken("name").ToString();
 
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.Write("\r\n" +
-                              "ID " + songId + "\r\n" +
-                              "Title " + songTitle + "\r\n" +
-                              "Artists " + songArtists + "\r\n" +
-                              "Album Url " + songAlbumUrl + "\r\n" +
-                              "Duration " + songDuration + "\r\n" +
-                              "Song Url " + songUrl + "\r\n" + "\r\n");
+                //Console.ForegroundColor = ConsoleColor.DarkGreen;
+                //Console.Write("\r\n" +
+                //              "ID " + songId + "\r\n" +
+                //              "Title " + songTitle + "\r\n" +
+                //              "Artists " + songArtists + "\r\n" +
+                //              "Album Url " + songAlbumUrl + "\r\n" +
+                //              "Duration " + songDuration + "\r\n" +
+                //              "Song Url " + songUrl + "\r\n" + "\r\n");
                 foundSong = songTitle + " by " + songArtists + " was added to the playlist";
                 Console.ForegroundColor = ConsoleColor.White;
             var succuess = db.AddSong(fromChannel, messageSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
@@ -650,10 +654,6 @@ namespace twitch_irc_bot
         public string MobileSearchSong(TwitchMessage msg, DatabaseFunctions db)
         {
             const string baseUrl = "https://api.spotify.com/v1";
-            var foundSong = "";
-            var songDuration = "";
-            var songAlbumUrl = "";
-            var songArtists = "";
             var songUrl = "";
             var songId = "";
             var songTitle = "";
@@ -672,7 +672,17 @@ namespace twitch_irc_bot
 
                 for (var i = 1; i < msgAry.Length; i++)
                 {
-                    queryString += msgAry[i] + " ";
+                    if (msgAry[i] != "-")
+                    {
+                        if (msgAry[i].Contains("-"))
+                        {
+                            queryString += msgAry[i].Trim('-');
+                        }
+                        else
+                        {
+                            queryString += msgAry[i] + " ";
+                        }
+                    }
                 }
                 queryString = queryString.Trim(' ');
 
@@ -685,7 +695,7 @@ namespace twitch_irc_bot
                     if (response == "400" || response == "401" || response == "404" || response == "429" ||
                         response == "500" || response == "503")
                     {
-                        return "song not found.";
+                        return "Spotify API is down please try again in a few minutes.";
                     }
 
                     JToken jsonArr = JObject.Parse(response).SelectToken("tracks").SelectToken("items");
@@ -693,7 +703,7 @@ namespace twitch_irc_bot
                     //grab the first result
 
                     if (!jsonArr.HasValues)
-                        return "song not found.";
+                        return ", I couldn't find that song on Spotify.";
 
                     var availableMarketsAry = jsonArr[0].SelectToken("available_markets");
                     var validCountry = false;
@@ -704,12 +714,11 @@ namespace twitch_irc_bot
                         break;
                     }
                     //not playable in us
-                    if (!validCountry) return "song not found.";
+                    if (!validCountry) return  ", this song isn't avialable in NA.";
 
-                    songAlbumUrl =
-                        (jsonArr[0].SelectToken("album").SelectToken("images")[0].SelectToken("url")).ToString();
+                    var songAlbumUrl = (jsonArr[0].SelectToken("album").SelectToken("images")[0].SelectToken("url")).ToString();
                     var artistAry = jsonArr[0].SelectToken("artists").ToArray();
-                    songArtists = "";
+                    var songArtists = "";
 
                     for (var i = 0; i < artistAry.Length; i++)
                     {
@@ -735,20 +744,20 @@ namespace twitch_irc_bot
                         seconds = "0" + a;
                     }
 
-                    songDuration = minutes + ":" + seconds;
+                    var songDuration = minutes + ":" + seconds;
 
                     songUrl = jsonArr[0].SelectToken("external_urls").SelectToken("spotify").ToString();
                     songId = jsonArr[0].SelectToken("id").ToString();
                     songTitle = jsonArr[0].SelectToken("name").ToString();
 
-                    foundSong = songTitle + " by " + songArtists + " was added to the playlist";
-                    Console.Write("\r\n" +
-                                  "ID " + songId + "\r\n" +
-                                  "Title " + songTitle + "\r\n" +
-                                  "Artists " + songArtists + "\r\n" +
-                                  "Album Url " + songAlbumUrl + "\r\n" +
-                                  "Duration " + songDuration + "\r\n" +
-                                  "Song Url " + songUrl + "\r\n" + "\r\n");
+                    var foundSong = songTitle + " by " + songArtists + " was added to the playlist";
+                    //Console.Write("\r\n" +
+                    //              "ID " + songId + "\r\n" +
+                    //              "Title " + songTitle + "\r\n" +
+                    //              "Artists " + songArtists + "\r\n" +
+                    //              "Album Url " + songAlbumUrl + "\r\n" +
+                    //              "Duration " + songDuration + "\r\n" +
+                    //              "Song Url " + songUrl + "\r\n" + "\r\n");
 
                 AddSongById(songId, db, msg.FromChannel, msg.MsgSender);
 
@@ -760,7 +769,7 @@ namespace twitch_irc_bot
         }
 
 
-        public List<string> SearchSong(string message, string messageSender, DatabaseFunctions db, string fromChannel, string userType, TwitchMessage msg)
+        public List<string> SearchSong(DatabaseFunctions db, TwitchMessage msg, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue  )
         {
             //Get multiple results
             //message user the results
@@ -777,22 +786,32 @@ namespace twitch_irc_bot
             var songId = "";
             var songTitle = "";
             var songList = new List<string>();
-            if (message.StartsWith("!songrequest ") || message.StartsWith("!sr "))
+            if (msg.Msg.StartsWith("!songrequest ") || msg.Msg.StartsWith("!sr "))
             {
-                if (userType != "mod")
+                if (msg.UserType != "mod")
                 {
                     if (db.GetRegularStatus(msg))
                     {
-                        if (!db.RegularExist(fromChannel, messageSender)) return songList;
+                        if (!db.RegularExist(msg.FromChannel, msg.MsgSender)) return songList;
                     }
                 }
-                var msgAry = message.Split(' ');
+                var msgAry = msg.Msg.Split(' ');
                 var queryString = "";
 
 
                 for (var i = 1; i < msgAry.Length; i++)
                 {
-                    queryString += msgAry[i] + " ";
+                    if (msgAry[i] != "-")
+                    {
+                        if (msgAry[i].Contains("-"))
+                        {
+                            queryString += msgAry[i].Trim('-');
+                        }
+                        else
+                        {
+                            queryString += msgAry[i] + " ";
+                        }
+                    }
                 }
                 queryString = queryString.Trim(' ');
 
@@ -801,9 +820,9 @@ namespace twitch_irc_bot
                 const string pattern =
                     @"https:\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-]+)(&(amp;)?[\w\?=]*)?";
 
-                if (Regex.Match(message, pattern).Success)
+                if (Regex.Match(msg.Msg, pattern).Success)
                 {
-                    songList.Add("sorry we are using Spotify not YouTube.");
+                    songList.Add("Sorry we are using Spotify not YouTube.");
                     return songList;
                 }
 
@@ -821,17 +840,17 @@ namespace twitch_irc_bot
 
                 //don't allow request by album
                 else if (queryString.Length == 36 && queryString.Contains("spotify:album:") ||
-                        Regex.Match(message, @"^https:\/\/.*com\/album\/").Success)
+                        Regex.Match(msg.Msg, @"^https:\/\/.*com\/album\/").Success)
                 {
-                    songList.Add("sorry you can't request a whole album.");
+                    songList.Add("Sorry you can't request a whole album.");
                     return songList;
                 }
 
                 //don't allow request by artist
                 else if (queryString.Length == 37 && queryString.Contains("spotify:artist:") ||
-                        Regex.Match(message, @"^https:\/\/.*com\/artist\/").Success)
+                        Regex.Match(msg.Msg, @"^https:\/\/.*com\/artist\/").Success)
                 {
-                    songList.Add("Sorry you can't request an artist");
+                    songList.Add("Sorry you can't request an artist.");
                     return songList;
                 }
 
@@ -840,16 +859,16 @@ namespace twitch_irc_bot
                 //track ID only look up by track id
                 if (!queryString.Contains(" ") && queryString.Length == 22)
                 {
-                    songList.Add(AddSongById(queryString, db, fromChannel, messageSender));
+                    songList.Add(AddSongById(queryString, db, msg.FromChannel, msg.MsgSender));
                     return songList;
                 }
                 //If we are searching for a track with words do below
 
                 string requestUrl = baseUrl + "/search?type=track&offset=0&limit=20&market=US&q=" + queryString;
-                var multipleResults = SearchSongByName(requestUrl);
+                var multipleResults = SearchSongByName(requestUrl, msg, BlockingMessageQueue, BlockingWhisperQueue);
                 if (multipleResults == null || multipleResults.Count == 0)
                 {
-                    songList.Add("Song not found.");
+                    //songList.Add("Song not found.");
                     return songList;    
                 }
 
@@ -859,16 +878,16 @@ namespace twitch_irc_bot
 
                     foreach (var song in multipleResults)
                     {
-                        Console.WriteLine(song);
+                        //Console.WriteLine(song);
                         songList.Add(song.Value.Key + " - " + song.Value.Value + "" +
                                 " [Track Id]: => " + song.Key);
                     }
                     return songList;
                 }
-                songList.Add(AddSongById(multipleResults.First().Key, db, fromChannel, messageSender));
+                songList.Add(AddSongById(multipleResults.First().Key, db, msg.FromChannel, msg.MsgSender));
                 return songList;    
             }
-            var succuess = db.AddSong(fromChannel, messageSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
+            var succuess = db.AddSong(msg.FromChannel, msg.MsgSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
             if (succuess)
             {
                 songList.Add(foundSong);
@@ -880,7 +899,7 @@ namespace twitch_irc_bot
 
         public string AddToQueue(TwitchMessage msg, RiotApi riotApi, DatabaseFunctions db)
         {
-            var summonerName = msg.Msg.Split(' ')[1];
+            var summonerName = msg.Msg.Substring(msg.Msg.IndexOf(' ') + 1);
             var postion = 1;
             if (riotApi.GetSummonerId(summonerName) == null) return null;
             var leagueQueue = db.AddToQueue(msg, summonerName);

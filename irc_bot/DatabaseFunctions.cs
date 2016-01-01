@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using MySql.Data.MySqlClient;
 
@@ -1202,12 +1203,18 @@ namespace twitch_irc_bot
                 catch
                     (MySqlException e)
                 {
+                    var st = new StackTrace(e, true);
+                    var frame = st.GetFrame(0);
                     Console.Write(e + "\r\n");
+                    Console.Write("Error in ParseRecentFollowers \r\n" + "Line number: " + frame.GetFileLineNumber());
                     return null;
                 }
                 catch (TimeoutException e)
                 {
+                    var st = new StackTrace(e, true);
+                    var frame = st.GetFrame(0);
                     Console.Write(e + "\r\n");
+                    Console.Write("Error in ParseRecentFollowers \r\n" + "Line number: " + frame.GetFileLineNumber());
                     return null;
                 }
             }

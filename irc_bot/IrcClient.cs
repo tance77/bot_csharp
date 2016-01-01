@@ -76,11 +76,10 @@ namespace twitch_irc_bot
 				followerTimer.AutoReset = true;
 				followerTimer.Enabled = true;
 
-				var pointsTenTimer = new Timer {Interval = 600000}; //1 coin every 10 minutes
-				//var pointsTenTimer = new Timer { Interval = 20 }; //1 coin every 10 minutes
-				pointsTenTimer.Elapsed += AddPointsTen;
-				pointsTenTimer.AutoReset = true;
-				pointsTenTimer.Enabled = true;
+                //var pointsTenTimer = new Timer { Interval = 600000 }; //1 coin every 10 minutes
+                //pointsTenTimer.Elapsed += AddPointsTen;
+                //pointsTenTimer.AutoReset = true;
+                //pointsTenTimer.Enabled = true;
 
                 var advertiseTimer = new Timer { Interval = 1800000};
 				//900000 advertise timers in channels every 30 minutes
@@ -114,14 +113,14 @@ namespace twitch_irc_bot
 			if (WhisperServer) {
 				while (RateLimit < 20 && BlockingWhisperQueue.Count > 0) {
 						SendIrcMessage (BlockingWhisperQueue.Take ());
-						Thread.Sleep (1000);
+						Thread.Sleep (400);
 				}
 			}
 				else{
 			while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
 			{
 				SendIrcMessage(BlockingMessageQueue.Take());
-				Thread.Sleep(1000);
+				Thread.Sleep(400);
 			}
 				}
 		}
@@ -161,8 +160,14 @@ namespace twitch_irc_bot
 				{
 					if (!WhisperServer)
 					{
+					    if (channel == "sophiabot")
+					    {
 
-						AddPrivMsgToQueue(message, channel);
+					    }
+					    else
+					    {
+					        AddPrivMsgToQueue(message, channel);
+					    }
 					}
 				}
 			}
@@ -325,7 +330,7 @@ namespace twitch_irc_bot
 						continue;
 					if (!buf.StartsWith ("PING ")) { //If its not ping lets treat it as another message
 						if (WhisperServer) {
-						Console.Write (buf + "\r\n");
+                        //Console.Write (buf + "\r\n");
 							continue;
 						}
                         Console.Write(buf + "\r\n");
