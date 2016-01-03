@@ -202,8 +202,19 @@ namespace twitch_irc_bot
 	    public bool CheckUrls(TwitchMessage msg)
 	    {
 	        if (_db.UrlStatus(msg.FromChannel) || _db.RegularExist(msg.FromChannel, msg.MsgSender)) return false;
-			if (!Regex.Match(msg.Msg, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)")
-				.Success || msg.UserType == "mod") return false;
+            var msgParts = msg.Msg.Split(' ');
+            var linkDetected = false;
+            foreach (var a in msgParts)
+            {
+                if (Regex.IsMatch(a,
+                    @"^(?!.{256})(?:[a-z0-9][a-z0-9-]{0,61}[a-z0-9]\.|[a-z0-9]\.)+(?:[a-z]{2}|AERO|ARPA|ASIA|BIZ|CAT|COM|COOP|EDU|GOV|INFO|INT|JOBS|MIL|MOBI|MUSEUM|NAME|NET|ORG|POST|PRO|TEL|TRAVEL|XXX)$",
+                    RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace))
+                {
+                    linkDetected = true;
+                    break;
+                }
+            }
+			if (!linkDetected || msg.UserType == "mod") return false;
 			if (_db.PermitExist(msg.FromChannel, msg.MsgSender) && _db.CheckPermitStatus(msg.FromChannel, msg.MsgSender))
 				//if they exist in permit and if permit has not expired
 				//if it got here that means it was a url and they were permitted
@@ -237,9 +248,19 @@ namespace twitch_irc_bot
 					return true;
 				}
 				//match url
-				if (
-					Regex.Match(msg.Msg, @"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)")
-					.Success)
+                var msgParts = msg.Msg.Split(' ');
+                var linkDetected = false;
+                foreach (var a in msgParts)
+                {
+                    if (Regex.IsMatch(a,
+                        @"^(?!.{256})(?:[a-z0-9][a-z0-9-]{0,61}[a-z0-9]\.|[a-z0-9]\.)+(?:[a-z]{2}|AERO|ARPA|ASIA|BIZ|CAT|COM|COOP|EDU|GOV|INFO|INT|JOBS|MIL|MOBI|MUSEUM|NAME|NET|ORG|POST|PRO|TEL|TRAVEL|XXX)$",
+                        RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace))
+                    {
+                        linkDetected = true;
+                        break;
+                    }
+                }
+				if (linkDetected)
 				{
 					AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 1", msg.FromChannel);
                     AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 1", msg.FromChannel);
