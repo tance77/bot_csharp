@@ -155,21 +155,17 @@ namespace twitch_irc_bot
 			if (channelList == null) return;
 			foreach (string channel in channelList)
 			{
-				string message = _commandHelpers.AssembleFollowerList(channel, _db, _twitchApi);
-				if (message != null)
-				{
-					if (!WhisperServer)
-					{
-					    if (channel == "sophiabot")
-					    {
-
-					    }
-					    else
-					    {
-					        AddPrivMsgToQueue(message, channel);
-					    }
-					}
-				}
+			    if (_db.GetAnnounceFollowerStatus(channel)) //if announce followers is set to true.
+			    {
+			        string message = _commandHelpers.AssembleFollowerList(channel, _db, _twitchApi);
+			        if (message != null)
+			        {
+			            if (!WhisperServer)
+			            {
+			                    AddPrivMsgToQueue(message, channel);
+			            }
+			        }
+			    }
 			}
 		}
 

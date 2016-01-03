@@ -718,6 +718,7 @@ namespace twitch_irc_bot
 					Console.WriteLine(response.First());
 					AddPrivMsgToQueue(response.First(), Message.FromChannel);
 				}
+
                 else if (Regex.Match(Message.Msg, @"^!msr\s+").Success  &&
 					_db.CheckSongRequestStatus(Message.FromChannel) )
                 {
@@ -736,6 +737,12 @@ namespace twitch_irc_bot
 					var song = _db.GetCurrentSong(Message.FromChannel);
 					AddPrivMsgToQueue(song, Message.FromChannel);
 				}
+                else if (Regex.Match(Message.Msg, @"^!wrongsong$").Success  || Regex.Match(Message.Msg, @"^!ws$").Success &&_db.CheckSongRequestStatus(Message.FromChannel))
+                {
+                    var response = _commandHelpers.RemoveUserLastSong(_db, Message);
+                    if (string.IsNullOrEmpty(response)) return;
+                    AddWhisperToQueue(response, Message.FromChannel);
+                }
 				else if ((Regex.Match(Message.Msg, @"!songlist").Success ||
 					Regex.Match(Message.Msg, @"!sl").Success ||
 					Regex.Match(Message.Msg, @"!playlist").Success) 

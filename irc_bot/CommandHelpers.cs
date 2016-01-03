@@ -494,20 +494,20 @@ namespace twitch_irc_bot
                 if(k >= 3){
                     break;
                 }
-                var availableMarketsAry = song.SelectToken("available_markets");
-                var validCountry = false;
-                foreach (var country in availableMarketsAry)
-                {
-                    if (country.ToString() != "US") continue;
-                    validCountry = true;
-                    break;
-                }
-                //not playable in us
-                if (!validCountry)
-                {
-                    BlockingWhisperQueue.Add("PRIVMSG #jtv :/w " + message.MsgSender + " , this song is not available in the US.");
-                    return null;
-                }
+                //var availableMarketsAry = song.SelectToken("available_markets");
+                //var validCountry = false;
+                //foreach (var country in availableMarketsAry)
+                //{
+                //    if (country.ToString() != "US") continue;
+                //    validCountry = true;
+                //    break;
+                //}
+                ////not playable in us
+                //if (!validCountry)
+                //{
+                //    BlockingWhisperQueue.Add("PRIVMSG #jtv :/w " + message.MsgSender + " , this song is not available in the US.");
+                //    return null;
+                //}
 
                 var songTitle = song.SelectToken("name").ToString();
                 var songId = song.SelectToken("id").ToString();
@@ -705,16 +705,18 @@ namespace twitch_irc_bot
                     if (!jsonArr.HasValues)
                         return ", I couldn't find that song on Spotify.";
 
-                    var availableMarketsAry = jsonArr[0].SelectToken("available_markets");
-                    var validCountry = false;
-                    foreach (var country in availableMarketsAry)
-                    {
-                        if (country.ToString() != "US") continue;
-                        validCountry = true;
-                        break;
-                    }
-                    //not playable in us
-                    if (!validCountry) return  ", this song isn't avialable in NA.";
+                    //var availableMarketsAry = jsonArr[0].SelectToken("available_markets");
+                    //var validCountry = false;
+                    //foreach (var country in availableMarketsAry)
+                    //{
+                    //    if (country.ToString() != "US") continue;
+                    //    validCountry = true;
+                    //    break;
+                    //}
+                    ////not playable in us
+                    //if (!validCountry) return  ", this song isn't avialable in NA.";
+                    Console.WriteLine(jsonArr[0].SelectToken("artists").ToString());
+                    Console.WriteLine(jsonArr[0].SelectToken("name").ToString());
 
                     var songAlbumUrl = (jsonArr[0].SelectToken("album").SelectToken("images")[0].SelectToken("url")).ToString();
                     var artistAry = jsonArr[0].SelectToken("artists").ToArray();
@@ -759,9 +761,8 @@ namespace twitch_irc_bot
                     //              "Duration " + songDuration + "\r\n" +
                     //              "Song Url " + songUrl + "\r\n" + "\r\n");
 
-                AddSongById(songId, db, msg.FromChannel, msg.MsgSender);
+                return AddSongById(songId, db, msg.FromChannel, msg.MsgSender);
 
-                    return foundSong;
         
 
             }
@@ -895,6 +896,12 @@ namespace twitch_irc_bot
             }
             songList.Add("song already exists or something went wrong on my end.");
             return songList;
+        }
+
+        public string RemoveUserLastSong(DatabaseFunctions db, TwitchMessage msg)
+        {
+                    var result = db.RemoveUserLastSong(msg.FromChannel, msg.MsgSender);
+                    return !string.IsNullOrEmpty(result) ? result : null;
         }
 
         public string AddToQueue(TwitchMessage msg, RiotApi riotApi, DatabaseFunctions db)

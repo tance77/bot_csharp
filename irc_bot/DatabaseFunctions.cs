@@ -1471,7 +1471,7 @@ namespace twitch_irc_bot
 
             }
         }
-
+        
 
         public bool RemoveRegular(string fromChannel, string userToRemove)
         {
@@ -1642,6 +1642,52 @@ namespace twitch_irc_bot
                 return song;
             }
         }
+
+        public string RemoveUserLastSong(string fromChannel, string userToRemove)
+        {
+            try
+            {
+                var songName = "";
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (var inDb = new MySqlCommand("SELECT * FROM Songs where channel_name=@c and requested_by=@r ORDER BY id DESC LIMIT 1;", dbConnection))
+                    {
+                        inDb.Parameters.AddWithValue("@c", fromChannel);
+                        inDb.Parameters.AddWithValue("@r", userToRemove);
+                        using (var reader = inDb.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                songName = reader.GetString(6);
+                                songName += " by ";
+                                songName += reader.GetString(5);
+                                songName += " was removed from the playlist";
+                            }
+                        }
+                    }
+                    GC.Collect();
+                }
+                using (var dbConnection = new MySqlConnection(ConnectionString)){
+                    dbConnection.Open();
+                    using (var inDb = new MySqlCommand("delete from Songs where channel_name=@c and requested_by=@r ORDER BY id DESC LIMIT 1;", dbConnection))
+                    {
+                        inDb.Parameters.AddWithValue("@c", fromChannel);
+                        inDb.Parameters.AddWithValue("@r", userToRemove);
+                        inDb.ExecuteNonQuery();
+                    }
+                }
+                GC.Collect();
+                return songName;
+            }
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return null;
+            }
+        }
+
+
         public List<string> GetListOfActiveChannels()
         {
             var listOfActiveChannels = new List<string>();
@@ -1835,6 +1881,43 @@ namespace twitch_irc_bot
                 return false;
             }
         }
+
+
+        public bool GetAnnounceFollowerStatus(string fromChannel)
+        {
+            var announceFollowerStatus = false;
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                        var command = new MySqlCommand("select * From Channels WHERE channel_name=@c", dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", fromChannel);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                announceFollowerStatus = reader.GetBoolean(11);
+                            }
+                        }
+
+                    }
+
+                }
+                GC.Collect();
+                return announceFollowerStatus;
+            }
+
+            catch (MySqlException e)
+            {
+                Console.Write(e + "\r\n Error in Get Regular Status");
+                return false;
+            }
+        }
+
+
 
         public bool GetRegularStatus(TwitchMessage msg)
         {
