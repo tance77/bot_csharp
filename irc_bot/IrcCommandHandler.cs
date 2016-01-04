@@ -762,7 +762,7 @@ namespace twitch_irc_bot
                 {
                     var response = _commandHelpers.RemoveUserLastSong(_db, Message);
                     if (string.IsNullOrEmpty(response)) return;
-                    AddWhisperToQueue(response, Message.FromChannel);
+                    AddWhisperToQueue(response, Message.MsgSender);
                 }
 				else if ((Regex.Match(Message.Msg, @"!songlist").Success ||
 					Regex.Match(Message.Msg, @"!sl").Success ||
