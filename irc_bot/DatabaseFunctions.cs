@@ -91,6 +91,13 @@ namespace twitch_irc_bot
                         cmd.ExecuteNonQuery();
                     }
 
+                    using (var cmd = new MySqlCommand("INSERT INTO FollowerNotifications(channel_name)Values(@c)", dbConnection))
+                    {
+                        cmd.Parameters.AddWithValue("@c", channel);
+                        cmd.ExecuteNonQuery();
+                    }
+
+
                     using (var cmd =
                             new MySqlCommand(
                                 "INSERT INTO League(channel_name,summoner_name,summoner_id)VALUES(@channel,@summoner,@summoner_id)",
@@ -99,6 +106,11 @@ namespace twitch_irc_bot
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.Parameters.AddWithValue("@summoner", null);
                         cmd.Parameters.AddWithValue("@summoner_id", null);
+                        cmd.ExecuteNonQuery();
+                    }
+                    using (var cmd =new MySqlCommand("INSERT INTO FollowerNotifications(channel_name)VALUES(@channel)",dbConnection))
+                    {
+                        cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.ExecuteNonQuery();
                     }
                     return true;
@@ -140,13 +152,13 @@ namespace twitch_irc_bot
                         cmd.ExecuteNonQuery();
                     }
                     using (
-                            var cmd = new MySqlCommand("delete from Spotify where channel_name=@channel", dbConnection))
+                            var cmd = new MySqlCommand("delete from League WHERE channel_name=@channel", dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.ExecuteNonQuery();
                     }
                     using (
-                            var cmd = new MySqlCommand("delete from League WHERE channel_name=@channel", dbConnection))
+                    var cmd = new MySqlCommand("delete from FollowerNotifications WHERE channel_name=@channel", dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.ExecuteNonQuery();
