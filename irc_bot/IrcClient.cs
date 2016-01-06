@@ -321,7 +321,7 @@ namespace twitch_irc_bot
 			BlockingWhisperQueue = wq;
 			while (true) {
 				try {
-					var buf = _inputStream.ReadLine ();
+					var buf = _inputStream.ReadLine();
 					if (buf == null)
 						continue;
 					if (!buf.StartsWith ("PING ")) { //If its not ping lets treat it as another message

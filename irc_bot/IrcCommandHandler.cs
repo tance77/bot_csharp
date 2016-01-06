@@ -170,6 +170,7 @@ namespace twitch_irc_bot
 
 	    public bool CheckAscii(TwitchMessage msg)
 	    {
+            //Return True = Timeout
 	        if (msg.UserType == "mod")
 	        {
                 //Console.Write("I'm a mod**************************");
@@ -182,10 +183,10 @@ namespace twitch_irc_bot
 	        var count = 0;
 	        foreach (char c in msg.Msg)
 	        {
-	            if (c > 127)
-	            {
-	                count ++;
-	            }
+	                if (c > 127)
+	                {
+	                    count ++;
+	                }
 	        }
             //If the ascii count in this message was greater than the channel count time that user out
 		    if (count > _db.CheckAsciiCount(Message.FromChannel))

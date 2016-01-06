@@ -77,7 +77,7 @@ namespace twitch_irc_bot
                     }
                     using (var cmd =
                             new MySqlCommand(
-                                "INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,song_request,gameq, ascii_count, emote_count)VALUES(@channel,@urls,@dicksize,@gg,@song_request,@gameq, @ascii, @emote)",
+                                "INSERT INTO Channels(channel_name,allow_urls,dicksize,gg,song_request,gameq) VALUES(@channel,@urls,@dicksize,@gg,@song_request,@gameq)",
                                 dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
@@ -86,8 +86,6 @@ namespace twitch_irc_bot
                         cmd.Parameters.AddWithValue("@gg", false);
                         cmd.Parameters.AddWithValue("@song_request", false);
                         cmd.Parameters.AddWithValue("@gameq", false);
-                        cmd.Parameters.AddWithValue("@ascii", 10);
-                        cmd.Parameters.AddWithValue("@emote", 10);
                         cmd.ExecuteNonQuery();
                     }
 
