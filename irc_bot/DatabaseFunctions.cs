@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using MySql.Data.MySqlClient;
@@ -609,6 +610,43 @@ namespace twitch_irc_bot
         }
 
 
+
+        public bool CheckQueueStatus(string channel)
+        {
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                            var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
+                                dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                var result = false;
+                                result =  reader.GetBoolean(5);
+                                return result;
+                            }
+                            
+                        }
+                        GC.Collect();
+                        return false;
+                    }
+                }
+            }
+            catch
+                (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return false;
+            }
+        }
+
+
         public string SummonerStatus(string channel)
         {
             try
@@ -838,6 +876,34 @@ namespace twitch_irc_bot
                 }
             }
         }
+
+
+        public bool QueueToggle(string channel, bool toggle)
+        {
+            using (var dbConnection = new MySqlConnection(ConnectionString))
+            {
+                dbConnection.Open();
+                using (
+                        var command = new MySqlCommand("UPDATE Channels SET gameq=@g WHERE channel_name=@c",
+                            dbConnection))
+                {
+                    try
+                    {
+                        command.Parameters.AddWithValue("@c", channel);
+                        command.Parameters.AddWithValue("@g", toggle);
+                        command.ExecuteNonQuery();
+
+                        return true;
+                    }
+                    catch (MySqlException e)
+                    {
+                        Console.Write(e + "\r\n");
+                        return false;
+                    }
+                }
+            }
+        }
+
         public bool SongRequestToggle(string channel, bool toggle)
         {
             using (var dbConnection = new MySqlConnection(ConnectionString))
@@ -1059,7 +1125,7 @@ namespace twitch_irc_bot
             }
         }
 
-        public Dictionary<string, List<string>> GetTimmedMessages()
+        public Dictionary<string, List<string>> GetTimers(int time)
         {
             var timedMessages = new Dictionary<string, List<string>>();
             try
@@ -1068,21 +1134,23 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                            var command =
-                            new MySqlCommand("SELECT * FROM TimedMessages", dbConnection))
+                            var command = new MySqlCommand("getTimers", dbConnection))
                     {
+
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@t", time);
                         using (MySqlDataReader reader = command.ExecuteReader())
                         {
                             while (reader.Read())
                             {
-                                if (timedMessages.ContainsKey(reader.GetString(0)))
+                                if (timedMessages.ContainsKey(reader.GetString(1)))
                                 {
-                                    timedMessages[reader.GetString(0)].Add(reader.GetString(1));
+                                    timedMessages[reader.GetString(1)].Add(reader.GetString(2));
                                 }
                                 else
                                 {
-                                    timedMessages.Add(reader.GetString(0), new List<string>());
-                                    timedMessages[reader.GetString(0)].Add(reader.GetString(1));
+                                    timedMessages.Add(reader.GetString(1), new List<string>());
+                                    timedMessages[reader.GetString(1)].Add(reader.GetString(2));
                                 }
                             }
                         }

@@ -80,12 +80,40 @@ namespace twitch_irc_bot
                 //pointsTenTimer.Elapsed += AddPointsTen;
                 //pointsTenTimer.AutoReset = true;
                 //pointsTenTimer.Enabled = true;
+                
+                //Timers for Timed Messages every 30,25,20,15,10, 5 minutes
 
-                var advertiseTimer = new Timer { Interval = 1800000};
-				//900000 advertise timers in channels every 30 minutes
-				advertiseTimer.Elapsed += Advertise;
-				advertiseTimer.AutoReset = true;
-				advertiseTimer.Enabled = true;
+                var advertiseThirtyTimer = new Timer { Interval = 1800000 };
+                advertiseThirtyTimer.Elapsed += AdvertiseThirty;
+                advertiseThirtyTimer.AutoReset = true;
+                advertiseThirtyTimer.Enabled = true;
+
+
+                var advertiseTwentyFive = new Timer { Interval = 1500000 };
+                advertiseTwentyFive.Elapsed += AdvertiseTwentyFive;
+                advertiseTwentyFive.AutoReset = true;
+                advertiseTwentyFive.Enabled = true;
+
+                var advertiseTwenty = new Timer { Interval = 1200000 };
+                advertiseTwenty.Elapsed += AdvertiseTwenty;
+                advertiseTwenty.AutoReset = true;
+                advertiseTwenty.Enabled = true;
+
+                var advertiseFifteen = new Timer { Interval = 900000 };
+                advertiseFifteen.Elapsed += AdvertiseFifteen;
+                advertiseFifteen.AutoReset = true;
+                advertiseFifteen.Enabled = true;
+
+                var advertiseTen = new Timer { Interval = 600000 };
+                advertiseTen.Elapsed += AdvertiseTen;
+                advertiseTen.AutoReset = true;
+                advertiseTen.Enabled = true;
+
+                var advertiseFive = new Timer { Interval = 300000 };
+                advertiseFive.Elapsed += AdvertiseFive;
+                advertiseFive.AutoReset = true;
+                advertiseFive.Enabled = true;
+
 
 			}
 
@@ -125,9 +153,9 @@ namespace twitch_irc_bot
 				}
 		}
 
-		private void Advertise(Object source, ElapsedEventArgs e)
+		private void AdvertiseThirty(Object source, ElapsedEventArgs e)
 		{
-			Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimmedMessages();
+			Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimers(30);
 			if (timmedMessagesDict == null) return;
 			foreach (var item in timmedMessagesDict)
 			{
@@ -142,6 +170,91 @@ namespace twitch_irc_bot
 				}
 			}
 		}
+        private void AdvertiseTwentyFive(Object source, ElapsedEventArgs e)
+        {
+            Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimers(25);
+            if (timmedMessagesDict == null) return;
+            foreach (var item in timmedMessagesDict)
+            {
+                var r = new Random();
+                int randomMsg = r.Next(0, item.Value.Count);
+                if (_twitchApi.StreamStatus(item.Key))
+                {
+                    if (!WhisperServer)
+                    {
+                        AddPrivMsgToQueue(item.Value[randomMsg], item.Key);
+                    }
+                }
+            }
+        }
+        private void AdvertiseTwenty(Object source, ElapsedEventArgs e)
+        {
+            Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimers(20);
+            if (timmedMessagesDict == null) return;
+            foreach (var item in timmedMessagesDict)
+            {
+                var r = new Random();
+                int randomMsg = r.Next(0, item.Value.Count);
+                if (_twitchApi.StreamStatus(item.Key))
+                {
+                    if (!WhisperServer)
+                    {
+                        AddPrivMsgToQueue(item.Value[randomMsg], item.Key);
+                    }
+                }
+            }
+        }
+        private void AdvertiseFifteen(Object source, ElapsedEventArgs e)
+        {
+            Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimers(15);
+            if (timmedMessagesDict == null) return;
+            foreach (var item in timmedMessagesDict)
+            {
+                var r = new Random();
+                int randomMsg = r.Next(0, item.Value.Count);
+                if (_twitchApi.StreamStatus(item.Key))
+                {
+                    if (!WhisperServer)
+                    {
+                        AddPrivMsgToQueue(item.Value[randomMsg], item.Key);
+                    }
+                }
+            }
+        }
+        private void AdvertiseTen(Object source, ElapsedEventArgs e)
+        {
+            Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimers(10);
+            if (timmedMessagesDict == null) return;
+            foreach (var item in timmedMessagesDict)
+            {
+                var r = new Random();
+                int randomMsg = r.Next(0, item.Value.Count);
+                if (_twitchApi.StreamStatus(item.Key))
+                {
+                    if (!WhisperServer)
+                    {
+                        AddPrivMsgToQueue(item.Value[randomMsg], item.Key);
+                    }
+                }
+            }
+        }
+        private void AdvertiseFive(Object source, ElapsedEventArgs e)
+        {
+            Dictionary<string, List<string>> timmedMessagesDict = _db.GetTimers(5);
+            if (timmedMessagesDict == null) return;
+            foreach (var item in timmedMessagesDict)
+            {
+                var r = new Random();
+                int randomMsg = r.Next(0, item.Value.Count);
+                if (_twitchApi.StreamStatus(item.Key))
+                {
+                    if (!WhisperServer)
+                    {
+                        AddPrivMsgToQueue(item.Value[randomMsg], item.Key);
+                    }
+                }
+            }
+        }
 
 		private void ResetRateLimit(Object source, ElapsedEventArgs e)
 		{

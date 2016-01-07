@@ -323,6 +323,16 @@ namespace twitch_irc_bot
             return "Something went wrong on my end.";
         }
 
+        public string QueueToggle(string channel, bool toggle, DatabaseFunctions db)
+        {
+            bool success = db.QueueToggle(channel, toggle);
+            if (success)
+            {
+                return toggle ? "Game queue is now on." : "Game queue is now off.";
+            }
+            return "Something went wrong on my end.";
+        }
+
         public string RegToggle(TwitchMessage message, bool toggle, DatabaseFunctions db)
         {
             bool success = db.ToggleRegularOnOff(message, toggle);
