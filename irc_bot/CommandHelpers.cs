@@ -596,16 +596,16 @@ namespace twitch_irc_bot
                 return ", Song not found on Spotify.";
             }
 
-            var availableMarketsAry = jsonArr.SelectToken("available_markets");
-            var validCountry = false;
-            foreach (var country in availableMarketsAry)
-            {
-                if (country.ToString() != "US") continue;
-                validCountry = true;
-                break;
-            }
-            //not playable in us
-            if (!validCountry) return ", this song is not available in the US.";
+            //var availableMarketsAry = jsonArr.SelectToken("available_markets");
+            //var validCountry = false;
+            //foreach (var country in availableMarketsAry)
+            //{
+            //    if (country.ToString() != "US") continue;
+            //    validCountry = true;
+            //    break;
+            //}
+            ////not playable in us
+            //if (!validCountry) return ", this song is not available in the US.";
 
             songAlbumUrl = jsonArr.SelectToken("album").SelectToken("images")[0].SelectToken("url").ToString();
             var artistAry = jsonArr.SelectToken("artists").ToArray();

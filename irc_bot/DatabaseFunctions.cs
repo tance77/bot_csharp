@@ -1773,8 +1773,8 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                            var command = new MySqlCommand("SELECT * FROM Channels",
-                                dbConnection))
+                        var command = new MySqlCommand("SELECT * FROM Channels",
+                            dbConnection))
                     {
                         using (MySqlDataReader dr = command.ExecuteReader())
                         {
@@ -1786,6 +1786,11 @@ namespace twitch_irc_bot
                         GC.Collect();
                     }
                 }
+            }
+            catch (TimeoutException e)
+            {
+                Console.WriteLine(e +"\r\n");
+                return null;
             }
             catch
                 (MySqlException e)
@@ -1984,6 +1989,12 @@ namespace twitch_irc_bot
                 }
                 GC.Collect();
                 return announceFollowerStatus;
+            }
+
+            catch (TimeoutException e)
+            {
+                Console.WriteLine("Connection Timeout in Recent Followers");
+                return false;
             }
 
             catch (MySqlException e)

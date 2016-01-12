@@ -23,7 +23,6 @@ namespace twitch_irc_bot
 			Irc = c;
 			Message = m;
 			_riotApi = new RiotApi(_db);
-			Run();
 		}
 
 		#endregion
@@ -43,21 +42,26 @@ namespace twitch_irc_bot
 
 		#region Methods
 
-		public void Run()
+		public bool Run()
 		{
-			if (Message.Msg == null) return;
+			if (Message.Msg == null) return false;
 			if (Message.Command == "PRIVMSG")
 			{
 				if (!CheckSpam())
 				{
 					//If not spam
-					CheckCommands();
+					var response = CheckCommands();
+				    if (response == "restart")
+				    {
+				        return true;
+				    }
 				}
 			}
 			if (Message.Command == "JOIN")
 			{
 				AddPrivMsgToQueue(Message.Msg, Message.FromChannel);
 			}
+		    return false;
 		}
 
 		private void kill_user(string fromChannel, string msgSender, string userType)
@@ -94,8 +98,6 @@ namespace twitch_irc_bot
 			if (Regex.Match(msg.Msg, @".*?I just got championship riven skin from here.*?").Success ||
 				Regex.Match(msg.Msg, @".*?I just got championship riven skin code.*?").Success ||
 				Regex.Match(msg.Msg, @".*?OMG I just won an Iphone 6.*?").Success ||
-				Regex.Match(msg.Msg, @".*?I am a 15 year old Rhinoceros.*?").Success ||
-				Regex.Match(msg.Msg, @".*?sexually Identify as*?").Success ||
 				Regex.Match(msg.Msg, @".*?[Rr][Aa][Ff][2].*?[Cc][Oo][Mm].*?").Success ||
 				Regex.Match(msg.Msg, @".*?[Rr]\.*[Aa]\.*[Ff]\.*[2].*?[Cc][Oo][Mm].*?").Success ||
 				Regex.Match(msg.Msg, @".*?v=IacCuPMkdXk.*?").Success ||
@@ -124,13 +126,10 @@ namespace twitch_irc_bot
 			)
 			{
 				if (msg.UserType == "mod") return false; //your a mod no timeout
-				AddPrivMsgToQueue(msg.MsgSender + ", [Ban]", msg.FromChannel);
 				AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 120", msg.FromChannel);
 				AddWhisperToQueue("You have been banned from chatting in " +
 					"'s channel. If you think you have been wrongly banned whisper a mod or message the channel owner.",
 					msg.MsgSender);
-				AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 120", msg.FromChannel);
-				AddPrivMsgToQueue("/timeout " + msg.MsgSender + " 120", msg.FromChannel);
 				AddPrivMsgToQueue("/ban " + msg.MsgSender, msg.FromChannel);
 				return true;
 			}
@@ -374,7 +373,7 @@ namespace twitch_irc_bot
 			return false;
 		}
 
-		public void CheckCommands()
+		public string CheckCommands()
 		{
 			#region Chinnbot Only Commands
 
@@ -422,14 +421,14 @@ namespace twitch_irc_bot
 				if (!MatchCommand(Message.Msg, Message.FromChannel, Message.MsgSender))
 				{
 					//we found a user command in our database
-					return;
+					return "";
 				}
 
 				//If we don't find a channel command check the built in commands
 
 				if (Regex.Match(Message.Msg, @"!commands").Success)
 				{
-				    if (Message.FromChannel == "sophiabot") return;
+				    if (Message.FromChannel == "sophiabot") return "";
 					AddPrivMsgToQueue(
 						Message.MsgSender +
 						", the commands for this channel can be found here http://chinnbot.tv/commands?user=" +
@@ -523,7 +522,7 @@ namespace twitch_irc_bot
 
 				else if (Regex.Match(Message.Msg, @"!addcom").Success)
 				{
-                    if (Message.FromChannel == "sophiabot") return;
+                    if (Message.FromChannel == "sophiabot") return "";
 					if (Message.UserType == "mod")
 					{
 						string response = _commandHelpers.AddCommand(Message.FromChannel, Message.Msg, _db);
@@ -535,7 +534,7 @@ namespace twitch_irc_bot
 				}
 				else if (Regex.Match(Message.Msg, @"!editcom").Success)
 				{
-                    if (Message.FromChannel == "sophiabot") return;
+                    if (Message.FromChannel == "sophiabot") return "";
 					if (Message.UserType == "mod")
 					{
 						string response = _commandHelpers.EditCommand(Message.FromChannel, Message.Msg, _db);
@@ -547,7 +546,7 @@ namespace twitch_irc_bot
 				}
 				else if (Regex.Match(Message.Msg, @"!removecom").Success || Regex.Match(Message.Msg, @"!delcom").Success)
 				{
-                    if (Message.FromChannel == "sophiabot") return;
+                    if (Message.FromChannel == "sophiabot") return "";
 					if (Message.UserType == "mod")
 					{
 						string response = _commandHelpers.RemoveCommand(Message.FromChannel, Message.Msg, _db);
@@ -624,7 +623,7 @@ namespace twitch_irc_bot
 				}
 				else if (Regex.Match(Message.Msg, @"^!uptime$").Success)
 				{
-				    if (Message.FromChannel == "sophiabot") return;
+				    if (Message.FromChannel == "sophiabot") return "";
 					AddPrivMsgToQueue(_twitchApi.GetStreamUptime(Message.FromChannel),
 						Message.FromChannel);
 				}
@@ -660,15 +659,15 @@ namespace twitch_irc_bot
 				}
                 else if (Regex.Match(Message.Msg, @"^!regular\sadd\s").Success || Regex.Match(Message.Msg, @"!reg\sadd\s").Success)
                 {
-                    if (Message.UserType != "mod") return;
-                    if (_db.GetRegularStatus(Message) == false) return;
+                    if (Message.UserType != "mod") return "";
+                    if (_db.GetRegularStatus(Message) == false) return "";
                     _commandHelpers.AddRegular(Message, _db, Irc);
                 }
                 else if (Regex.Match(Message.Msg, @"^!regular\sdelete\s").Success || Regex.Match(Message.Msg, @"!reg\sdel\s").Success ||
                     Regex.Match(Message.Msg, @"^!regular\sremove\s").Success || Regex.Match(Message.Msg, @"^!reg\srem\s").Success)
                 {
-                    if (Message.UserType != "mod") return;
-                    if (_db.GetRegularStatus(Message) == false) return;
+                    if (Message.UserType != "mod") return "";
+                    if (_db.GetRegularStatus(Message) == false) return "";
                     _commandHelpers.RemoveRegular(Message, _db, Irc);
                 }
 				//else if (Regex.Match(message, @"!timer").Success)
@@ -744,7 +743,7 @@ namespace twitch_irc_bot
 					_db.CheckSongRequestStatus(Message.FromChannel) )
 				{
 					var response = _commandHelpers.SearchSong(_db, Message, BlockingMessageQueue, BlockingWhisperQueue);
-				    if (response.Count == 0) return;
+				    if (response.Count == 0) return ""; 
 					if (response.Count > 1)
 					{
                         //Console.WriteLine(response.Count);
@@ -753,7 +752,7 @@ namespace twitch_irc_bot
 						foreach(var song in response){
 							AddWhisperToQueue(song, Message.MsgSender);
 						}
-						return;
+						return "";
 					}
 
 					Console.WriteLine(response.First());
@@ -781,12 +780,12 @@ namespace twitch_irc_bot
                 else if (Regex.Match(Message.Msg, @"^!wrongsong$").Success  || Regex.Match(Message.Msg, @"^!ws$").Success &&_db.CheckSongRequestStatus(Message.FromChannel))
                 {
                     var response = _commandHelpers.RemoveUserLastSong(_db, Message);
-                    if (string.IsNullOrEmpty(response)) return;
+                    if (string.IsNullOrEmpty(response)) return "";
                     AddWhisperToQueue(response, Message.MsgSender);
                 }
-				else if ((Regex.Match(Message.Msg, @"!songlist").Success ||
-					Regex.Match(Message.Msg, @"!sl").Success ||
-					Regex.Match(Message.Msg, @"!playlist").Success) 
+				else if ((Regex.Match(Message.Msg, @"^!songlist$").Success ||
+					Regex.Match(Message.Msg, @"^!sl$").Success ||
+					Regex.Match(Message.Msg, @"^!playlist$").Success) 
                     && _db.CheckSongRequestStatus(Message.FromChannel))
 				{
 					AddPrivMsgToQueue(
@@ -816,7 +815,7 @@ namespace twitch_irc_bot
                     if (_db.RemovePersonFromQueue(Message.FromChannel, Message.MsgSender))
                     {
                         AddWhisperToQueue("You have been taken out of the queue", Message.MsgSender);
-                        return;
+                        return "";
                     }
                         AddWhisperToQueue("You are not in the queue type \"!queue summoner_name\" to join the queue.", Message.MsgSender);
                 }
@@ -826,10 +825,17 @@ namespace twitch_irc_bot
                     if (msgToBeSent != null)
                     {
                         AddWhisperToQueue(msgToBeSent, Message.MsgSender);
-                        return;
+                        return "";
                     }
                         AddWhisperToQueue("You are not in the queue type \"!queue summoner_name\" to join the queue.", Message.MsgSender);
 
+                }
+
+
+                else if ((Regex.Match(Message.Msg, @"^!restart$").Success) && Message.MsgSender == "blackmarmalade")
+                {
+                    AddPrivMsgToQueue("Restarting sit tight I will be right back.", Message.FromChannel);
+                    return "restart";
                 }
 
 				//else if (Regex.Match(message, @"!addquote").Success)
@@ -845,8 +851,9 @@ namespace twitch_irc_bot
 				//    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
 				//}
 			}
+		    return "";
 
-			#endregion
+		    #endregion
 		}
 
 		#endregion

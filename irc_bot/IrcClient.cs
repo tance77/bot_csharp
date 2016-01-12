@@ -13,13 +13,14 @@ namespace twitch_irc_bot
     internal class IrcClient : WebFunctions
 	{
 		public string BotUserName{ get; set; }
-		private readonly StreamReader _inputStream;
-		private readonly StreamWriter _outputStream;
+		private StreamReader _inputStream;
+		private StreamWriter _outputStream;
 		private List<string> _listOfActiveChannels;
 		private readonly CommandHelpers _commandHelpers = new CommandHelpers();
 		private readonly DatabaseFunctions _db = new DatabaseFunctions();
 		private readonly TwitchApi _twitchApi = new TwitchApi();
 	    private const bool Debug = false;
+        private bool _running = false;
 	    public int RateLimit { get; set; }
 
 		public List<MessageHistory> ChannelHistory { get; set; }
@@ -33,11 +34,12 @@ namespace twitch_irc_bot
 
 		#region Constructors
 
-		public IrcClient(string ip, int port, string userName, string oAuth, bool a)
+		public IrcClient(string ip, int port, string userName, string oAuth, bool whisperServer)
 		{
 			RateLimit = 0;
 
-			WhisperServer = a;
+			WhisperServer = whisperServer;
+		    _running = true;
 		    EmoteList = GetGlobalEmotes();
 		    _listOfActiveChannels = new List<string>();
 			BotUserName = userName;
@@ -122,7 +124,7 @@ namespace twitch_irc_bot
 			rateCheckTimer.AutoReset = true;
 			rateCheckTimer.Enabled = true;
 
-			var rateLimitTimer = new Timer { Interval = 30000 }; //20 messages every 30 seconds
+			var rateLimitTimer = new Timer { Interval = 30000 }; //100 messages every 30 seconds
 			rateLimitTimer.Elapsed += ResetRateLimit;
 			rateLimitTimer.AutoReset = true;
 			rateLimitTimer.Enabled = true;
@@ -139,13 +141,13 @@ namespace twitch_irc_bot
         public void CheckRateAndSend(Object source, ElapsedEventArgs e)
 		{
 			if (WhisperServer) {
-				while (RateLimit < 20 && BlockingWhisperQueue.Count > 0) {
+				while (RateLimit < 100 && BlockingWhisperQueue.Count > 0) {
 						SendIrcMessage (BlockingWhisperQueue.Take ());
 						Thread.Sleep (400);
 				}
 			}
 				else{
-			while (RateLimit < 20 && BlockingMessageQueue.Count > 0)
+			while (RateLimit < 100 && BlockingMessageQueue.Count > 0)
 			{
 				SendIrcMessage(BlockingMessageQueue.Take());
 				Thread.Sleep(400);
@@ -416,6 +418,7 @@ namespace twitch_irc_bot
 			}
 			catch (IOException e)
 			{
+			    _running = false;
 				Console.ForegroundColor = ConsoleColor.Red;
 				Console.WriteLine(e);
 				Console.ForegroundColor = ConsoleColor.White;
@@ -432,7 +435,7 @@ namespace twitch_irc_bot
 		{
 			BlockingMessageQueue = q;
 			BlockingWhisperQueue = wq;
-			while (true) {
+			while (_running) {
 				try {
 					var buf = _inputStream.ReadLine();
 					if (buf == null)
@@ -444,7 +447,15 @@ namespace twitch_irc_bot
 						}
                         Console.Write(buf + "\r\n");
 						var twitchMessage = new TwitchMessage (buf);
-                        new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
+                        var handler = new IrcCommandHandler (twitchMessage, ref q, ref wq, this);
+                        var restartStatus = handler.Run();
+					    if (restartStatus)
+					    {
+					        _running = false;
+                            Console.ForegroundColor = ConsoleColor.DarkRed;
+                            Console.WriteLine("****** FORCED RESTART ******");
+                            Console.ForegroundColor = ConsoleColor.White;
+					    }
 						continue;
 
 					}
@@ -459,10 +470,13 @@ namespace twitch_irc_bot
 					_outputStream.Flush ();
 
 				} catch (Exception e) {
-					Console.WriteLine (e);
-
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+				    _running = false;
+                    Console.WriteLine("************ Lost connection trying to reconnect. ************");
+                    Console.ForegroundColor = ConsoleColor.White;
 				}
 			}
+		    return "restart";
 		}
 
 
