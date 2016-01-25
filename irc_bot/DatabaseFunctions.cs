@@ -932,7 +932,7 @@ namespace twitch_irc_bot
 
         public string DickSize(string channel)
         {
-            var randRange = new Random();
+            var randRange = new Random((int)DateTime.Now.Ticks & (0x0000FFFF));
             try
             {
                 using (var dbConnection = new MySqlConnection(ConnectionString))
@@ -1283,8 +1283,10 @@ namespace twitch_irc_bot
                 {
                     var st = new StackTrace(e, true);
                     var frame = st.GetFrame(0);
-                    Console.Write(e + "\r\n");
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine("Error in recent followers\r\n");
                     Console.Write("Error in ParseRecentFollowers \r\n" + "Line number: " + frame.GetFileLineNumber());
+                    Console.ForegroundColor = ConsoleColor.White;
                     return null;
                 }
                 catch (TimeoutException e)
@@ -1324,6 +1326,14 @@ namespace twitch_irc_bot
                     GC.Collect();
                     return channelsList;
                 }
+            }
+            catch (TimeoutException e)
+            {
+                var st = new StackTrace(e, true);
+                var frame = st.GetFrame(0);
+                Console.Write(e + "\r\n");
+                Console.Write("Error in Get List Of Channels \r\n" + "Line number: " + frame.GetFileLineNumber());
+                return null;
             }
             catch
                 (MySqlException e)
@@ -1789,6 +1799,9 @@ namespace twitch_irc_bot
             }
             catch (TimeoutException e)
             {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine("Error in list of Active Channels \r\n");
+                    Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine(e +"\r\n");
                 return null;
             }
@@ -1993,7 +2006,9 @@ namespace twitch_irc_bot
 
             catch (TimeoutException e)
             {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine("Connection Timeout in Recent Followers");
+                    Console.ForegroundColor = ConsoleColor.White;
                 return false;
             }
 

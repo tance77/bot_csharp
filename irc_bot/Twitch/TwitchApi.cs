@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using RestSharp.Extensions;
-using SpotifyAPI.Web.Models;
 
 namespace twitch_irc_bot
 {

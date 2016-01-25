@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Timers;
-using Newtonsoft.Json.Linq;
 using Timer = System.Timers.Timer;
 
 namespace twitch_irc_bot

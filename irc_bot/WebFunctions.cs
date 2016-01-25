@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
-using NUnit.Framework;
 
 namespace twitch_irc_bot
 {
@@ -14,6 +13,7 @@ namespace twitch_irc_bot
             try
             {
                 WebRequest request = WebRequest.Create(url);
+                request.Timeout = 1000;
                 using (WebResponse response = request.GetResponse())
                 {
                     using (Stream responseStream = response.GetResponseStream())

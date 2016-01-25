@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace twitch_irc_bot
 {
@@ -76,6 +71,32 @@ namespace twitch_irc_bot
 
         public string MessageHandler(string m)
         {
+            //var colenCount = 0;
+            //var shit = m.Split(' ');
+            //var totalM = "";
+            //foreach (var a in shit)
+            //{
+            //    if (a.StartsWith(":"))
+            //    {
+            //        colenCount++;
+            //    }
+            //    if (colenCount == 2)
+            //    {
+            //        totalM += a + " ";
+            //    }
+            //    else
+            //    {
+            //Console.WriteLine(a);
+            //    }
+                
+            //}
+            //totalM = totalM.Trim();
+            //if (totalM != "")
+            //{
+            //    totalM = totalM.Substring(1);
+            //Console.WriteLine("ACTUAL MESSAGE");
+            //Console.WriteLine(totalM);
+            //}
             /*------- Successfull Twitch Connection -----------*/
             if (Regex.Match(m, @":tmi.twitch.tv").Success)
             {
