@@ -619,7 +619,7 @@ namespace twitch_irc_bot
                     AddPrivMsgToQueue (response.First (), Message.FromChannel);
                 } else if ((Regex.Match (Message.Msg, @"^!sr$").Success || Regex.Match (Message.Msg, @"^!songrequest$").Success) &&
                            _db.CheckSongRequestStatus (Message.FromChannel)) {
-                    AddWhisperToQueue ("To request a song type !sr or !songrequest followed by the track ID." +
+                    AddWhisperToQueue ("To request a song with Spotify type !sr or !songrequest followed by the track ID." +
                     " If you do not know the track idea type !sr and the name of the song and I will give you a list of track IDs." +
                     " Alternatively you can type !msr followed by the song name and I will try to best match your song." +
                     " If you add the wrong song type !wrongsong or !ws to delete your last song.", Message.MsgSender);

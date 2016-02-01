@@ -15,7 +15,7 @@ namespace twitch_irc_bot
             var username = jObj.SelectToken ("bot_username").ToString ();
             var oAuth = jObj.SelectToken ("oauth").ToString ();
 
-            const bool debug = true;
+            const bool debug = false;
             var q = new BlockingCollection<string> ();
             var wq = new BlockingCollection<string> ();
             var ircServer = new IrcClient ("irc.twitch.tv", 443, username, oAuth, ref q, ref wq, false, debug);
@@ -31,6 +31,7 @@ namespace twitch_irc_bot
 
             while (!whisperThread.IsAlive) {
                 //spin for a bit till the thread starts
+                        Thread.Sleep (1000);
             }
 
             var ircThread = new Thread (() => ircServer.ReadMessage ());
@@ -38,6 +39,7 @@ namespace twitch_irc_bot
 
             while (!ircThread.IsAlive) {
                 //spin for a bit till the thread starts
+                        Thread.Sleep (1000);
             }
 
             while (true) {
