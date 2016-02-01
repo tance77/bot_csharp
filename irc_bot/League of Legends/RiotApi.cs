@@ -136,7 +136,7 @@ namespace twitch_irc_bot
             string jsonString = RequestJson(url);
             if (jsonString == null)
             {
-                return jsonString;
+                return "404";
             }
             string division =
                 JObject.Parse(jsonString)

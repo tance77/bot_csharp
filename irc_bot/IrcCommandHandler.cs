@@ -610,17 +610,17 @@ namespace twitch_irc_bot
 							Message.FromChannel);
 					}
 				}
-				else if (
-					Regex.Match(Message.Msg,
-						@".*?[Ss][Hh][Oo][Ww].*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?")
-					.Success ||
-					Regex.Match(Message.Msg,
-						@".*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?[Pp]+[Ll]+(([Ee]+[Aa]+[Ss]+[Ee]+)|([Zz]+)|([Ss]+)).*?")
-					.Success)
-				{
-					AddPrivMsgToQueue(
-						Message.MsgSender + " here's  your boobs NSFW https://goo.gl/gGMasE", Message.FromChannel);
-				}
+                //else if (
+                //    Regex.Match(Message.Msg,
+                //        @".*?[Ss][Hh][Oo][Ww].*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?")
+                //    .Success ||
+                //    Regex.Match(Message.Msg,
+                //        @".*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?[Pp]+[Ll]+(([Ee]+[Aa]+[Ss]+[Ee]+)|([Zz]+)|([Ss]+)).*?")
+                //    .Success)
+                //{
+                //    AddPrivMsgToQueue(
+                //        Message.MsgSender + " here's  your boobs NSFW https://goo.gl/gGMasE", Message.FromChannel);
+                //}
 				else if (Regex.Match(Message.Msg, @"^!uptime$").Success)
 				{
 				    if (Message.FromChannel == "sophiabot") return "";
