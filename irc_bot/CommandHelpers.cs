@@ -10,161 +10,145 @@ namespace twitch_irc_bot
 {
     internal class CommandHelpers : WebFunctions
     {
-        public bool AddTimer(DatabaseFunctions db, string msg, string channel)
+        public bool AddTimer (DatabaseFunctions db, string msg, string channel)
         {
-            string[] msgArray = msg.Split(' ');
+            string[] msgArray = msg.Split (' ');
             msg = "";
-            var actualMessage = new StringBuilder();
-            for (int i = 1; i < msgArray.Length; i++)
-            {
-                if (msgArray.Length > 2)
-                {
-                    if (i == msgArray.Length)
-                    {
-                        actualMessage.Append(msgArray[i]);
+            var actualMessage = new StringBuilder ();
+            for (int i = 1; i < msgArray.Length; i++) {
+                if (msgArray.Length > 2) {
+                    if (i == msgArray.Length) {
+                        actualMessage.Append (msgArray [i]);
+                    } else {
+                        actualMessage.Append (msgArray [i] + " ");
                     }
-                    else
-                    {
-                        actualMessage.Append(msgArray[i] + " ");
-                    }
-                }
-                else
-                {
-                    actualMessage.Append(msgArray[i]);
+                } else {
+                    actualMessage.Append (msgArray [i]);
                 }
             }
-            if (db.AddTimer(channel, actualMessage.ToString()))
-            {
+            if (db.AddTimer (channel, actualMessage.ToString ())) {
                 return true;
             }
             return false;
         }
 
-        public string ChannelTimers(DatabaseFunctions db, string fromChannel)
+        public string ChannelTimers (DatabaseFunctions db, string fromChannel)
         {
-            Dictionary<int, string> channelTimerDict = db.GetTimers(fromChannel);
-            if (channelTimerDict == null) return null;
-            var message = new StringBuilder();
-            message.Append("Timer list with ID's: ");
-            foreach (var item in channelTimerDict)
-            {
-                message.Append(item.Value + " " + item.Key + " ");
+            Dictionary<int, string> channelTimerDict = db.GetTimers (fromChannel);
+            if (channelTimerDict == null)
+                return null;
+            var message = new StringBuilder ();
+            message.Append ("Timer list with ID's: ");
+            foreach (var item in channelTimerDict) {
+                message.Append (item.Value + " " + item.Key + " ");
             }
-            return message.ToString();
+            return message.ToString ();
         }
 
-        public int DiceRoll()
+        public int DiceRoll ()
         {
-            var r = new Random();
-            int diceRoll = r.Next(1, 100);
+            var r = new Random ();
+            int diceRoll = r.Next (1, 100);
             return diceRoll;
         }
 
-        public bool Roulette(string channel)
+        public bool Roulette (string channel)
         {
-            var chamber = new Random();
-            int deathShot = chamber.Next(1, 3);
-            int playerShot = chamber.Next(1, 3);
-            if (deathShot == playerShot)
-            {
+            var chamber = new Random ();
+            int deathShot = chamber.Next (1, 3);
+            int playerShot = chamber.Next (1, 3);
+            if (deathShot == playerShot) {
                 return true;
             }
             return false;
         }
 
-        public string CheckSummonerName(string fromChannel, DatabaseFunctions db, RiotApi riotApi)
+        public string CheckSummonerName (string fromChannel, DatabaseFunctions db, RiotApi riotApi)
         {
-            string summonerName = db.SummonerStatus(fromChannel);
-            if (summonerName == "") return "No Summoner Name";
-            string summonerId = riotApi.GetSummonerId(summonerName);
+            string summonerName = db.SummonerStatus (fromChannel);
+            if (summonerName == "")
+                return "No Summoner Name";
+            string summonerId = riotApi.GetSummonerId (summonerName);
             //GetRunes(summonerId);
             //
-            if(summonerId == null) return null;
-            if (!db.SetSummonerId(fromChannel, summonerId)) return "ERR Summoner ID";
-            string rank = riotApi.GetRank(summonerId);
-                // Invalid summoner name
-            if(rank == null) return null;
+            if (summonerId == null)
+                return null;
+            if (!db.SetSummonerId (fromChannel, summonerId))
+                return "ERR Summoner ID";
+            string rank = riotApi.GetRank (summonerId);
+            // Invalid summoner name
+            if (rank == null)
+                return null;
             return rank;
         }
 
-        public string GetLeagueRank(string fromChannel, string msgSender, DatabaseFunctions db, RiotApi riotApi)
+        public string GetLeagueRank (string fromChannel, string msgSender, DatabaseFunctions db, RiotApi riotApi)
         {
-            string result = CheckSummonerName(fromChannel, db, riotApi);
-            switch (result)
-            {
-                case "No Summoner Name":
-                    return
+            string result = CheckSummonerName (fromChannel, db, riotApi);
+            switch (result) {
+            case "No Summoner Name":
+                return
                         "No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]";
-                case "401":
-                case "400":
-                    return "Invalid Summoner Name";
-                case "404":
-                    return fromChannel + " is not yet ranked.";
-                case "429":
-                    return "To many requests at one time please try again.";
-                case "503":
-                case "500":
-                    return "Could not reach Riot API. Please try again in a few minutes.";
-                default:
-                    return fromChannel + " is currently " + result;
+            case "401":
+            case "400":
+                return "Invalid Summoner Name";
+            case "404":
+                return fromChannel + " is not yet ranked.";
+            case "429":
+                return "To many requests at one time please try again.";
+            case "503":
+            case "500":
+                return "Could not reach Riot API. Please try again in a few minutes.";
+            default:
+                return fromChannel + " is currently " + result;
             }
         }
 
-        public string GetMasteries(string fromChannel, RiotApi riotApi)
+        public string GetMasteries (string fromChannel, RiotApi riotApi)
         {
-            Dictionary<string, int> masteriesDictionary = riotApi.GetMasteries(fromChannel);
-            if (masteriesDictionary == null)
-            {
+            Dictionary<string, int> masteriesDictionary = riotApi.GetMasteries (fromChannel);
+            if (masteriesDictionary == null) {
                 return
                     "No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]";
             }
-            var message = new StringBuilder();
-            foreach (var tree in masteriesDictionary)
-            {
-                message.AppendFormat("{0}: {1} ", tree.Key, tree.Value);
+            var message = new StringBuilder ();
+            foreach (var tree in masteriesDictionary) {
+                message.AppendFormat ("{0}: {1} ", tree.Key, tree.Value);
             }
-            return message.ToString();
+            return message.ToString ();
         }
 
 
-        public string SetSummonerName(string fromChannel, string summonerName, string msgSender, DatabaseFunctions db)
+        public string SetSummonerName (string fromChannel, string summonerName, string msgSender, DatabaseFunctions db)
         {
-            if (msgSender != fromChannel)
-            {
+            if (msgSender != fromChannel) {
                 return "Insufficient privileges";
             }
-            if (db.SetSummonerName(fromChannel, summonerName)) // on success
-            {
+            if (db.SetSummonerName (fromChannel, summonerName)) { // on success
                 return "Summoner name has been set to " + summonerName;
             }
             return "Something went wrong on my end please try again";
         }
 
-        public string SplitSummonerName(string message)
+        public string SplitSummonerName (string message)
         {
-            string[] msgParts = message.Split(' ');
-            var summonerName = new StringBuilder();
-            for (int i = 1; i < msgParts.Length; i++)
-            {
-                if (i == msgParts.Length)
-                {
-                    summonerName.Append(msgParts[i]);
-                }
-                else
-                {
-                    summonerName.Append(msgParts[i] + " ");
+            string[] msgParts = message.Split (' ');
+            var summonerName = new StringBuilder ();
+            for (int i = 1; i < msgParts.Length; i++) {
+                if (i == msgParts.Length) {
+                    summonerName.Append (msgParts [i]);
+                } else {
+                    summonerName.Append (msgParts [i] + " ");
                 }
             }
-            return summonerName.ToString();
+            return summonerName.ToString ();
         }
 
-        public string ParseRuneDictionary(Dictionary<string, int> runeDictionary)
+        public string ParseRuneDictionary (Dictionary<string, int> runeDictionary)
         {
             string message = "";
-            foreach (var name in runeDictionary)
-            {
-                if (name.Equals(runeDictionary.Last()))
-                {
+            foreach (var name in runeDictionary) {
+                if (name.Equals (runeDictionary.Last ())) {
                     message += name.Key + " x" + name.Value;
                     break;
                 }
@@ -173,285 +157,238 @@ namespace twitch_irc_bot
             return message;
         }
 
-        public string GetChannelCommands(string fromChannel, DatabaseFunctions db)
+        public string GetChannelCommands (string fromChannel, DatabaseFunctions db)
         {
-            List<string> commands = db.GetChannelCommands(fromChannel);
-            if (commands == null || !commands.Any())
-            {
+            List<string> commands = db.GetChannelCommands (fromChannel);
+            if (commands == null || !commands.Any ()) {
                 return "No commands were found for this channel.";
             }
             string sendString = "";
-            for (int i = 0; i < commands.Count(); i++)
-            {
-                if (i == commands.Count() - 1)
-                {
-                    sendString += " !" + commands[i];
-                }
-                else
-                {
-                    sendString += " !" + commands[i] + ",";
+            for (int i = 0; i < commands.Count (); i++) {
+                if (i == commands.Count () - 1) {
+                    sendString += " !" + commands [i];
+                } else {
+                    sendString += " !" + commands [i] + ",";
                 }
             }
             return "Commands are" + sendString;
         }
 
-        public string AddCommand(string channel, string message, DatabaseFunctions db)
+        public string AddCommand (string channel, string message, DatabaseFunctions db)
         {
-            if (!message.StartsWith("!"))
-            {
+            if (!message.StartsWith ("!")) {
                 return null;
             }
-            try
-            {
-                string[] messageArray = message.Split(' ');
-                string command = messageArray[1].Split('!')[1];
+            try {
+                string[] messageArray = message.Split (' ');
+                string command = messageArray [1].Split ('!') [1];
                 string commandDescription = "";
-                for (int i = 2; i < messageArray.Length; i++)
-                {
-                    if (i == messageArray.Length - 1)
-                    {
-                        commandDescription += messageArray[i];
-                    }
-                    else
-                    {
-                        commandDescription += messageArray[i] + " ";
+                for (int i = 2; i < messageArray.Length; i++) {
+                    if (i == messageArray.Length - 1) {
+                        commandDescription += messageArray [i];
+                    } else {
+                        commandDescription += messageArray [i] + " ";
                     }
                 }
-                bool success = db.AddCommand(command, commandDescription, false, channel);
+                bool success = db.AddCommand (command, commandDescription, false, channel);
                 command = "!" + command;
-                if (success)
-                {
+                if (success) {
                     return command + " was add successfully.";
                 }
                 return command + " command already exists use !editcom if you would like to change it.";
-            }
-            catch (IndexOutOfRangeException)
-            {
+            } catch (IndexOutOfRangeException) {
                 return "With no <> syntax is <!addcom> <!command_name> <response>";
-            }
-            catch (Exception e)
-            {
-                Console.Write(e + "\r\n");
+            } catch (Exception e) {
+                Console.Write (e + "\r\n");
                 return "Sorry something went wrong on my end, please try again.";
             }
         }
 
-        public string RemoveCommand(string fromChannel, string message, DatabaseFunctions db)
+        public string RemoveCommand (string fromChannel, string message, DatabaseFunctions db)
         {
-            if (!message.StartsWith("!")) return null;
-            try
-            {
-                string[] splitMessage = message.Split(' ');
-                string command = splitMessage[1].Split('!')[1];
-                bool succes = db.RemoveCommand(command, fromChannel);
+            if (!message.StartsWith ("!"))
+                return null;
+            try {
+                string[] splitMessage = message.Split (' ');
+                string command = splitMessage [1].Split ('!') [1];
+                bool succes = db.RemoveCommand (command, fromChannel);
                 command = "!" + command;
-                if (succes)
-                {
+                if (succes) {
                     return command + " was deleted successfully.";
                 }
                 return command + " there is no such command.";
-            }
-            catch (IndexOutOfRangeException)
-            {
+            } catch (IndexOutOfRangeException) {
                 return "With no <> syntax is <!delcom> <!command_name>";
-            }
-            catch (Exception e)
-            {
-                Console.Write(e + "\r\n");
+            } catch (Exception e) {
+                Console.Write (e + "\r\n");
                 return "Sorry something went wrong on my end, please try again.";
             }
         }
 
-        public string EditCommand(string fromChannel, string message, DatabaseFunctions db)
+        public string EditCommand (string fromChannel, string message, DatabaseFunctions db)
         {
-            if (!message.StartsWith("!"))
-            {
+            if (!message.StartsWith ("!")) {
                 return null;
             }
-            try
-            {
-                string[] splitMessage = message.Split(' ');
-                string command = splitMessage[1].Split('!')[1];
+            try {
+                string[] splitMessage = message.Split (' ');
+                string command = splitMessage [1].Split ('!') [1];
                 string commandDescription = "";
-                for (int i = 2; i < splitMessage.Length; i++)
-                {
-                    if (i == splitMessage.Length - 1)
-                    {
-                        commandDescription += splitMessage[i];
-                    }
-                    else commandDescription += splitMessage[i] + " ";
+                for (int i = 2; i < splitMessage.Length; i++) {
+                    if (i == splitMessage.Length - 1) {
+                        commandDescription += splitMessage [i];
+                    } else
+                        commandDescription += splitMessage [i] + " ";
                 }
-                bool success = db.EditCommand(command, commandDescription, false, fromChannel);
+                bool success = db.EditCommand (command, commandDescription, false, fromChannel);
                 command = "!" + command;
-                if (success)
-                {
+                if (success) {
                     return command + " was updated successfully.";
                 }
                 return command + " there is no such command. Use !addcom if you wish to add a command.";
-            }
-            catch (IndexOutOfRangeException)
-            {
+            } catch (IndexOutOfRangeException) {
                 return "With no <> syntax is <!editcom> <!command_name> <response>";
-            }
-            catch (Exception e)
-            {
-                Console.Write(e + "\r\n");
+            } catch (Exception e) {
+                Console.Write (e + "\r\n");
                 return "Sorry something went wrong on my end, please try again.";
             }
         }
 
-        public string DickSize(string channel, string sender, DatabaseFunctions db)
+        public string DickSize (string channel, string sender, DatabaseFunctions db)
         {
-            string response = db.DickSize(channel);
-            if (response == null)
-            {
+            string response = db.DickSize (channel);
+            if (response == null) {
                 return null;
             }
             return sender + ", " + response;
         }
 
-        public string DickSizeToggle(string channel, bool toggle, DatabaseFunctions db)
+        public string DickSizeToggle (string channel, bool toggle, DatabaseFunctions db)
         {
-            bool success = db.DickSizeToggle(channel, toggle);
-            if (success)
-            {
+            bool success = db.DickSizeToggle (channel, toggle);
+            if (success) {
                 return toggle ? "Dicksize is now on." : "Dicksize is now off.";
             }
             return "Something went wrong on my end.";
         }
 
-        public string QueueToggle(string channel, bool toggle, DatabaseFunctions db)
+        public string QueueToggle (string channel, bool toggle, DatabaseFunctions db)
         {
-            bool success = db.QueueToggle(channel, toggle);
-            if (success)
-            {
+            bool success = db.QueueToggle (channel, toggle);
+            if (success) {
                 return toggle ? "Game queue is now on." : "Game queue is now off.";
             }
             return "Something went wrong on my end.";
         }
 
-        public string RegToggle(TwitchMessage message, bool toggle, DatabaseFunctions db)
+        public string RegToggle (TwitchMessage message, bool toggle, DatabaseFunctions db)
         {
-            bool success = db.ToggleRegularOnOff(message, toggle);
-            if (success)
-            {
+            bool success = db.ToggleRegularOnOff (message, toggle);
+            if (success) {
                 return toggle ? "Regulars are now on." : "Regulars are now off.";
             }
             return "Something went wrong on my end.";
         }
 
 
-        public string EmoteToggle(string channel, bool toggle, DatabaseFunctions db)
+        public string EmoteToggle (string channel, bool toggle, DatabaseFunctions db)
         {
-            bool success = db.EmoteToggle(channel, toggle);
-            if (success)
-            {
+            bool success = db.EmoteToggle (channel, toggle);
+            if (success) {
                 return toggle ? "Spam away emotes are fair game." : "Excessive emotes will be purged.";
             }
             return "Something went wrong on my end.";
         }
 
-        public string AsciiToggle(string channel, bool toggle, DatabaseFunctions db)
+        public string AsciiToggle (string channel, bool toggle, DatabaseFunctions db)
         {
-            bool success = db.AsciiToggle(channel, toggle);
-            if (success)
-            {
+            bool success = db.AsciiToggle (channel, toggle);
+            if (success) {
                 return toggle ? "Spam away ascii's are fair game." : "Excessive ascii characters will be purged";
             }
             return "Something went wrong on my end.";
         }
 
 
-        public string SongRequestToggle(string channel, bool toggle, DatabaseFunctions db)
+        public string SongRequestToggle (string channel, bool toggle, DatabaseFunctions db)
         {
-            bool success = db.SongRequestToggle(channel, toggle);
-            if (success)
-            {
+            bool success = db.SongRequestToggle (channel, toggle);
+            if (success) {
                 return toggle ? "Song Requests a now on." : "Song requests are now off.";
             }
             return "Something went wrong on my end.";
         }
 
-        public string UrlToggle(string channel, bool toggle, DatabaseFunctions db)
+        public string UrlToggle (string channel, bool toggle, DatabaseFunctions db)
         {
-            bool success = db.UrlToggle(channel, toggle);
-            if (success)
-            {
+            bool success = db.UrlToggle (channel, toggle);
+            if (success) {
                 return toggle ? "URL's are now allowed." : "URL's are no longer allowed.";
             }
             return "Something went wrong on my end.";
         }
 
-        public string GgToggle(string channel, bool toggle, DatabaseFunctions db)
+        public string GgToggle (string channel, bool toggle, DatabaseFunctions db)
         {
-            bool success = db.GgToggle(channel, toggle);
-            if (success)
-            {
+            bool success = db.GgToggle (channel, toggle);
+            if (success) {
                 return toggle ? "GG is now on." : "GG is now off.";
             }
             return "Something went wrong on my end.";
         }
 
-        public bool CheckGg(string fromChannel, DatabaseFunctions db)
+        public bool CheckGg (string fromChannel, DatabaseFunctions db)
         {
-            return db.GgStatus(fromChannel);
+            return db.GgStatus (fromChannel);
         }
 
-        public string PermitUser(string fromChannel, string msgSender, string message, string userType,
-                DatabaseFunctions db)
+        public string PermitUser (string fromChannel, string msgSender, string message, string userType,
+                                 DatabaseFunctions db)
         {
-            if (db.UrlStatus(fromChannel) || userType != "mod") return null;
-            string[] msgArr = message.Split(' ');
-            var userToPermit = new StringBuilder();
-            for (int i = 1; i < msgArr.Length; i++)
-            {
-                if (i == msgArr.Length)
-                {
-                    userToPermit.Append(msgArr[i]);
-                }
-                else
-                {
-                    userToPermit.Append(msgArr[i] + " ");
+            if (db.UrlStatus (fromChannel) || userType != "mod")
+                return null;
+            string[] msgArr = message.Split (' ');
+            var userToPermit = new StringBuilder ();
+            for (int i = 1; i < msgArr.Length; i++) {
+                if (i == msgArr.Length) {
+                    userToPermit.Append (msgArr [i]);
+                } else {
+                    userToPermit.Append (msgArr [i] + " ");
                 }
             }
-            if (userToPermit.ToString() == "") return null;
-            bool success = db.PermitUser(fromChannel.ToLower().Trim(' '), userToPermit.ToString().ToLower().Trim(' '));
-            if (success)
-            {
+            if (userToPermit.ToString () == "")
+                return null;
+            bool success = db.PermitUser (fromChannel.ToLower ().Trim (' '), userToPermit.ToString ().ToLower ().Trim (' '));
+            if (success) {
                 return msgSender + " -> " + userToPermit +
-                    " can post 1 link anytime in the next 3 minutes and will not get timed out.";
+                " can post 1 link anytime in the next 3 minutes and will not get timed out.";
             }
             return null;
         }
 
 
-    public void GetFollowers(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi){
-       List<string> followersList = db.ParseFirstHundredFollowers(fromChannel, twitchApi);
-    }
-
-
-        public string AssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
+        public void GetFollowers (string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
         {
-            List<string> followersList = db.ParseRecentFollowers(fromChannel, twitchApi);
-            if (followersList == null) return null;
+            List<string> followersList = db.ParseFirstHundredFollowers (fromChannel, twitchApi);
+        }
+
+
+        public string AssembleFollowerList (string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
+        {
+            List<string> followersList = db.ParseRecentFollowers (fromChannel, twitchApi);
+            if (followersList == null)
+                return null;
             var message = "";
-            if (followersList.Count == 1)
-            {
-                message += followersList.First() + " thanks for following!";
+            if (followersList.Count == 1) {
+                message += followersList.First () + " thanks for following!";
                 //message += "A new follower approaches " + followersList.First() + "!";
 
-            }
-            else
-            {
-                foreach (var item in followersList)
-                {
-                    if (item == followersList.Last())
-                    {
+            } else {
+                foreach (var item in followersList) {
+                    if (item == followersList.Last ()) {
                         message += "and " + item + ", thank you for following!";
                         //message += "and " + item + "!";
-                    }
-                    else
-                    {
+                    } else {
                         message += item + ", ";
                         //message += "Multiple followers have appeared " + item + ", ";
                     }
@@ -460,45 +397,43 @@ namespace twitch_irc_bot
             return message == "" ? null : message;
         }
 
-        public void JoinAssembleFollowerList(string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
+        public void JoinAssembleFollowerList (string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
         {
-            db.ParseRecentFollowers(fromChannel, twitchApi);
+            db.ParseRecentFollowers (fromChannel, twitchApi);
         }
 
-        public bool CoinFlip()
+        public bool CoinFlip ()
         {
-            var r = new Random();
-            int a = r.Next(0, 2);
+            var r = new Random ();
+            int a = r.Next (0, 2);
             return a == 0;
         }
 
-        public Dictionary<string, KeyValuePair<string,string>> SearchSongByName(string queryString, TwitchMessage message, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue )
+        public Dictionary<string, KeyValuePair<string,string>> SearchSongByName (string queryString, TwitchMessage message, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue)
         {
-            var foundSongs = new Dictionary<string, KeyValuePair<string,string>>() ;
+            var foundSongs = new Dictionary<string, KeyValuePair<string,string>> ();
 
             //Console.WriteLine(queryString);
 
 
-            var response = RequestJson(queryString);
-            if (response == null)
-            {
-                BlockingWhisperQueue.Add("PRIVMSG #jtv :/w " + message.MsgSender + " Spotify API is down please try again in a few minutes.");
+            var response = RequestJson (queryString);
+            if (response == null) {
+                BlockingWhisperQueue.Add ("PRIVMSG #jtv :/w " + message.MsgSender + " Spotify API is down please try again in a few minutes.");
                 return null;
             }
 
-            JToken jsonArr = JObject.Parse(response).SelectToken("tracks").SelectToken("items");
+            JToken jsonArr = JObject.Parse (response).SelectToken ("tracks").SelectToken ("items");
 
             //grab the first result
 
-            if (!jsonArr.HasValues)
-            {
-                BlockingWhisperQueue.Add("PRIVMSG #jtv :/w " + message.MsgSender + ", this song is not on Spotify.");
+            if (!jsonArr.HasValues) {
+                BlockingWhisperQueue.Add ("PRIVMSG #jtv :/w " + message.MsgSender + " Could not find the requested song on Spotify. Check your spelling and try again. Alternatively use the track ID.");
                 return null;
             }
 
             var k = 0;
-            foreach(var song in jsonArr){
-                if(k >= 3){
+            foreach (var song in jsonArr) {
+                if (k >= 3) {
                     break;
                 }
                 //var availableMarketsAry = song.SelectToken("available_markets");
@@ -516,25 +451,21 @@ namespace twitch_irc_bot
                 //    return null;
                 //}
 
-                var songTitle = song.SelectToken("name").ToString();
-                var songId = song.SelectToken("id").ToString();
+                var songTitle = song.SelectToken ("name").ToString ();
+                var songId = song.SelectToken ("id").ToString ();
                 var songArtists = "";
-                var artistAry = song.SelectToken("artists").ToArray();
+                var artistAry = song.SelectToken ("artists").ToArray ();
 
-                for (var i = 0; i < artistAry.Length; i++)
-                {
-                    if (i == artistAry.Length - 1)
-                    {
-                        songArtists += artistAry[i].SelectToken("name");
-                    }
-                    else
-                    {
-                        songArtists += artistAry[i].SelectToken("name") + " and ";
+                for (var i = 0; i < artistAry.Length; i++) {
+                    if (i == artistAry.Length - 1) {
+                        songArtists += artistAry [i].SelectToken ("name");
+                    } else {
+                        songArtists += artistAry [i].SelectToken ("name") + " and ";
                     }
                 }
 
-                var pair = new KeyValuePair<string, string>(songTitle, songArtists);
-                foundSongs.Add(songId, pair);
+                var pair = new KeyValuePair<string, string> (songTitle, songArtists);
+                foundSongs.Add (songId, pair);
                 k++;
 
             }
@@ -542,29 +473,29 @@ namespace twitch_irc_bot
             return foundSongs;
         }
 
-        public void AddRegular(TwitchMessage Message, DatabaseFunctions db, IrcClient irc)
+        public void AddRegular (TwitchMessage Message, DatabaseFunctions db, IrcClient irc)
         {
-            if (irc.WhisperServer) return;
-            var userToAdd = Message.Msg.Split(' ')[2];
-            var success = db.AddRegular(Message.FromChannel, userToAdd);
-            if (success)
-            {
-                irc.AddPrivMsgToQueue(userToAdd + " " + "was added to the regular list by " + Message.MsgSender, Message.FromChannel);
+            if (irc.WhisperServer)
+                return;
+            var userToAdd = Message.Msg.Split (' ') [2];
+            var success = db.AddRegular (Message.FromChannel, userToAdd);
+            if (success) {
+                irc.AddPrivMsgToQueue (userToAdd + " " + "was added to the regular list by " + Message.MsgSender, Message.FromChannel);
             }
         }
 
-        public void RemoveRegular(TwitchMessage message, DatabaseFunctions db, IrcClient irc)
+        public void RemoveRegular (TwitchMessage message, DatabaseFunctions db, IrcClient irc)
         {
-            if (irc.WhisperServer) return;
-            var userToRemove = message.Msg.Split(' ')[2];
-            var success = db.RemoveRegular(message.FromChannel, userToRemove);
-            if (success)
-            {
-                irc.AddPrivMsgToQueue(userToRemove + " " + "is no longer a regular", message.FromChannel);
+            if (irc.WhisperServer)
+                return;
+            var userToRemove = message.Msg.Split (' ') [2];
+            var success = db.RemoveRegular (message.FromChannel, userToRemove);
+            if (success) {
+                irc.AddPrivMsgToQueue (userToRemove + " " + "is no longer a regular", message.FromChannel);
             }
         }
 
-        public string AddSongById(string songId, DatabaseFunctions db, string fromChannel, string messageSender)
+        public string AddSongById (string songId, DatabaseFunctions db, string fromChannel, string messageSender)
         {
 
 
@@ -581,15 +512,13 @@ namespace twitch_irc_bot
 
             var requestUrl = baseUrl + "/tracks/" + songId;
 
-            var response = RequestJson(requestUrl);
+            var response = RequestJson (requestUrl);
             if (response == "400" || response == "401" || response == "404" || response == "429" ||
-                    response == "500" || response == "503")
-            {
+                response == "500" || response == "503") {
                 return "Spotify API is down please try again in a few minutes.";
             }
-            JToken jsonArr = JObject.Parse(response);
-            if (!jsonArr.HasValues)
-            {
+            JToken jsonArr = JObject.Parse (response);
+            if (!jsonArr.HasValues) {
                 return ", Song not found on Spotify.";
             }
 
@@ -604,53 +533,47 @@ namespace twitch_irc_bot
             ////not playable in us
             //if (!validCountry) return ", this song is not available in the US.";
 
-            songAlbumUrl = jsonArr.SelectToken("album").SelectToken("images")[0].SelectToken("url").ToString();
-            var artistAry = jsonArr.SelectToken("artists").ToArray();
+            songAlbumUrl = jsonArr.SelectToken ("album").SelectToken ("images") [0].SelectToken ("url").ToString ();
+            var artistAry = jsonArr.SelectToken ("artists").ToArray ();
             songArtists = "";
-            for (var i = 0; i < artistAry.Length; i++)
-            {
-                if (i == artistAry.Length - 1)
-                {
-                    songArtists += artistAry[i].SelectToken("name");
-                }
-                else
-                {
-                    songArtists += artistAry[i].SelectToken("name") + " and ";
+            for (var i = 0; i < artistAry.Length; i++) {
+                if (i == artistAry.Length - 1) {
+                    songArtists += artistAry [i].SelectToken ("name");
+                } else {
+                    songArtists += artistAry [i].SelectToken ("name") + " and ";
                 }
             }
 
-            var miliseconds = Int32.Parse(jsonArr.SelectToken("duration_ms").ToString());
+            var miliseconds = Int32.Parse (jsonArr.SelectToken ("duration_ms").ToString ());
 
             var a = miliseconds / 1000;
             var minutes = a / 60;
             a = a % 60;
 
-            var seconds = a.ToString();
+            var seconds = a.ToString ();
 
-            if (a < 10)
-            {
+            if (a < 10) {
                 seconds = "0" + a;
             }
 
             songDuration = minutes + ":" + seconds;
 
-            songUrl = jsonArr.SelectToken("external_urls").SelectToken("spotify").ToString();
-            songId = jsonArr.SelectToken("id").ToString();
-            songTitle = jsonArr.SelectToken("name").ToString();
+            songUrl = jsonArr.SelectToken ("external_urls").SelectToken ("spotify").ToString ();
+            songId = jsonArr.SelectToken ("id").ToString ();
+            songTitle = jsonArr.SelectToken ("name").ToString ();
 
-                //Console.ForegroundColor = ConsoleColor.DarkGreen;
-                //Console.Write("\r\n" +
-                //              "ID " + songId + "\r\n" +
-                //              "Title " + songTitle + "\r\n" +
-                //              "Artists " + songArtists + "\r\n" +
-                //              "Album Url " + songAlbumUrl + "\r\n" +
-                //              "Duration " + songDuration + "\r\n" +
-                //              "Song Url " + songUrl + "\r\n" + "\r\n");
-                foundSong = songTitle + " by " + songArtists + " was added to the playlist";
-                Console.ForegroundColor = ConsoleColor.White;
-            var succuess = db.AddSong(fromChannel, messageSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
-            if (succuess)
-            {
+            //Console.ForegroundColor = ConsoleColor.DarkGreen;
+            //Console.Write("\r\n" +
+            //              "ID " + songId + "\r\n" +
+            //              "Title " + songTitle + "\r\n" +
+            //              "Artists " + songArtists + "\r\n" +
+            //              "Album Url " + songAlbumUrl + "\r\n" +
+            //              "Duration " + songDuration + "\r\n" +
+            //              "Song Url " + songUrl + "\r\n" + "\r\n");
+            foundSong = songTitle + " by " + songArtists + " was added to the playlist";
+            Console.ForegroundColor = ConsoleColor.White;
+            var succuess = db.AddSong (fromChannel, messageSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
+            if (succuess) {
                 return foundSong;
             }
             return "song already exists or something went wrong on my end.";
@@ -658,117 +581,104 @@ namespace twitch_irc_bot
         }
 
 
-        public string MobileSearchSong(TwitchMessage msg, DatabaseFunctions db)
+        public string MobileSearchSong (TwitchMessage msg, DatabaseFunctions db)
         {
             const string baseUrl = "https://api.spotify.com/v1";
             var songUrl = "";
             var songId = "";
             var songTitle = "";
-            if (msg.Msg.StartsWith("!msr"))
-            {
-                if (msg.UserType != "mod")
-                {
-                    if (db.GetRegularStatus(msg))
-                    {
-                        if (!db.RegularExist(msg.FromChannel, msg.MsgSender)) return null;
+            if (msg.Msg.StartsWith ("!msr")) {
+                if (msg.UserType != "mod") {
+                    if (db.GetRegularStatus (msg)) {
+                        if (!db.RegularExist (msg.FromChannel, msg.MsgSender))
+                            return null;
                     }
                 }
-                var msgAry = msg.Msg.Split(' ');
+                var msgAry = msg.Msg.Split (' ');
                 var queryString = "";
 
 
-                for (var i = 1; i < msgAry.Length; i++)
-                {
-                    if (msgAry[i] != "-")
-                    {
-                        if (msgAry[i].Contains("-"))
-                        {
-                            queryString += msgAry[i].Trim('-');
-                        }
-                        else
-                        {
-                            queryString += msgAry[i] + " ";
+                for (var i = 1; i < msgAry.Length; i++) {
+                    if (msgAry [i] != "-") {
+                        if (msgAry [i].Contains ("-")) {
+                            queryString += msgAry [i].Trim ('-');
+                        } else {
+                            queryString += msgAry [i] + " ";
                         }
                     }
                 }
-                queryString = queryString.Trim(' ');
+                queryString = queryString.Trim (' ');
 
                 //If we are searching for a track with words do below
 
-                    string requestUrl = baseUrl + "/search?type=track&offset=0&limit=20&market=US&q=" + queryString;
+                string requestUrl = baseUrl + "/search?type=track&offset=0&limit=20&market=US&q=" + queryString;
 
 
-                    var response = RequestJson(requestUrl);
-                    if (response == "400" || response == "401" || response == "404" || response == "429" ||
-                        response == "500" || response == "503")
-                    {
-                        return "Spotify API is down please try again in a few minutes.";
+                var response = RequestJson (requestUrl);
+                if (response == "400" || response == "401" || response == "404" || response == "429" ||
+                        response == "500" || response == "503") {
+                    return "Spotify API is down please try again in a few minutes.";
+                }
+
+                JToken jsonArr = JObject.Parse (response).SelectToken ("tracks").SelectToken ("items");
+
+                //grab the first result
+
+                if (!jsonArr.HasValues)
+                    return ", I couldn't find that song on Spotify.";
+
+                //var availableMarketsAry = jsonArr[0].SelectToken("available_markets");
+                //var validCountry = false;
+                //foreach (var country in availableMarketsAry)
+                //{
+                //    if (country.ToString() != "US") continue;
+                //    validCountry = true;
+                //    break;
+                //}
+                ////not playable in us
+                //if (!validCountry) return  ", this song isn't avialable in NA.";
+                Console.WriteLine (jsonArr [0].SelectToken ("artists").ToString ());
+                Console.WriteLine (jsonArr [0].SelectToken ("name").ToString ());
+
+                var songAlbumUrl = (jsonArr [0].SelectToken ("album").SelectToken ("images") [0].SelectToken ("url")).ToString ();
+                var artistAry = jsonArr [0].SelectToken ("artists").ToArray ();
+                var songArtists = "";
+
+                for (var i = 0; i < artistAry.Length; i++) {
+                    if (i == artistAry.Length - 1) {
+                        songArtists += artistAry [i].SelectToken ("name");
+                    } else {
+                        songArtists += artistAry [i].SelectToken ("name") + " and ";
                     }
+                }
+                var miliseconds = Int32.Parse (jsonArr [0].SelectToken ("duration_ms").ToString ());
 
-                    JToken jsonArr = JObject.Parse(response).SelectToken("tracks").SelectToken("items");
+                var a = miliseconds / 1000;
+                var minutes = a / 60;
+                a = a % 60;
 
-                    //grab the first result
+                var seconds = a.ToString ();
 
-                    if (!jsonArr.HasValues)
-                        return ", I couldn't find that song on Spotify.";
+                if (a < 10) {
+                    seconds = "0" + a;
+                }
 
-                    //var availableMarketsAry = jsonArr[0].SelectToken("available_markets");
-                    //var validCountry = false;
-                    //foreach (var country in availableMarketsAry)
-                    //{
-                    //    if (country.ToString() != "US") continue;
-                    //    validCountry = true;
-                    //    break;
-                    //}
-                    ////not playable in us
-                    //if (!validCountry) return  ", this song isn't avialable in NA.";
-                    Console.WriteLine(jsonArr[0].SelectToken("artists").ToString());
-                    Console.WriteLine(jsonArr[0].SelectToken("name").ToString());
+                var songDuration = minutes + ":" + seconds;
 
-                    var songAlbumUrl = (jsonArr[0].SelectToken("album").SelectToken("images")[0].SelectToken("url")).ToString();
-                    var artistAry = jsonArr[0].SelectToken("artists").ToArray();
-                    var songArtists = "";
+                songUrl = jsonArr [0].SelectToken ("external_urls").SelectToken ("spotify").ToString ();
+                songId = jsonArr [0].SelectToken ("id").ToString ();
+                songTitle = jsonArr [0].SelectToken ("name").ToString ();
 
-                    for (var i = 0; i < artistAry.Length; i++)
-                    {
-                        if (i == artistAry.Length - 1)
-                        {
-                            songArtists += artistAry[i].SelectToken("name");
-                        }
-                        else
-                        {
-                            songArtists += artistAry[i].SelectToken("name") + " and ";
-                        }
-                    }
-                    var miliseconds = Int32.Parse(jsonArr[0].SelectToken("duration_ms").ToString());
+                var foundSong = songTitle + " by " + songArtists + " was added to the playlist";
+                //Console.Write("\r\n" +
+                //              "ID " + songId + "\r\n" +
+                //              "Title " + songTitle + "\r\n" +
+                //              "Artists " + songArtists + "\r\n" +
+                //              "Album Url " + songAlbumUrl + "\r\n" +
+                //              "Duration " + songDuration + "\r\n" +
+                //              "Song Url " + songUrl + "\r\n" + "\r\n");
 
-                    var a = miliseconds/1000;
-                    var minutes = a/60;
-                    a = a%60;
-
-                    var seconds = a.ToString();
-
-                    if (a < 10)
-                    {
-                        seconds = "0" + a;
-                    }
-
-                    var songDuration = minutes + ":" + seconds;
-
-                    songUrl = jsonArr[0].SelectToken("external_urls").SelectToken("spotify").ToString();
-                    songId = jsonArr[0].SelectToken("id").ToString();
-                    songTitle = jsonArr[0].SelectToken("name").ToString();
-
-                    var foundSong = songTitle + " by " + songArtists + " was added to the playlist";
-                    //Console.Write("\r\n" +
-                    //              "ID " + songId + "\r\n" +
-                    //              "Title " + songTitle + "\r\n" +
-                    //              "Artists " + songArtists + "\r\n" +
-                    //              "Album Url " + songAlbumUrl + "\r\n" +
-                    //              "Duration " + songDuration + "\r\n" +
-                    //              "Song Url " + songUrl + "\r\n" + "\r\n");
-
-                return AddSongById(songId, db, msg.FromChannel, msg.MsgSender);
+                return AddSongById (songId, db, msg.FromChannel, msg.MsgSender);
 
         
 
@@ -777,7 +687,7 @@ namespace twitch_irc_bot
         }
 
 
-        public List<string> SearchSong(DatabaseFunctions db, TwitchMessage msg, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue  )
+        public List<string> SearchSong (DatabaseFunctions db, TwitchMessage msg, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue)
         {
             //Get multiple results
             //message user the results
@@ -793,137 +703,118 @@ namespace twitch_irc_bot
             var songUrl = "";
             var songId = "";
             var songTitle = "";
-            var songList = new List<string>();
-            if (msg.Msg.StartsWith("!songrequest ") || msg.Msg.StartsWith("!sr "))
-            {
-                if (msg.UserType != "mod")
-                {
-                    if (db.GetRegularStatus(msg))
-                    {
-                        if (!db.RegularExist(msg.FromChannel, msg.MsgSender)) return songList;
+            var songList = new List<string> ();
+            if (msg.Msg.StartsWith ("!songrequest ") || msg.Msg.StartsWith ("!sr ")) {
+                if (msg.UserType != "mod") {
+                    if (db.GetRegularStatus (msg)) {
+                        if (!db.RegularExist (msg.FromChannel, msg.MsgSender))
+                            return songList;
                     }
                 }
-                var msgAry = msg.Msg.Split(' ');
+                var msgAry = msg.Msg.Split (' ');
                 var queryString = "";
 
 
-                for (var i = 1; i < msgAry.Length; i++)
-                {
-                    if (msgAry[i] != "-")
-                    {
-                        if (msgAry[i].Contains("-"))
-                        {
-                            queryString += msgAry[i].Trim('-');
-                        }
-                        else
-                        {
-                            queryString += msgAry[i] + " ";
+                for (var i = 1; i < msgAry.Length; i++) {
+                    if (msgAry [i] != "-") {
+                        if (msgAry [i].Contains ("-")) {
+                            queryString += msgAry [i].Trim ('-');
+                        } else {
+                            queryString += msgAry [i] + " ";
                         }
                     }
                 }
-                queryString = queryString.Trim(' ');
+                queryString = queryString.Trim (' ');
 
 
                 //don't allow youtube requests
                 const string pattern =
                     @"https:\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-]+)(&(amp;)?[\w\?=]*)?";
 
-                if (Regex.Match(msg.Msg, pattern).Success)
-                {
-                    songList.Add("Sorry we are using Spotify not YouTube.");
+                if (Regex.Match (msg.Msg, pattern).Success) {
+                    songList.Add ("Sorry we are using Spotify not YouTube.");
                     return songList;
                 }
 
                 //song track URL
-                if (Regex.Match(queryString, @"^https:\/\/.*com\/track\/").Success)
-                {
-                    queryString = queryString.Split('/')[4];
+                if (Regex.Match (queryString, @"^https:\/\/.*com\/track\/").Success) {
+                    queryString = queryString.Split ('/') [4];
                 }
 
                 //song URI Request
-                else if (queryString.Length == 36 && queryString.Contains("spotify:track:"))
-                {
-                    queryString = queryString.Split(':')[2];
+                else if (queryString.Length == 36 && queryString.Contains ("spotify:track:")) {
+                    queryString = queryString.Split (':') [2];
                 }
 
                 //don't allow request by album
-                else if (queryString.Length == 36 && queryString.Contains("spotify:album:") ||
-                        Regex.Match(msg.Msg, @"^https:\/\/.*com\/album\/").Success)
-                {
-                    songList.Add("Sorry you can't request a whole album.");
+                else if (queryString.Length == 36 && queryString.Contains ("spotify:album:") ||
+                         Regex.Match (msg.Msg, @"^https:\/\/.*com\/album\/").Success) {
+                    songList.Add ("Sorry you can't request a whole album.");
                     return songList;
                 }
 
                 //don't allow request by artist
-                else if (queryString.Length == 37 && queryString.Contains("spotify:artist:") ||
-                        Regex.Match(msg.Msg, @"^https:\/\/.*com\/artist\/").Success)
-                {
-                    songList.Add("Sorry you can't request an artist.");
+                else if (queryString.Length == 37 && queryString.Contains ("spotify:artist:") ||
+                         Regex.Match (msg.Msg, @"^https:\/\/.*com\/artist\/").Success) {
+                    songList.Add ("Sorry you can't request an artist.");
                     return songList;
                 }
 
 
 
                 //track ID only look up by track id
-                if (!queryString.Contains(" ") && queryString.Length == 22)
-                {
-                    songList.Add(AddSongById(queryString, db, msg.FromChannel, msg.MsgSender));
+                if (!queryString.Contains (" ") && queryString.Length == 22) {
+                    songList.Add (AddSongById (queryString, db, msg.FromChannel, msg.MsgSender));
                     return songList;
                 }
                 //If we are searching for a track with words do below
 
                 string requestUrl = baseUrl + "/search?type=track&offset=0&limit=20&market=US&q=" + queryString;
-                var multipleResults = SearchSongByName(requestUrl, msg, BlockingMessageQueue, BlockingWhisperQueue);
-                if (multipleResults == null || multipleResults.Count == 0)
-                {
+                var multipleResults = SearchSongByName (requestUrl, msg, BlockingMessageQueue, BlockingWhisperQueue);
+                if (multipleResults == null || multipleResults.Count == 0) {
                     //songList.Add("Song not found.");
                     return songList;    
                 }
 
-                if (multipleResults.Count > 1)
-                {
+                if (multipleResults.Count > 1) {
 
 
-                    foreach (var song in multipleResults)
-                    {
+                    foreach (var song in multipleResults) {
                         //Console.WriteLine(song);
-                        songList.Add(song.Value.Key + " - " + song.Value.Value + "" +
-                                " [Track Id]: => " + song.Key);
+                        songList.Add (song.Value.Key + " - " + song.Value.Value + "" +
+                        " [Track Id]: => " + song.Key);
                     }
                     return songList;
                 }
-                songList.Add(AddSongById(multipleResults.First().Key, db, msg.FromChannel, msg.MsgSender));
+                songList.Add (AddSongById (multipleResults.First ().Key, db, msg.FromChannel, msg.MsgSender));
                 return songList;    
             }
-            var succuess = db.AddSong(msg.FromChannel, msg.MsgSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
-            if (succuess)
-            {
-                songList.Add(foundSong);
+            var succuess = db.AddSong (msg.FromChannel, msg.MsgSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
+            if (succuess) {
+                songList.Add (foundSong);
                 return songList;
             }
-            songList.Add("song already exists or something went wrong on my end.");
+            songList.Add ("song already exists or something went wrong on my end.");
             return songList;
         }
 
-        public string RemoveUserLastSong(DatabaseFunctions db, TwitchMessage msg)
+        public string RemoveUserLastSong (DatabaseFunctions db, TwitchMessage msg)
         {
-                    var result = db.RemoveUserLastSong(msg.FromChannel, msg.MsgSender);
-                    return !string.IsNullOrEmpty(result) ? result : null;
+            var result = db.RemoveUserLastSong (msg.FromChannel, msg.MsgSender);
+            return !string.IsNullOrEmpty (result) ? result : null;
         }
 
-        public string AddToQueue(TwitchMessage msg, RiotApi riotApi, DatabaseFunctions db)
+        public string AddToQueue (TwitchMessage msg, RiotApi riotApi, DatabaseFunctions db)
         {
-            var summonerName = msg.Msg.Substring(msg.Msg.IndexOf(' ') + 1);
+            var summonerName = msg.Msg.Substring (msg.Msg.IndexOf (' ') + 1);
             var postion = 1;
-            if (riotApi.GetSummonerId(summonerName) == null) return null;
-            var leagueQueue = db.AddToQueue(msg, summonerName);
-            if(leagueQueue != null)
-            {
+            if (riotApi.GetSummonerId (summonerName) == null)
+                return null;
+            var leagueQueue = db.AddToQueue (msg, summonerName);
+            if (leagueQueue != null) {
                 var currentCount = leagueQueue.Count;
-                foreach (var person in leagueQueue)
-                {
-                    if (person == msg.MsgSender)
-                    {
+                foreach (var person in leagueQueue) {
+                    if (person == msg.MsgSender) {
                         break;
                     }
                     postion++;
@@ -933,24 +824,20 @@ namespace twitch_irc_bot
             return "Could not reach database please try again.";
         }
 
-        public string CheckPostion(TwitchMessage msg, DatabaseFunctions db)
+        public string CheckPostion (TwitchMessage msg, DatabaseFunctions db)
         {
-            var leagueQueue = db.GetQueuePostion(msg);
+            var leagueQueue = db.GetQueuePostion (msg);
             var postion = 1;
             var exists = false;
-            if (leagueQueue != null && leagueQueue.Count != 0)
-            {
-                foreach (var person in leagueQueue)
-                {
-                    if (person == msg.MsgSender)
-                    {
+            if (leagueQueue != null && leagueQueue.Count != 0) {
+                foreach (var person in leagueQueue) {
+                    if (person == msg.MsgSender) {
                         exists = true;
                         break;
                     }
                     postion++;
                 }
-                if (exists)
-                {
+                if (exists) {
                     return msg.MsgSender + " you are number " + postion + " in queue.";
                 }
                 return msg.MsgSender + " you are not in the queue type \"!queue summonername\" to join the queue"; 
