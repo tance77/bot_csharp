@@ -18,6 +18,7 @@ namespace twitch_irc_bot
 
         public IrcCommandHandler (TwitchMessage m, ref BlockingCollection<string> q, ref BlockingCollection<string> wq, IrcClient c)
         {
+            Spotify = new Spotify ();
             BlockingMessageQueue = q;
             BlockingWhisperQueue = wq;
             Irc = c;
@@ -32,6 +33,8 @@ namespace twitch_irc_bot
         public BlockingCollection<string> BlockingMessageQueue{ get; set; }
 
         public BlockingCollection<string> BlockingWhisperQueue{ get; set; }
+
+        public Spotify Spotify { get; set; }
 
         public TwitchMessage Message { get; set; }
 
@@ -65,8 +68,6 @@ namespace twitch_irc_bot
         {
             if (userType == "mod")
                 return;
-            AddPrivMsgToQueue ("/timeout " + msgSender + " 4", fromChannel);
-            AddPrivMsgToQueue ("/timeout " + msgSender + " 3", fromChannel);
             AddPrivMsgToQueue ("/timeout " + msgSender + " 2", fromChannel);
             AddPrivMsgToQueue ("/timeout " + msgSender + " 1", fromChannel);
             AddWhisperToQueue (
@@ -137,7 +138,6 @@ namespace twitch_irc_bot
         public bool CheckEmotes (TwitchMessage msg, IrcClient ircServer)
         {
             if (msg.UserType == "mod") {
-                //Console.Write("I'm a mod**************************");
                 return false;
             }
             if (_db.EmoteStatus (msg.FromChannel) || _db.RegularExist (msg.FromChannel, msg.MsgSender)) {
@@ -164,7 +164,6 @@ namespace twitch_irc_bot
         {
             //Return True = Timeout
             if (msg.UserType == "mod") {
-                //Console.Write("I'm a mod**************************");
                 return false;
             }
             if (_db.AsciiStatus (msg.FromChannel)) {
@@ -498,19 +497,7 @@ namespace twitch_irc_bot
                         AddPrivMsgToQueue (_commandHelpers.GgToggle (Message.FromChannel, false, _db),
                             Message.FromChannel);
                     }
-                }
-                //else if (
-                //    Regex.Match(Message.Msg,
-                //        @".*?[Ss][Hh][Oo][Ww].*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?")
-                //    .Success ||
-                //    Regex.Match(Message.Msg,
-                //        @".*?(([Tt][Ii][Tt][Ss])|([Bb](([Oo]+)|([Ee]+[Ww]+))[Bb]+[Ss]+)).*?[Pp]+[Ll]+(([Ee]+[Aa]+[Ss]+[Ee]+)|([Zz]+)|([Ss]+)).*?")
-                //    .Success)
-                //{
-                //    AddPrivMsgToQueue(
-                //        Message.MsgSender + " here's  your boobs NSFW https://goo.gl/gGMasE", Message.FromChannel);
-                //}
-				else if (Regex.Match (Message.Msg, @"^!uptime$").Success) {
+                } else if (Regex.Match (Message.Msg, @"^!uptime$").Success) {
                     if (Message.FromChannel == "sophiabot")
                         return "";
                     AddPrivMsgToQueue (_twitchApi.GetStreamUptime (Message.FromChannel),
@@ -548,35 +535,7 @@ namespace twitch_irc_bot
                     if (_db.GetRegularStatus (Message) == false)
                         return "";
                     _commandHelpers.RemoveRegular (Message, _db, Irc);
-                }
-				//else if (Regex.Match(message, @"!timer").Success)
-				//{
-				//    if (_commandHelpers.AddTimer(_db, message, FromChannel)) //Everything worked
-				//    {
-				//        AddMessageToMessageList("Timer was addedd succesffully", FromChannel);
-				//    }
-				//    else //faild to add timer
-				//    {
-
-				//        AddMessageToMessageList("Failed to add timer", FromChannel);
-				//    }
-				//}
-				//else if (Regex.Match(message, @"^!mytimers$").Success)
-				//{
-				//    var toBeSent = _commandHelpers.ChannelTimers(_db, FromChannel);
-				//    if (toBeSent != null)
-				//    {
-				//        AddMessageToMessageList(toBeSent, FromChannel);
-				//    }
-				//}
-
-				//else if (Regex.Match(message, @"!addtimer").Success)
-				//{
-				//    var mytimer = _commandHelpers.AddTimer(FromChannel, message, 3, this);
-				//    AddMessageToMessageList("Timer added", FromChannel);
-				//    GC.KeepAlive(mytimer);
-				//}
-				else if (Regex.Match (Message.Msg, @"^!reg\son$").Success && Message.UserType == "mod") {
+                } else if (Regex.Match (Message.Msg, @"^!reg\son$").Success && Message.UserType == "mod") {
                     AddPrivMsgToQueue (
                         _commandHelpers.RegToggle (Message, true, _db), Message.FromChannel);
                 } else if (Regex.Match (Message.Msg, @"^!reg\soff$").Success && Message.UserType == "mod") {
@@ -602,11 +561,10 @@ namespace twitch_irc_bot
                         _commandHelpers.EmoteToggle (Message.FromChannel, false, _db), Message.FromChannel);
                 } else if ((Regex.Match (Message.Msg, @"^!sr\s+").Success || Regex.Match (Message.Msg, @"^!songrequest\s+").Success) &&
                            _db.CheckSongRequestStatus (Message.FromChannel)) {
-                    var response = _commandHelpers.SearchSong (_db, Message, BlockingMessageQueue, BlockingWhisperQueue);
+                    var response = Spotify.SearchSong (_db, Message, BlockingMessageQueue, BlockingWhisperQueue);
                     if (response.Count == 0)
                         return ""; 
                     if (response.Count > 1) {
-                        //Console.WriteLine(response.Count);
                         AddWhisperToQueue ("______________________________", Message.MsgSender);
                         AddWhisperToQueue ("Multiple results! What did you mean? Re-request with the track id.", Message.MsgSender);
                         foreach (var song in response) {
@@ -614,7 +572,6 @@ namespace twitch_irc_bot
                         }
                         return "";
                     }
-
                     Console.WriteLine (response.First ());
                     AddPrivMsgToQueue (response.First (), Message.FromChannel);
                 } else if ((Regex.Match (Message.Msg, @"^!sr$").Success || Regex.Match (Message.Msg, @"^!songrequest$").Success) &&
@@ -625,7 +582,7 @@ namespace twitch_irc_bot
                     " If you add the wrong song type !wrongsong or !ws to delete your last song.", Message.MsgSender);
                 } else if (Regex.Match (Message.Msg, @"^!msr\s+").Success &&
                            _db.CheckSongRequestStatus (Message.FromChannel)) {
-                    var response = _commandHelpers.MobileSearchSong (Message, _db);
+                    var response = Spotify.MobileSongSearh (Message, _db);
                     if (!string.IsNullOrEmpty (response)) {
                         AddPrivMsgToQueue (Message.MsgSender + " " + response, Message.FromChannel);
                     } else {
@@ -635,7 +592,7 @@ namespace twitch_irc_bot
                     var song = _db.GetCurrentSong (Message.FromChannel);
                     AddPrivMsgToQueue (song, Message.FromChannel);
                 } else if (Regex.Match (Message.Msg, @"^!wrongsong$").Success || Regex.Match (Message.Msg, @"^!ws$").Success && _db.CheckSongRequestStatus (Message.FromChannel)) {
-                    var response = _commandHelpers.RemoveUserLastSong (_db, Message);
+                    var response = Spotify.RemoveUserLastSong (_db, Message);
                     if (string.IsNullOrEmpty (response))
                         return "";
                     AddWhisperToQueue (response, Message.MsgSender);

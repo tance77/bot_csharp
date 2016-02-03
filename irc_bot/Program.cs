@@ -12,7 +12,7 @@ namespace twitch_irc_bot
         private static void Main (string[] args)
         {
 
-            const bool debug = false;
+            const bool debug = true;
 
             var jObj = JObject.Parse (File.ReadAllText (@"login.json"));
             var username = jObj.SelectToken ("bot_username").ToString ();
@@ -33,15 +33,15 @@ namespace twitch_irc_bot
 
             while (!whisperThread.IsAlive) {
                 //spin for a bit till the thread starts
-                        Thread.Sleep (1000);
+                Thread.Sleep (1000);
             }
 
-            var ircThread = new Thread (() => ircServer.ReadMessage ());
+            var ircThread = new Thread (() => ircServer.ReadMessage (/*PARAMS*/));
             ircThread.Start ();
 
             while (!ircThread.IsAlive) {
                 //spin for a bit till the thread starts
-                        Thread.Sleep (1000);
+                Thread.Sleep (1000);
             }
 
             while (true) {
