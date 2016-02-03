@@ -11,11 +11,13 @@ namespace twitch_irc_bot
     {
         private static void Main (string[] args)
         {
+
+            const bool debug = false;
+
             var jObj = JObject.Parse (File.ReadAllText (@"login.json"));
             var username = jObj.SelectToken ("bot_username").ToString ();
             var oAuth = jObj.SelectToken ("oauth").ToString ();
 
-            const bool debug = false;
             var q = new BlockingCollection<string> ();
             var wq = new BlockingCollection<string> ();
             var ircServer = new IrcClient ("irc.twitch.tv", 443, username, oAuth, ref q, ref wq, false, debug);

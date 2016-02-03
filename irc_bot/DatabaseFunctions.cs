@@ -965,6 +965,7 @@ namespace twitch_irc_bot
                                 }
                         }
                         GC.Collect();
+        
                         int randOne = randRange.Next(1, listOfResponses.Count);
                         Console.Write(listOfResponses[randOne] + "\r\n");
                         return listOfResponses[randOne];

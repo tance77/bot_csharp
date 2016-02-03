@@ -31,7 +31,7 @@ namespace twitch_irc_bot
                 {
                     string errorCode = e.ToString().Split('(')[1].Split(')')[0];
                     Console.Write(e + "\r\n");
-                    return null;
+                    return errorCode;
                 }
         }
         public List<string> GetGlobalEmotes()

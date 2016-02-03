@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
@@ -36,6 +37,8 @@ namespace twitch_irc_bot
         public bool Debug { get; set; }
 
         public bool WhisperServer { get; set; }
+
+       
 
         #region Constructors
 
@@ -334,6 +337,28 @@ namespace twitch_irc_bot
             if (message == null) {
                 return;
             }
+            var colorList = new List<string>()
+                {
+                    "Blue",
+                    "BlueViolet",
+                    "CadetBlue",
+                    "Chocolate",
+                    "Coral",
+                    "DodgerBlue",
+                    "Firebrick",
+                    "GoldenRod",
+                    "Green",
+                    "HotPink",
+                    "OrangeRed",
+                    "Red",
+                    "SeaGreen",
+                    "SpringGreen",
+                    "YellowGreen"
+                };
+            var randRange = new Random((int)DateTime.Now.Ticks & (0x0000FFFF));
+            int randOne = randRange.Next(1, colorList.Count);
+            BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
+            + BotUserName + ".tmi.twitch.tv PRIVMSG #" + "chinnbot" + " :" + "/color " + colorList[randOne]);
             BlockingMessageQueue.Add (":" + BotUserName + "!" + BotUserName + "@"
             + BotUserName + ".tmi.twitch.tv PRIVMSG #" + fromChannel + " :" + message);
         }
@@ -386,13 +411,14 @@ namespace twitch_irc_bot
 
         private void SendIrcMessage (string message)
         {
-            RateLimit += 1;
+            RateLimit += 2;
             try {
                 if (WhisperServer) {
                     Console.ForegroundColor = ConsoleColor.Magenta;
                 } else {
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
                 }
+
                 Console.WriteLine (message);
                 _outputStream.WriteLine (message);
                 Console.ForegroundColor = ConsoleColor.White;
