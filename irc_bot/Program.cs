@@ -12,7 +12,7 @@ namespace twitch_irc_bot
         private static void Main (string[] args)
         {
 
-            const bool debug = true;
+            const bool debug = false;
 
             var jObj = JObject.Parse (File.ReadAllText (@"login.json"));
             var username = jObj.SelectToken ("bot_username").ToString ();

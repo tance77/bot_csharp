@@ -357,8 +357,9 @@ namespace twitch_irc_bot
                 };
             var randRange = new Random((int)DateTime.Now.Ticks & (0x0000FFFF));
             int randOne = randRange.Next(1, colorList.Count);
+            Console.Write(colorList[randOne]);
             BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
-            + BotUserName + ".tmi.twitch.tv PRIVMSG #" + "chinnbot" + " :" + "/color " + colorList[randOne]);
+            + BotUserName + ".tmi.twitch.tv PRIVMSG #" + "chinnbot" + " :" + "/color " + colorList[randOne]); 
             BlockingMessageQueue.Add (":" + BotUserName + "!" + BotUserName + "@"
             + BotUserName + ".tmi.twitch.tv PRIVMSG #" + fromChannel + " :" + message);
         }
@@ -411,7 +412,7 @@ namespace twitch_irc_bot
 
         private void SendIrcMessage (string message)
         {
-            RateLimit += 2;
+            RateLimit += 1;
             try {
                 if (WhisperServer) {
                     Console.ForegroundColor = ConsoleColor.Magenta;

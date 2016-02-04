@@ -262,6 +262,29 @@ namespace twitch_irc_bot
             if (message == null) {
                 return;
             }
+            var colorList = new List<string>()
+                {
+                    "Blue",
+                    "BlueViolet",
+                    "CadetBlue",
+                    "Chocolate",
+                    "Coral",
+                    "DodgerBlue",
+                    "Firebrick",
+                    "GoldenRod",
+                    "Green",
+                    "HotPink",
+                    "OrangeRed",
+                    "Red",
+                    "SeaGreen",
+                    "SpringGreen",
+                    "YellowGreen"
+                };
+            var randRange = new Random((int)DateTime.Now.Ticks & (0x0000FFFF));
+            int randOne = randRange.Next(1, colorList.Count);
+            Console.Write(colorList[randOne]);
+            BlockingMessageQueue.Add(":" + Irc.BotUserName + "!" + Irc.BotUserName + "@"
+            + Irc.BotUserName + ".tmi.twitch.tv PRIVMSG #" + "chinnbot" + " :" + "/color " + colorList[randOne]);
             BlockingMessageQueue.Add (":" + Irc.BotUserName + "!" + Irc.BotUserName + "@"
             + Irc.BotUserName + ".tmi.twitch.tv PRIVMSG #" + fromChannel + " :" + message);
         }
