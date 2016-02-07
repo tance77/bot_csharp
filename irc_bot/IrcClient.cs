@@ -414,12 +414,7 @@ namespace twitch_irc_bot
         {
             RateLimit += 1;
             try {
-                if (WhisperServer) {
-                    Console.ForegroundColor = ConsoleColor.Magenta;
-                } else {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                }
-
+                Console.ForegroundColor = WhisperServer ? ConsoleColor.Magenta : ConsoleColor.DarkYellow;
                 Console.WriteLine (message);
                 _outputStream.WriteLine (message);
                 Console.ForegroundColor = ConsoleColor.White;
@@ -468,11 +463,11 @@ namespace twitch_irc_bot
                         Console.WriteLine ("Whisper Server");
                     }
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write (buf + "\r\n");
-                    _outputStream.Write (buf.Replace ("PING", "PONG") + "\r\n");
+                    Console.WriteLine(buf + "\r\n");
+                    _outputStream.WriteLine(buf.Replace ("PING", "PONG") + "\r\n");
                     Console.ForegroundColor = ConsoleColor.White;
-                    Console.Write (buf.Replace ("PING", "PONG") + "\r\n");
-                    _outputStream.Flush ();
+                    Console.WriteLine(buf.Replace ("PING", "PONG") + "\r\n");
+                    //_outputStream.Flush ();
 
                 } catch (Exception e) {
                     Console.ForegroundColor = ConsoleColor.DarkRed;
