@@ -130,24 +130,34 @@ namespace twitch_irc_bot
         }
         public bool CheckAccountCreation(string user)
         {
-            string url = "https://api.twitch.tv/kraken/users/" + user;
-            string jsonString = RequestJson(url);
-            //know way of telling if the account was created today so just return false
-            if(jsonString == null) return false;
-            var creation_date = JObject.Parse(jsonString).SelectToken("created_at").ToString();
-            //Was the account created before today
-            var a = DateTime.Compare(DateTime.Parse(creation_date).Date.AddDays(-7) , DateTime.UtcNow.Date); //.Date just compares the date
-            //returns true if creation is > = 0 else false
-            //you're to young for links
-            if (Convert.ToInt32(a) <= 0)
+            try
             {
-                return true;
+                string url = "https://api.twitch.tv/kraken/users/" + user;
+                string jsonString = RequestJson(url);
+                //know way of telling if the account was created today so just return false
+                if (jsonString.Length == 3) return false;
+                var creation_date = JObject.Parse(jsonString).SelectToken("created_at").ToString();
+                //Was the account created before today
+                var a = DateTime.Compare(DateTime.Parse(creation_date).Date.AddDays(-7), DateTime.UtcNow.Date);
+                //.Date just compares the date
+                //returns true if creation is > = 0 else false
+                //you're to young for links
+                if (Convert.ToInt32(a) <= 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+                //You're an adult please continue
             }
-            else
+            catch (Exception e)
             {
+                Console.Write("Error in check account creation twitchapi.cs 158");
                 return false;
             }
-            //You're an adult please continue
         }
     }
 }

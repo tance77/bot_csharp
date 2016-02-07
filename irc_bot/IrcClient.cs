@@ -356,8 +356,8 @@ namespace twitch_irc_bot
                     "YellowGreen"
                 };
             var randRange = new Random((int)DateTime.Now.Ticks & (0x0000FFFF));
-            int randOne = randRange.Next(1, colorList.Count);
-            Console.Write(colorList[randOne]);
+            var randOne = randRange.Next(1, colorList.Count);
+            //Console.Write(colorList[randOne]);
             BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
             + BotUserName + ".tmi.twitch.tv PRIVMSG #" + "chinnbot" + " :" + "/color " + colorList[randOne]); 
             BlockingMessageQueue.Add (":" + BotUserName + "!" + BotUserName + "@"

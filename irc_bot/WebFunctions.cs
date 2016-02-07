@@ -36,18 +36,26 @@ namespace twitch_irc_bot
         }
         public List<string> GetGlobalEmotes()
         {
-            var emoteList = new List<string>();
-            var response = RequestJson("http://twitchemotes.com/api_cache/v2/global.json");
-            if (response == null)
+            try
             {
+                var emoteList = new List<string>();
+                var response = RequestJson("http://twitchemotes.com/api_cache/v2/global.json");
+                if (response.Length == 3)
+                {
+                    return null;
+                }
+                var jsonArr = JObject.Parse(response).SelectToken("emotes");
+                foreach (var emote in jsonArr)
+                {
+                    emoteList.Add(emote.ToString().Split('"')[1]);
+                }
+                return emoteList;
+            }
+            catch (Newtonsoft.Json.JsonReaderException e)
+            {
+                Console.Write(e);
                 return null;
             }
-            var jsonArr = JObject.Parse(response).SelectToken("emotes");
-            foreach (var emote in jsonArr)
-            {
-                emoteList.Add(emote.ToString().Split('"')[1]);
-            }
-            return emoteList;
         }
     }
 }

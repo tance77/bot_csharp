@@ -80,13 +80,13 @@ namespace twitch_irc_bot
 
         }
 
-        public string MobileSongSearh (TwitchMessage msg, DatabaseFunctions db)
+        public string ImFeelingLuckySongSearch (TwitchMessage msg, DatabaseFunctions db)
         {
             const string baseUrl = "https://api.spotify.com/v1";
             var songUrl = "";
             var songId = "";
             var songTitle = "";
-            if (msg.Msg.StartsWith ("!msr")) {
+            if (msg.Msg.StartsWith ("!sr")) {
                 if (msg.UserType != "mod") {
                     if (db.GetRegularStatus (msg)) {
                         if (!db.RegularExist (msg.FromChannel, msg.MsgSender))
@@ -233,7 +233,7 @@ namespace twitch_irc_bot
             var songId = "";
             var songTitle = "";
             var songList = new List<string> ();
-            if (msg.Msg.StartsWith ("!songrequest ") || msg.Msg.StartsWith ("!sr ")) {
+            if (msg.Msg.StartsWith ("!songrequest ")) {
                 if (msg.UserType != "mod") {
                     if (db.GetRegularStatus (msg)) {
                         if (!db.RegularExist (msg.FromChannel, msg.MsgSender))
