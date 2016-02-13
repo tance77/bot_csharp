@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp.Extensions;
 
@@ -12,7 +13,7 @@ namespace twitch_irc_bot
         {
             string url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
             string jsonString = RequestJson(url);
-            if(jsonString == null) return "Stream is offline.";
+            if (jsonString == null) return "Stream is offline.";
             if (!JObject.Parse(jsonString).SelectToken("stream").HasValues)
             {
                 return "Stream is offline.";
@@ -36,72 +37,95 @@ namespace twitch_irc_bot
         //Returns weather the stream is online or not
         public bool StreamStatus(string fromChannel)
         {
-            var url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
-            var jsonString = RequestJson(url);
-            if (jsonString == null)
+            try
+            {
+                var url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
+                var jsonString = RequestJson(url);
+                if (jsonString == null)
+                {
+                    return false;
+                }
+                var tokenArry = JObject.Parse(jsonString).SelectToken("stream");
+                if (!tokenArry.ToString().HasValue())
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (JsonReaderException e)
             {
                 return false;
             }
-            var tokenArry = JObject.Parse(jsonString).SelectToken("stream");
-            if (!tokenArry.ToString().HasValue())
-            {
-                return false;
-            }
-            return true;
         }
 
         public Dictionary<string, DateTime> GetRecentFollowers(string fromChannel)
         {
-            var r = new Random();
-            int limit = r.Next(25, 100);
-            string url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=" + limit;
-            string jsonString = RequestJson(url);
-            var followsDictionary = new Dictionary<string, DateTime>();
-            if(jsonString.Count() == 3) return null;
-            if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
+            try
             {
-                return null;
-            }
-            JToken jsonArr = JObject.Parse(jsonString).SelectToken("follows");
-            foreach (JToken item in jsonArr)
-            {
-                string createdAt = JObject.Parse(item.ToString()).SelectToken("created_at").ToString();
-                DateTime followDate;
-                if (!DateTime.TryParse(createdAt, out followDate))
+                var r = new Random();
+                int limit = r.Next(25, 100);
+                string url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=" + limit;
+                string jsonString = RequestJson(url);
+                var followsDictionary = new Dictionary<string, DateTime>();
+                if (jsonString.Count() == 3) return null;
+                if (!JObject.Parse(jsonString).HasValues ||
+                    (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
                 {
                     return null;
                 }
-                string displayName =
-                    JObject.Parse(item.ToString()).SelectToken("user").SelectToken("display_name").ToString();
-                followsDictionary.Add(displayName, followDate);
+                JToken jsonArr = JObject.Parse(jsonString).SelectToken("follows");
+                foreach (JToken item in jsonArr)
+                {
+                    string createdAt = JObject.Parse(item.ToString()).SelectToken("created_at").ToString();
+                    DateTime followDate;
+                    if (!DateTime.TryParse(createdAt, out followDate))
+                    {
+                        return null;
+                    }
+                    string displayName =
+                        JObject.Parse(item.ToString()).SelectToken("user").SelectToken("display_name").ToString();
+                    followsDictionary.Add(displayName, followDate);
+                }
+                return followsDictionary;
             }
-            return followsDictionary;
+            catch (JsonReaderException e)
+            {
+                return null;
+            }
         }
 
         public Dictionary<string, DateTime> GetFirstHundredFollowers(string fromChannel)
         {
-            string url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=100";
-            string jsonString = RequestJson(url);
-            var followsDictionary = new Dictionary<string, DateTime>();
-            if (jsonString == null) return null;
-            if (!JObject.Parse(jsonString).HasValues || (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
+            try
             {
-                return null;
-            }
-            JToken jsonArr = JObject.Parse(jsonString).SelectToken("follows");
-            foreach (JToken item in jsonArr)
-            {
-                string createdAt = JObject.Parse(item.ToString()).SelectToken("created_at").ToString();
-                DateTime followDate;
-                if (!DateTime.TryParse(createdAt, out followDate))
+                string url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=100";
+                string jsonString = RequestJson(url);
+                var followsDictionary = new Dictionary<string, DateTime>();
+                if (jsonString == null) return null;
+                if (!JObject.Parse(jsonString).HasValues ||
+                    (!JObject.Parse(jsonString).SelectToken("follows").HasValues))
                 {
                     return null;
                 }
-                string displayName =
-                    JObject.Parse(item.ToString()).SelectToken("user").SelectToken("display_name").ToString();
-                followsDictionary.Add(displayName, followDate);
+                JToken jsonArr = JObject.Parse(jsonString).SelectToken("follows");
+                foreach (JToken item in jsonArr)
+                {
+                    string createdAt = JObject.Parse(item.ToString()).SelectToken("created_at").ToString();
+                    DateTime followDate;
+                    if (!DateTime.TryParse(createdAt, out followDate))
+                    {
+                        return null;
+                    }
+                    string displayName =
+                        JObject.Parse(item.ToString()).SelectToken("user").SelectToken("display_name").ToString();
+                    followsDictionary.Add(displayName, followDate);
+                }
+                return followsDictionary;
             }
-            return followsDictionary;
+            catch (JsonReaderException e)
+            {
+                return null;
+            }
         }
 
 
@@ -111,7 +135,7 @@ namespace twitch_irc_bot
             var userList = new List<string>();
             string url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
             string jsonString = RequestJson(url);
-            if(jsonString == null) return null;
+            if (jsonString == null) return null;
 
             //Line  87 is equivalent to line 89
             //JToken modsaksjdlsakd = JObject.Parse(jsonString)["chatters"]["moderators"];
@@ -121,13 +145,14 @@ namespace twitch_irc_bot
             JToken admins = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("admins");
             JToken globalMods = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("global_mods");
             JToken viewers = JObject.Parse(jsonString).SelectToken("chatters").SelectToken("viewers");
-            userList.AddRange(mods.Select(mod => (string) mod));
-            userList.AddRange(staff.Select(user => (string) user));
-            userList.AddRange(admins.Select(admin => (string) admin));
-            userList.AddRange(globalMods.Select(globalMod => (string) globalMod));
-            userList.AddRange(viewers.Select(viewer => (string) viewer));
+            userList.AddRange(mods.Select(mod => (string)mod));
+            userList.AddRange(staff.Select(user => (string)user));
+            userList.AddRange(admins.Select(admin => (string)admin));
+            userList.AddRange(globalMods.Select(globalMod => (string)globalMod));
+            userList.AddRange(viewers.Select(viewer => (string)viewer));
             return userList;
         }
+
         public bool CheckAccountCreation(string user)
         {
             try
@@ -146,10 +171,7 @@ namespace twitch_irc_bot
                 {
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+                return false;
 
                 //You're an adult please continue
             }

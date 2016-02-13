@@ -361,7 +361,7 @@ namespace twitch_irc_bot
             BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
             + BotUserName + ".tmi.twitch.tv PRIVMSG #" + "chinnbot" + " :" + "/color " + colorList[randOne]); 
             BlockingMessageQueue.Add (":" + BotUserName + "!" + BotUserName + "@"
-            + BotUserName + ".tmi.twitch.tv PRIVMSG #" + fromChannel + " :" + message);
+            + BotUserName + ".tmi.twitch.tv PRIVMSG #" + fromChannel + " :" + message + "\r\n");
         }
 
 
