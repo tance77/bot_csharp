@@ -135,10 +135,7 @@ namespace twitch_irc_bot
                 //    Irc.SendChatMessage("ᕙ༼ຈل͜ຈ༽ᕗ flex your dongers ᕙ༼ຈل͜ຈ༽ᕗᕙ༼ຈل͜ຈ༽ᕗ DongerinoUserino is here ᕙ༼ຈل͜ຈ༽ᕗ ",
                 //        FromChannel);
                 //}
-                //if (Joiner == "luminexi")
-                //{
-                //    Irc.SendChatMessage("Luminexi... you mean Lumisexi DatSheffy", FromChannel);
-                //}
+  
                 //if (Joiner == "stevenwinans")
                 //{
                 //    Irc.SendChatMessage("StevenWinans, Netflix and chill? DatSheffy?", FromChannel);
@@ -235,7 +232,7 @@ namespace twitch_irc_bot
                 {
                     UserId = tmp;
                 }
-                UserType = prefix[6].Split('=')[1].Split('"')[0].Split(' ')[0];
+                UserType = prefix[3].Split('=')[1].Split('"')[0].Split(' ')[0];
                 if (MsgSender.ToLower() == FromChannel.ToLower())
                 {
                     UserType = "mod";

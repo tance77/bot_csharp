@@ -107,6 +107,7 @@
     <Compile Include="Twitch\TwitchMessage.cs" />
     <Compile Include="WebFunctions.cs" />
     <Compile Include="Spotify\Spotify.cs" />
+    <Compile Include="Youtube\Youtube.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -134,7 +135,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="Spotify\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

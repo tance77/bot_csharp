@@ -150,12 +150,10 @@ namespace twitch_irc_bot
             if (WhisperServer) {
                 while (RateLimit < 100 && BlockingWhisperQueue.Count > 0) {
                     SendIrcMessage (BlockingWhisperQueue.Take ());
-                    Thread.Sleep (400);
                 }
             } else {
                 while (RateLimit < 100 && BlockingMessageQueue.Count > 0) {
                     SendIrcMessage (BlockingMessageQueue.Take ());
-                    Thread.Sleep (400);
                 }
             }
         }
@@ -320,10 +318,7 @@ namespace twitch_irc_bot
                     }
                 }
             }
-            //Finally we need to remove the channels that we parted
-            foreach (var channel in listOfChannelsToRemove) {
-                _listOfActiveChannels.Remove (channel);
-            }
+            _listOfActiveChannels = _db.GetListOfActiveChannels();
         }
 
         #endregion

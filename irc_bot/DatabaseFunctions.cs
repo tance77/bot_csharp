@@ -1641,6 +1641,45 @@ namespace twitch_irc_bot
         }
 
 
+        public int GetUsersSongCount(TwitchMessage message)
+        {
+            var count = 0;
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+
+                    using (
+                        var command =
+                            new MySqlCommand("Select Count(*) FROM Songs WHERE channel_name=@c AND requested_by=@r",
+                                dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@c", message.FromChannel);
+                        command.Parameters.AddWithValue("@r", message.MsgSender);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            // if we found a value that means it exits and we don't want ot add a duplicate
+                            if (reader.Read())
+                            {
+                                count = reader.GetInt32(0);
+                            }
+                        }
+                    }
+                    GC.Collect();
+                    return count;
+                }
+            }
+            catch
+                (MySqlException e)
+            {
+                Console.Write(e + "\r\n");
+                return 100;
+
+            }
+
+        }
+
         //1 of the same song check to see if the same sone exists before adding Lets avoid dupilcates
 
         public bool AddSong(string channelName, string requestedBy, string songId, string duration, string artist,
