@@ -38,14 +38,18 @@ namespace twitch_irc_bot
 
         public bool WhisperServer { get; set; }
 
+        public string YoutubeApiKey { get; set; }
+
        
 
         #region Constructors
 
-        public IrcClient (string ip, int port, string userName, string oAuth, ref BlockingCollection<string> q, ref BlockingCollection<string> wq, bool whisperServer, bool debug)
+        public IrcClient (string ip, int port, string userName, string oAuth, ref BlockingCollection<string> q, ref BlockingCollection<string> wq, bool whisperServer, bool debug, string youtubeApiKey)
         {
             RateLimit = 0;
             Debug = debug;
+
+            YoutubeApiKey = youtubeApiKey;
 
             WhisperServer = whisperServer;
             Running = true;

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
@@ -34,11 +35,11 @@ namespace twitch_irc_bot
             var response = RequestJson (requestUrl);
             if (response == "400" || response == "401" || response == "404" || response == "429" ||
                 response == "500" || response == "503") {
-                return "Spotify API is down please try again in a few minutes.";
+                return " Spotify API is down please try again in a few minutes.";
             }
             JToken jsonArr = JObject.Parse (response);
             if (!jsonArr.HasValues) {
-                return ", Song not found on Spotify.";
+                return " Song not found on Spotify.";
             }
 
 
@@ -76,7 +77,7 @@ namespace twitch_irc_bot
             if (succuess) {
                 return foundSong;
             }
-            return "song already exists or something went wrong on my end.";
+            return " song already exists or something.";
 
         }
 
@@ -124,7 +125,7 @@ namespace twitch_irc_bot
                 //grab the first result
 
                 if (!jsonArr.HasValues)
-                    return ", I couldn't find that song on Spotify.";
+                    return " I couldn't find that song on Spotify.";
 
                 Console.WriteLine (jsonArr [0].SelectToken ("artists").ToString ());
                 Console.WriteLine (jsonArr [0].SelectToken ("name").ToString ());
@@ -216,7 +217,7 @@ namespace twitch_irc_bot
             return foundSongs;
         }
 
-        public List<string> SearchSong (DatabaseFunctions db, TwitchMessage msg, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue)
+        public List<string> SearchSong (DatabaseFunctions db, TwitchMessage msg, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue, string youtubeApiKey)
         {
             //Get multiple results
             //message user the results
@@ -257,11 +258,44 @@ namespace twitch_irc_bot
 
 
                 //don't allow youtube requests
-                const string pattern =
-                    @"https:\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-]+)(&(amp;)?[\w\?=]*)?";
+                //var youtubeRegex = new Regex(@"youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)");
+                var youtubeRegex =
+                    new Regex(
+                        @"(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&amp;]v=)|youtu\.be\/)([^""&amp;?\/ ]{11})");
 
-                if (Regex.Match (msg.Msg, pattern).Success) {
-                    songList.Add ("Sorry we are using Spotify not YouTube.");
+                var youTubeBasicRegix = new Regex(@"\?*v=([a-zA-Z0-9_-]{11})");
+
+                var youtubeBasicMatch = youTubeBasicRegix.Match(msg.Msg);
+                var youtubeMatch = youtubeRegex.Match(msg.Msg);
+
+                if (youtubeMatch.Success || queryString.Length == 11 || youtubeBasicMatch.Success)
+                {
+                    var videoId = "";
+                    if (queryString.Length == 11)
+                    {
+                        videoId = queryString;
+                    }
+                    else if (youtubeMatch.Success)
+                    {
+                        videoId = youtubeMatch.Groups[1].Value;
+                    }
+                    else if (youtubeBasicMatch.Success)
+                    {
+                        videoId = youtubeBasicMatch.Groups[1].Value;
+                    }
+                    var youtubeSong = new Youtube(youtubeApiKey);
+                    youtubeSong.GetYoutubeInfo(videoId);
+                    youtubeSong.SanatizeTitle();
+
+
+                    msg.Msg = "!sr " + youtubeSong.Title;
+
+                    var result = ImFeelingLuckySongSearch(msg, db);
+
+                    Console.WriteLine(youtubeSong.Title);
+
+                    songList.Add(msg.MsgSender + " " + result);
+
                     return songList;
                 }
 
@@ -278,14 +312,14 @@ namespace twitch_irc_bot
                 //don't allow request by album
                 else if (queryString.Length == 36 && queryString.Contains ("spotify:album:") ||
                          Regex.Match (msg.Msg, @"^https:\/\/.*com\/album\/").Success) {
-                    songList.Add ("Sorry you can't request a whole album.");
+                    songList.Add (msg.MsgSender + " Sorry you can't request a whole album.");
                     return songList;
                 }
 
                 //don't allow request by artist
                 else if (queryString.Length == 37 && queryString.Contains ("spotify:artist:") ||
                          Regex.Match (msg.Msg, @"^https:\/\/.*com\/artist\/").Success) {
-                    songList.Add ("Sorry you can't request an artist.");
+                             songList.Add(msg.MsgSender + " Sorry you can't request an artist.");
                     return songList;
                 }
 
@@ -320,10 +354,10 @@ namespace twitch_irc_bot
             }
             var succuess = db.AddSong (msg.FromChannel, msg.MsgSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
             if (succuess) {
-                songList.Add (foundSong);
+                songList.Add(msg.MsgSender + " " +foundSong);
                 return songList;
             }
-            songList.Add ("song already exists or something went wrong on my end.");
+            songList.Add(msg.MsgSender + " song already exists.");
             return songList;
         }
 

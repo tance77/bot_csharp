@@ -663,7 +663,7 @@ namespace twitch_irc_bot
                         }
                         else
                         {
-                            var response = Spotify.SearchSong(_db, Message, BlockingMessageQueue, BlockingWhisperQueue);
+                            var response = Spotify.SearchSong(_db, Message, BlockingMessageQueue, BlockingWhisperQueue, Irc.YoutubeApiKey);
                             if (response.Count == 0)
                                 return "";
                             if (response.Count > 1)
