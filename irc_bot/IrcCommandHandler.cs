@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using NUnit.Framework.Constraints;
 
 namespace twitch_irc_bot
 {
@@ -114,6 +115,7 @@ namespace twitch_irc_bot
                 Regex.Match(msg.Msg,
                     @"I just got \$50 prepaid riot points from here its legit xD!!! http:\/\/getriotpointscodes\.com\/")
                 .Success ||
+                Regex.Match(msg.Msg, @"strawpoII\.me").Success || //fake strawpoll screamer
                 Regex.Match(msg.Msg, @"http:\/\/bit\.ly\/").Success ||
                 Regex.Match(msg.Msg, @".*?ddns.*?").Success ||
                 Regex.Match(msg.Msg, @".*?testmuk.*?").Success ||
@@ -540,283 +542,358 @@ namespace twitch_irc_bot
 
                 #region Non Mod Commands
 
-                    //If we don't find a channel command check the built in commands
+                //If we don't find a channel command check the built in commands
 
-                    if (Regex.Match(Message.Msg, @"!commands").Success)
+                if (Regex.Match(Message.Msg, @"!commands").Success)
+                {
+                    if (Message.FromChannel == "sophiabot")
+                        return "";
+                    Irc.AddPrivMsgToQueue(
+                        Message.MsgSender +
+                        ", the commands for this channel can be found here http://chinnbot.tv/commands?user=" +
+                        Message.FromChannel, Message.FromChannel);
+                }
+                else if (Regex.Match(Message.Msg, @"^!masteries").Success)
+                {
+                    var msgArr = Message.Msg.Split(' ');
+                    var definedUser = "";
+                    for (int i = 1; i < msgArr.Count(); i++)
                     {
-                        if (Message.FromChannel == "sophiabot")
-                            return "";
-                        Irc.AddPrivMsgToQueue(
-                            Message.MsgSender +
-                            ", the commands for this channel can be found here http://chinnbot.tv/commands?user=" +
-                            Message.FromChannel, Message.FromChannel);
+                        definedUser += msgArr[i] + " ";
                     }
-                    else if (Regex.Match(Message.Msg, @"^!masteries$").Success)
+                    definedUser = definedUser.Trim().ToLower();
+                    if (string.IsNullOrEmpty(definedUser))
                     {
-                        Irc.AddPrivMsgToQueue(_commandHelpers.GetMasteries(Message.FromChannel, _riotApi),
+                        Irc.AddPrivMsgToQueue(_commandHelpers.GetMasteries(Message, Message.FromChannel, _riotApi),
                             Message.FromChannel);
                     }
-                    else if (Regex.Match(Message.Msg, @"^!rank$").Success)
+                    else
                     {
-                        string resoponse = _commandHelpers.GetLeagueRank(Message.FromChannel, Message.MsgSender, _db,
-                            _riotApi);
-                        Irc.AddPrivMsgToQueue(resoponse, Message.FromChannel);
-                    }
-                    else if (Regex.Match(Message.Msg, @"^!runes$").Success)
-                    {
-                        Dictionary<string, int> runeDictionary = _riotApi.GetRunes(Message.FromChannel);
-                        if (runeDictionary != null)
-                        {
-                            Irc.AddPrivMsgToQueue(_commandHelpers.ParseRuneDictionary(runeDictionary),
-                                Message.FromChannel);
-                        }
-                        else
-                        {
-                            Irc.AddPrivMsgToQueue(
-                                "Please set up your summoner name by typing !setsummoner [summonername]",
-                                Message.FromChannel);
-                        }
+                        Irc.AddPrivMsgToQueue(_commandHelpers.GetMasteries(Message, definedUser, _riotApi), Message.FromChannel);
                     }
 
-                    else if (Regex.Match(Message.Msg, @"^!roulette$").Success)
+                }
+                else if (Regex.Match(Message.Msg, @"^!rank$").Success)
+                {
+                    string resoponse = _commandHelpers.GetLeagueRank(Message.FromChannel, Message.MsgSender, _db,
+                        _riotApi);
+                    Irc.AddPrivMsgToQueue(resoponse, Message.FromChannel);
+                }
+                else if (Regex.Match(Message.Msg, @"^!runes$").Success)
+                {
+                    Dictionary<string, int> runeDictionary = _riotApi.GetRunes(Message.FromChannel);
+                    if (runeDictionary != null)
                     {
-                        if (_commandHelpers.Roulette(Message.FromChannel))
+                        Irc.AddPrivMsgToQueue(_commandHelpers.ParseRuneDictionary(runeDictionary),
+                            Message.FromChannel);
+                    }
+                    else
+                    {
+                        Irc.AddPrivMsgToQueue(
+                            "Please set up your summoner name by typing !setsummoner [summonername]",
+                            Message.FromChannel);
+                    }
+                }
+
+                else if (Regex.Match(Message.Msg, @"^!roulette$").Success && Message.OperatingUser != "1")
+                {
+                    if (_commandHelpers.Roulette(Message.FromChannel))
+                    {
+                        Irc.AddPrivMsgToQueue("/timeout " + Message.MsgSender + " 300", Message.FromChannel);
+                        Irc.AddWhisperToQueue(
+                            " You have been killed. You can not speak for 5 minutes. To better simulate death the timeout has been increased from one minute to five minutes",
+                            Message.MsgSender);
+                        Irc.AddPrivMsgToQueue(Message.MsgSender + ", took a bullet to the head.",
+                            Message.FromChannel);
+                    }
+                    else
+                    {
+                        Irc.AddPrivMsgToQueue(
+                            Message.MsgSender + ", pulled the trigger and nothing happened.", Message.FromChannel);
+                    }
+                }
+                else if (Regex.Match(Message.Msg, @"!setsummoner").Success)
+                {
+                    string summonerName = _commandHelpers.SplitSummonerName(Message.Msg);
+                    Irc.AddPrivMsgToQueue(
+                        _commandHelpers.SetSummonerName(Message.FromChannel, summonerName, Message.MsgSender, _db),
+                        Message.FromChannel);
+                    string summonerId = _riotApi.GetSummonerId(summonerName);
+                    _db.SetSummonerId(Message.FromChannel, summonerId);
+                }
+                else if (Regex.Match(Message.Msg, @"^!suicide$").Success && Message.OperatingUser != "1")
+                {
+                    kill_user(Message.FromChannel, Message.MsgSender, Message.UserType);
+                }
+                else if (Message.Msg == "gg")
+                {
+                    if (_commandHelpers.CheckGg(Message.FromChannel, _db))
+                    {
+                        Irc.AddPrivMsgToQueue("GG", Message.FromChannel);
+                    }
+                }
+
+                else if (Regex.Match(Message.Msg, @"^!uptime$").Success)
+                {
+                    if (Message.FromChannel == "sophiabot")
+                        return "";
+                    Irc.AddPrivMsgToQueue(_twitchApi.GetStreamUptime(Message.FromChannel),
+                        Message.FromChannel);
+                }
+                else if (Regex.Match(Message.Msg, @"^!dicksize$").Success)
+                {
+                    string response = _commandHelpers.DickSize(Message.FromChannel, Message.MsgSender, _db);
+                    Irc.AddPrivMsgToQueue(response, Message.FromChannel);
+                }
+
+                else if (Regex.Match(Message.Msg, @"^!roll$").Success)
+                {
+                    int diceRoll = _commandHelpers.DiceRoll();
+                    Irc.AddPrivMsgToQueue(Message.MsgSender + " rolled a " + diceRoll, Message.FromChannel);
+                }
+                else if (Regex.Match(Message.Msg, @"^!coinflip$").Success)
+                {
+                    bool coinFlip = _commandHelpers.CoinFlip();
+                    if (coinFlip)
+                    {
+                        Irc.AddPrivMsgToQueue(Message.MsgSender + " flipped a coin and it came up heads",
+                            Message.FromChannel);
+                    }
+                    else
+                    {
                         {
-                            Irc.AddPrivMsgToQueue("/timeout " + Message.MsgSender + " 300", Message.FromChannel);
+                            Irc.AddPrivMsgToQueue(
+                                Message.MsgSender + " flipped a coin and it came up tails", Message.FromChannel);
+                        }
+                    }
+                }
+
+                else if ((Regex.Match(Message.Msg, @"^!songrequest\s+").Success) &&
+                         _db.CheckSongRequestStatus(Message.FromChannel))
+                {
+                    if (_db.GetUsersSongCount(Message) >= 4)
+                    {
+                        var x = 4;
+                        Irc.AddPrivMsgToQueue(
+                            Message.MsgSender + ", you already have " + x + " songs in the queue.",
+                            Message.FromChannel);
+                    }
+                    else
+                    {
+                        var response = Spotify.SearchSong(_db, Message, BlockingMessageQueue, BlockingWhisperQueue, Irc.YoutubeApiKey);
+                        if (response.Count == 0)
+                            return "";
+                        if (response.Count > 1)
+                        {
+                            Irc.AddWhisperToQueue("______________________________", Message.MsgSender);
                             Irc.AddWhisperToQueue(
-                                " You have been killed. You can not speak for 5 minutes. To better simulate death the timeout has been increased from one minute to five minutes",
+                                "Multiple results! What did you mean? Re-request with the track id.",
                                 Message.MsgSender);
-                            Irc.AddPrivMsgToQueue(Message.MsgSender + ", took a bullet to the head.",
-                                Message.FromChannel);
+                            foreach (var song in response)
+                            {
+                                Irc.AddWhisperToQueue(song, Message.MsgSender);
+                            }
+                            return "";
+                        }
+                        //Console.WriteLineWriteLine (response.First ());
+                        Irc.AddPrivMsgToQueue(response.First(), Message.FromChannel);
+                    }
+                }
+                else if ((Regex.Match(Message.Msg, @"^!sr$").Success ||
+                          Regex.Match(Message.Msg, @"^!songrequest$").Success) &&
+                         _db.CheckSongRequestStatus(Message.FromChannel))
+                {
+                    Irc.AddWhisperToQueue("To request a song with Spotify type \"!songrequest TRACK ID\"." +
+                                          " If you do not know the track idea type \"!songrequest TITLE\" and I will give you a list of track IDs." +
+                                          " Alternatively you can type \"!sr TITLE \" and I will try to best match your song." +
+                                          " If I add the wrong song type \"!wrongsong\" or \"!ws\" to delete your last song. " +
+                                          "If at any time you would like to know what is playing type \"!currentsong.\"",
+                        Message.MsgSender);
+                }
+                else if (Regex.Match(Message.Msg, @"^!sr\s+").Success &&
+                         _db.CheckSongRequestStatus(Message.FromChannel))
+                {
+                    if (_db.GetUsersSongCount(Message) >= 8)
+                    {
+                        var x = 8;
+                        Irc.AddPrivMsgToQueue(Message.MsgSender + ", you already have " + x + " songs in the queue.", Message.FromChannel);
+                    }
+                    else
+                    {
+                        var response = Spotify.ImFeelingLuckySongSearch(Message, _db);
+                        if (!string.IsNullOrEmpty(response))
+                        {
+                            Irc.AddPrivMsgToQueue(Message.MsgSender + " " + response, Message.FromChannel);
                         }
                         else
+                        {
+                            Irc.AddPrivMsgToQueue(Message.MsgSender + "Song not Found", Message.FromChannel);
+                        }
+                    }
+                }
+                else if (Regex.Match(Message.Msg, @"^!currentsong$").Success && _db.CheckSongRequestStatus(Message.FromChannel))
+                {
+                    var song = _db.GetCurrentSong(Message.FromChannel);
+                    if (!string.IsNullOrEmpty(song))
+                    {
+                        Irc.AddPrivMsgToQueue(song, Message.FromChannel);
+                    }
+                }
+                else if (Regex.Match(Message.Msg, @"^!wrongsong$").Success ||
+                         Regex.Match(Message.Msg, @"^!ws$").Success &&
+                         _db.CheckSongRequestStatus(Message.FromChannel))
+                {
+                    var response = Spotify.RemoveUserLastSong(_db, Message);
+                    if (string.IsNullOrEmpty(response))
+                        return "";
+                    Irc.AddWhisperToQueue(response, Message.MsgSender);
+                }
+                else if ((Regex.Match(Message.Msg, @"^!songlist$").Success ||
+                          Regex.Match(Message.Msg, @"^!sl$").Success ||
+                          Regex.Match(Message.Msg, @"^!playlist$").Success)
+                         && _db.CheckSongRequestStatus(Message.FromChannel))
+                {
+                    Irc.AddPrivMsgToQueue(
+                        Message.MsgSender +
+                        " the playlist can be found here http://chinnbot.tv/songlist?user=" +
+                        Message.FromChannel, Message.FromChannel);
+                }
+                else if ((Regex.Match(Message.Msg, @"^!queue$").Success ||
+                          Regex.Match(Message.Msg, @"^!que$").Success) &&
+                         _db.CheckQueueStatus(Message.FromChannel))
+                {
+                    Irc.AddPrivMsgToQueue(
+                        Message.MsgSender +
+                        " to join the queue type !queue (summoner_name) . To see the current queue click this link http://chinnbot.tv/guest_player_queue?user=" +
+                        Message.FromChannel, Message.FromChannel);
+                }
+                else if ((Regex.Match(Message.Msg, @"^!queue\s").Success ||
+                          Regex.Match(Message.Msg, @"^!que\s").Success) &&
+                         _db.CheckQueueStatus(Message.FromChannel))
+                {
+                    var queueStatus = _commandHelpers.AddToQueue(Message, _riotApi, _db);
+                    if (queueStatus == null)
+                    {
+                        Irc.AddWhisperToQueue("Summoner name invalid.", Message.MsgSender);
+                    }
+                    else
+                    {
+                        Irc.AddPrivMsgToQueue(queueStatus, Message.FromChannel);
+                    }
+                }
+                else if ((Regex.Match(Message.Msg, @"^!qleave$").Success ||
+                          Regex.Match(Message.Msg, @"^!leaveq$").Success ||
+                          Regex.Match(Message.Msg, @"^!queueleave$").Success ||
+                          Regex.Match(Message.Msg, @"^!queleave$").Success) &&
+                         _db.CheckQueueStatus(Message.FromChannel))
+                {
+                    if (_db.RemovePersonFromQueue(Message.FromChannel, Message.MsgSender))
+                    {
+                        Irc.AddWhisperToQueue("You have been taken out of the queue",
+                            Message.MsgSender);
+                        return "";
+                    }
+                    Irc.AddWhisperToQueue(
+                        "You are not in the queue type \"!queue summoner_name\" to join the queue.",
+                        Message.MsgSender);
+                }
+                else if ((Regex.Match(Message.Msg, @"^!qpos$").Success ||
+                          Regex.Match(Message.Msg, @"^!qpostion$").Success ||
+                          Regex.Match(Message.Msg, @"^!qspot$").Success) &&
+                         _db.CheckQueueStatus(Message.FromChannel))
+                {
+                    var msgToBeSent = _commandHelpers.CheckPostion(Message, _db);
+                    if (msgToBeSent != null)
+                    {
+                        Irc.AddWhisperToQueue(msgToBeSent, Message.MsgSender);
+                        return "";
+                    }
+                    Irc.AddWhisperToQueue(
+                        "You are not in the queue type \"!queue summoner_name\" to join the queue.",
+                        Message.MsgSender);
+
+                }
+                else if ((Regex.Match(Message.Msg, @"^!restart$").Success) &&
+                         Message.MsgSender == "blackmarmalade")
+                {
+                    Irc.AddPrivMsgToQueue("Restarting sit tight I will be right back.",
+                        Message.FromChannel);
+                    return "restart";
+                }
+                else if ((Regex.Match(Message.Msg, @"^!howlong").Success) && Message.FromChannel.ToLower() != "sophiabot")
+                {
+                    var msgArry = Message.Msg.Split(' ');
+                    var howLongUser = "";
+                    for (var i = 1; i < msgArry.Count(); i++)
+                    {
+                        howLongUser += msgArry[i] + " ";
+                    }
+                    howLongUser = howLongUser.Trim(' ').ToLower();
+
+                    if (String.IsNullOrEmpty(howLongUser))
+                    {
+                        howLongUser = Message.MsgSender;
+                    }
+
+                    if (howLongUser == Message.FromChannel)
+                    {
+                        Irc.AddPrivMsgToQueue(Message.FromChannel + ", can't follow their own channel", Message.FromChannel);
+                    }
+                    else
+                    {
+                        var msgToSend = _twitchApi.GetHowLongUserFollows(Message.FromChannel, howLongUser);
+
+
+
+                        if (String.IsNullOrEmpty(msgToSend))
                         {
                             Irc.AddPrivMsgToQueue(
-                                Message.MsgSender + ", pulled the trigger and nothing happened.", Message.FromChannel);
-                        }
-                    }
-                    else if (Regex.Match(Message.Msg, @"!setsummoner").Success)
-                    {
-                        string summonerName = _commandHelpers.SplitSummonerName(Message.Msg);
-                        Irc.AddPrivMsgToQueue(
-                            _commandHelpers.SetSummonerName(Message.FromChannel, summonerName, Message.MsgSender, _db),
-                            Message.FromChannel);
-                        string summonerId = _riotApi.GetSummonerId(summonerName);
-                        _db.SetSummonerId(Message.FromChannel, summonerId);
-                    }
-                    else if (Regex.Match(Message.Msg, @"^!suicide$").Success)
-                    {
-                        kill_user(Message.FromChannel, Message.MsgSender, Message.UserType);
-                    }
-                    else if (Message.Msg == "gg")
-                    {
-                        if (_commandHelpers.CheckGg(Message.FromChannel, _db))
-                        {
-                            Irc.AddPrivMsgToQueue("GG", Message.FromChannel);
-                        }
-                    }
-
-                    else if (Regex.Match(Message.Msg, @"^!uptime$").Success)
-                    {
-                        if (Message.FromChannel == "sophiabot")
-                            return "";
-                        Irc.AddPrivMsgToQueue(_twitchApi.GetStreamUptime(Message.FromChannel),
-                            Message.FromChannel);
-                    }
-                    else if (Regex.Match(Message.Msg, @"^!dicksize$").Success)
-                    {
-                        string response = _commandHelpers.DickSize(Message.FromChannel, Message.MsgSender, _db);
-                        Irc.AddPrivMsgToQueue(response, Message.FromChannel);
-                    }
-
-                    else if (Regex.Match(Message.Msg, @"^!roll$").Success)
-                    {
-                        int diceRoll = _commandHelpers.DiceRoll();
-                        Irc.AddPrivMsgToQueue(Message.MsgSender + " rolled a " + diceRoll, Message.FromChannel);
-                    }
-                    else if (Regex.Match(Message.Msg, @"^!coinflip$").Success)
-                    {
-                        bool coinFlip = _commandHelpers.CoinFlip();
-                        if (coinFlip)
-                        {
-                            Irc.AddPrivMsgToQueue(Message.MsgSender + " flipped a coin and it came up heads",
+                                Message.MsgSender + ", Twitch API unreachable please try again later",
                                 Message.FromChannel);
                         }
                         else
                         {
+                            if (howLongUser == Message.MsgSender && msgToSend == "404")
                             {
                                 Irc.AddPrivMsgToQueue(
-                                    Message.MsgSender + " flipped a coin and it came up tails", Message.FromChannel);
+                                    Message.MsgSender + ", you stupid little shit, you're not even following!",
+                                    Message.FromChannel);
                             }
-                        }
-                    }
-
-                    else if ((Regex.Match(Message.Msg, @"^!songrequest\s+").Success) &&
-                             _db.CheckSongRequestStatus(Message.FromChannel))
-                    {
-                        if (_db.GetUsersSongCount(Message) >= 4)
-                        {
-                            var x = 4;
-                            Irc.AddPrivMsgToQueue(
-                                Message.MsgSender + ", you already have " + x + " songs in the queue.",
-                                Message.FromChannel);
-                        }
-                        else
-                        {
-                            var response = Spotify.SearchSong(_db, Message, BlockingMessageQueue, BlockingWhisperQueue, Irc.YoutubeApiKey);
-                            if (response.Count == 0)
-                                return "";
-                            if (response.Count > 1)
+                            else if (howLongUser != Message.MsgSender && msgToSend == "404")
                             {
-                                Irc.AddWhisperToQueue("______________________________", Message.MsgSender);
-                                Irc.AddWhisperToQueue(
-                                    "Multiple results! What did you mean? Re-request with the track id.",
-                                    Message.MsgSender);
-                                foreach (var song in response)
-                                {
-                                    Irc.AddWhisperToQueue(song, Message.MsgSender);
-                                }
-                                return "";
+                                Irc.AddPrivMsgToQueue(
+                                    Message.MsgSender + ", " + howLongUser + ", this dumb fuck isn't even following.", Message.FromChannel);
                             }
-                            //Console.WriteLineWriteLine (response.First ());
-                            Irc.AddPrivMsgToQueue(response.First(), Message.FromChannel);
-                        }
-                    }
-                    else if ((Regex.Match(Message.Msg, @"^!sr$").Success ||
-                              Regex.Match(Message.Msg, @"^!songrequest$").Success) &&
-                             _db.CheckSongRequestStatus(Message.FromChannel))
-                    {
-                        Irc.AddWhisperToQueue("To request a song with Spotify type \"!songrequest TRACK ID\"." +
-                                              " If you do not know the track idea type \"!songrequest TITLE\" and I will give you a list of track IDs." +
-                                              " Alternatively you can type \"!sr TITLE \" and I will try to best match your song." +
-                                              " If I add the wrong song type \"!wrongsong\" or \"!ws\" to delete your last song. " +
-                                              "If at any time you would like to know what is playing type \"!currentsong.\"",
-                            Message.MsgSender);
-                    }
-                    else if (Regex.Match(Message.Msg, @"^!sr\s+").Success &&
-                             _db.CheckSongRequestStatus(Message.FromChannel))
-                    {
-                        if (_db.GetUsersSongCount(Message) >= 4)
-                        {
-                            var x = 4;
-                          Irc.AddPrivMsgToQueue(Message.MsgSender + ", you already have " + x + " songs in the queue.", Message.FromChannel);
-                        }
-                        else
-                        {
-                            var response = Spotify.ImFeelingLuckySongSearch(Message, _db);
-                            if (!string.IsNullOrEmpty(response))
+                            else if (howLongUser == Message.MsgSender)
                             {
-                                Irc.AddPrivMsgToQueue(Message.MsgSender + " " + response, Message.FromChannel);
+                                Irc.AddPrivMsgToQueue(
+                                    Message.MsgSender + ", you have been following for " + msgToSend,
+                                    Message.FromChannel);
                             }
                             else
                             {
-                                Irc.AddPrivMsgToQueue(Message.MsgSender + "Song not Found", Message.FromChannel);
+                                Irc.AddPrivMsgToQueue(
+                                    Message.MsgSender + ", " + howLongUser + ", has been following for " + msgToSend,
+                                    Message.FromChannel);
                             }
                         }
                     }
-                    else if (Regex.Match(Message.Msg, @"^!currentsong$").Success)
-                    {
-                        var song = _db.GetCurrentSong(Message.FromChannel);
-                        if (!string.IsNullOrEmpty(song))
-                        {
-                            Irc.AddPrivMsgToQueue(song, Message.FromChannel);
-                        }
-                    }
-                    else if (Regex.Match(Message.Msg, @"^!wrongsong$").Success ||
-                             Regex.Match(Message.Msg, @"^!ws$").Success &&
-                             _db.CheckSongRequestStatus(Message.FromChannel))
-                    {
-                        var response = Spotify.RemoveUserLastSong(_db, Message);
-                        if (string.IsNullOrEmpty(response))
-                            return "";
-                        Irc.AddWhisperToQueue(response, Message.MsgSender);
-                    }
-                    else if ((Regex.Match(Message.Msg, @"^!songlist$").Success ||
-                              Regex.Match(Message.Msg, @"^!sl$").Success ||
-                              Regex.Match(Message.Msg, @"^!playlist$").Success)
-                             && _db.CheckSongRequestStatus(Message.FromChannel))
-                    {
-                        Irc.AddPrivMsgToQueue(
-                            Message.MsgSender +
-                            " the playlist can be found here http://chinnbot.tv/songlist?user=" +
-                            Message.FromChannel, Message.FromChannel);
-                    }
-                    else if ((Regex.Match(Message.Msg, @"^!queue$").Success ||
-                              Regex.Match(Message.Msg, @"^!que$").Success) &&
-                             _db.CheckQueueStatus(Message.FromChannel))
-                    {
-                        Irc.AddPrivMsgToQueue(
-                            Message.MsgSender +
-                            " to join the queue type !queue (summoner_name) . To see the current queue click this link http://chinnbot.tv/guest_player_queue?user=" +
-                            Message.FromChannel, Message.FromChannel);
-                    }
-                    else if ((Regex.Match(Message.Msg, @"^!queue\s").Success ||
-                              Regex.Match(Message.Msg, @"^!que\s").Success) &&
-                             _db.CheckQueueStatus(Message.FromChannel))
-                    {
-                        var queueStatus = _commandHelpers.AddToQueue(Message, _riotApi, _db);
-                        if (queueStatus == null)
-                        {
-                            Irc.AddWhisperToQueue("Summoner name invalid.", Message.MsgSender);
-                        }
-                        else
-                        {
-                            Irc.AddPrivMsgToQueue(queueStatus, Message.FromChannel);
-                        }
-                    }
-                    else if ((Regex.Match(Message.Msg, @"^!qleave$").Success ||
-                              Regex.Match(Message.Msg, @"^!leaveq$").Success ||
-                              Regex.Match(Message.Msg, @"^!queueleave$").Success ||
-                              Regex.Match(Message.Msg, @"^!queleave$").Success) &&
-                             _db.CheckQueueStatus(Message.FromChannel))
-                    {
-                        if (_db.RemovePersonFromQueue(Message.FromChannel, Message.MsgSender))
-                        {
-                            Irc.AddWhisperToQueue("You have been taken out of the queue",
-                                Message.MsgSender);
-                            return "";
-                        }
-                        Irc.AddWhisperToQueue(
-                            "You are not in the queue type \"!queue summoner_name\" to join the queue.",
-                            Message.MsgSender);
-                    }
-                    else if ((Regex.Match(Message.Msg, @"^!qpos$").Success ||
-                              Regex.Match(Message.Msg, @"^!qpostion$").Success ||
-                              Regex.Match(Message.Msg, @"^!qspot$").Success) &&
-                             _db.CheckQueueStatus(Message.FromChannel))
-                    {
-                        var msgToBeSent = _commandHelpers.CheckPostion(Message, _db);
-                        if (msgToBeSent != null)
-                        {
-                            Irc.AddWhisperToQueue(msgToBeSent, Message.MsgSender);
-                            return "";
-                        }
-                        Irc.AddWhisperToQueue(
-                            "You are not in the queue type \"!queue summoner_name\" to join the queue.",
-                            Message.MsgSender);
 
-                    }
-                    else if ((Regex.Match(Message.Msg, @"^!restart$").Success) &&
-                             Message.MsgSender == "blackmarmalade")
-                    {
-                        Irc.AddPrivMsgToQueue("Restarting sit tight I will be right back.",
-                            Message.FromChannel);
-                        return "restart";
-                    }
-
-                    //else if (Regex.Match(message, @"!addquote").Success)
-                    //{
-                    //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
-                    //}
-                    //else if (Regex.Match(message, @"!quote").Success)
-                    //{
-                    //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
-                    //}
-                    //else if (Regex.Match(message, @"!m8b").Success)
-                    //{
-                    //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
-                    //}
                 }
+
+                //else if (Regex.Match(message, @"!addquote").Success)
+                //{
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
+                //}
+                //else if (Regex.Match(message, @"!quote").Success)
+                //{
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
+                //}
+                //else if (Regex.Match(message, @"!m8b").Success)
+                //{
+                //    AddMessageToMessageList("Temporaryily Unavailable.", FromChannel);
+                //}
+            }
 
                 #endregion
 

@@ -12,17 +12,21 @@ namespace twitch_irc_bot
         private static void Main (string[] args)
         {
 
-            const bool debug = false;
 
             var jObj = JObject.Parse (File.ReadAllText (@"login.json"));
             var username = jObj.SelectToken ("bot_username").ToString ();
             var oAuth = jObj.SelectToken ("oauth").ToString ();
             var youTubeApiKey = jObj.SelectToken("youtube_api_key").ToString();
 
+
+            var debug = jObj.SelectToken("debug").ToString() == "True"  ;
+
+
+
             var q = new BlockingCollection<string> ();
             var wq = new BlockingCollection<string> ();
-            var ircServer = new IrcClient ("irc.twitch.tv", 443, username, oAuth, ref q, ref wq, false, debug, youTubeApiKey);
-            var whisperServer = new IrcClient ("192.16.64.212", 443, username, oAuth, ref q, ref wq, true, debug, youTubeApiKey);
+            var ircServer = new IrcClient ("irc.twitch.tv", 80, username, oAuth, ref q, ref wq, false, debug, youTubeApiKey);
+            var whisperServer = new IrcClient("irc.twitch.tv", 80, username, oAuth, ref q, ref wq, true, debug, youTubeApiKey);
             if (debug) {
                 ircServer.JoinChannel ("blackmarmalade");
             } else {
@@ -47,7 +51,7 @@ namespace twitch_irc_bot
 
             while (true) {
                 if (!ircThread.IsAlive) {
-                    ircServer = new IrcClient ("irc.twitch.tv", 443, username, oAuth, ref q, ref wq, false, debug, youTubeApiKey);
+                    ircServer = new IrcClient("irc.twitch.tv", 80, username, oAuth, ref q, ref wq, false, debug, youTubeApiKey);
                     if (debug) {
                         ircServer.JoinChannel ("blackmarmalade");
                     } else {
@@ -61,7 +65,7 @@ namespace twitch_irc_bot
                     }
                 }
                 if (!whisperThread.IsAlive) {
-                    whisperServer = new IrcClient("192.16.64.212", 443, username, oAuth, ref q, ref wq, true, debug, youTubeApiKey);
+                    whisperServer = new IrcClient("irc.twitch.tv", 80, username, oAuth, ref q, ref wq, true, debug, youTubeApiKey);
                     whisperThread = new Thread (() => whisperServer.ReadMessage ());
                     whisperThread.Start ();
 

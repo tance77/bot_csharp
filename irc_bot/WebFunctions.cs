@@ -8,12 +8,22 @@ namespace twitch_irc_bot
 {
     internal class WebFunctions
     {
+        public void WriteError(Exception e)
+        {
+            const string filePath = @"C:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\errors.txt";
+
+            using (var writer = new StreamWriter(filePath, true))
+            {
+                writer.WriteLine("Message :" + e.Message + "<br/>" + Environment.NewLine + "StackTrace :" + e.StackTrace +
+                   "" + Environment.NewLine + "Date :" + DateTime.Now.ToString());
+                writer.WriteLine(Environment.NewLine + "-----------------------------------------------------------------------------" + Environment.NewLine);
+            }
+        }
         public string RequestJson(string url)
         {
             try
             {
                 WebRequest request = WebRequest.Create(url);
-                request.Timeout = 1000;
                 using (WebResponse response = request.GetResponse())
                 {
                     using (Stream responseStream = response.GetResponseStream())
@@ -29,8 +39,8 @@ namespace twitch_irc_bot
             catch
                 (WebException e)
                 {
+                    WriteError(e);
                     var errorCode = e.ToString().Split('(')[1].Split(')')[0];
-                    Console.Write(e + "\r\n" + errorCode + "\r\n");
                     return errorCode;
                 }
         }
@@ -53,7 +63,7 @@ namespace twitch_irc_bot
             }
             catch (Newtonsoft.Json.JsonReaderException e)
             {
-                Console.Write(e);
+                WriteError(e);
                 return null;
             }
         }

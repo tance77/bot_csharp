@@ -129,6 +129,50 @@ namespace twitch_irc_bot
         }
 
 
+        public string GetHowLongUserFollows(string fromChannel, string user)
+        {
+            try
+            {
+                var url = "https://api.twitch.tv/kraken/users/" + user + "/follows/channels/" + fromChannel;
+                string jsonString = RequestJson(url);
+                if (jsonString == null) return null;
+                if (jsonString == "404" || JObject.Parse(jsonString).SelectToken("status") != null)
+                {
+                    return "404";
+                }
+                var createdAt = JObject.Parse(jsonString).SelectToken("created_at").ToString();
+                Console.WriteLine(createdAt);
+                var followedAt = Convert.ToDateTime(createdAt).ToUniversalTime();
+                var todaysDate = DateTime.UtcNow;
+
+                var howlong = (todaysDate - followedAt);
+
+                var years = Math.Floor(howlong.TotalDays/365);
+                var months = Math.Floor(howlong.TotalDays%365/30);
+                var days = Math.Floor(howlong.TotalDays%365%30);
+
+
+                //Console.WriteLine(years);
+                //Console.WriteLine(months);
+                //Console.WriteLine(days);
+
+                //Console.WriteLine(howlong);
+                
+                
+                
+                //Console.WriteLine(howlong.TotalDays);
+                //Console.WriteLine(howlong.TotalDays%365);
+                return years + " year(s) " + months + " month(s) and " + days + " day(s) Follow Date " + followedAt;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
+
+
 
         public List<string> GetActiveUsers(string fromChannel) //via chatters json deprecated
         {

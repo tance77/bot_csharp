@@ -311,7 +311,7 @@ namespace twitch_irc_bot
 
                 //don't allow request by album
                 else if (queryString.Length == 36 && queryString.Contains ("spotify:album:") ||
-                         Regex.Match (msg.Msg, @"^https:\/\/.*com\/album\/").Success) {
+                         Regex.Match (msg.Msg, @"https:\/\/.*com\/album\/").Success){
                     songList.Add (msg.MsgSender + " Sorry you can't request a whole album.");
                     return songList;
                 }

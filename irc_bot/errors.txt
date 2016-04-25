@@ -1,0 +1,1086 @@
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:19:56 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:20:06 PM
+
+-----------------------------------------------------------------------------
+
+Message :Timeout expired.  The timeout period elapsed prior to completion of the operation or the server is not responding.<br/>
+StackTrace :   at MySql.Data.MySqlClient.ExceptionInterceptor.Throw(Exception exception)
+   at MySql.Data.MySqlClient.MySqlConnection.Throw(Exception ex)
+   at MySql.Data.MySqlClient.MySqlConnection.HandleTimeoutOrThreadAbort(Exception ex)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader()
+   at MySql.Data.MySqlClient.MySqlCommand.ExecuteScalar()
+   at MySql.Data.MySqlClient.Driver.GetTimeZoneOffset(MySqlConnection con)
+   at MySql.Data.MySqlClient.Driver.LoadServerProperties(MySqlConnection connection)
+   at MySql.Data.MySqlClient.Driver.Configure(MySqlConnection connection)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetListOfChannels() in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1318
+Date :4/20/2016 6:20:08 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:23:42 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:23:45 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:23:55 PM
+
+-----------------------------------------------------------------------------
+
+Message :Error reading JObject from JsonReader. Path '', line 0, position 0.<br/>
+StackTrace :   at Newtonsoft.Json.Linq.JObject.Load(JsonReader reader, JsonLoadSettings settings)
+   at Newtonsoft.Json.Linq.JObject.Parse(String json, JsonLoadSettings settings)
+   at Newtonsoft.Json.Linq.JObject.Parse(String json)
+   at twitch_irc_bot.WebFunctions.GetGlobalEmotes() in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 58
+Date :4/20/2016 6:23:59 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:30:36 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (400) Bad Request.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:30:49 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (400) Bad Request.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:31:06 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (400) Bad Request.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:31:39 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (400) Bad Request.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:31:39 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (400) Bad Request.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:31:48 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:32:55 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (400) Bad Request.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:33:14 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (400) Bad Request.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:33:52 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (400) Bad Request.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:33:55 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (403) Forbidden.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:33:56 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:34:41 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:35:43 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:36:06 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:37:17 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:37:26 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:37:58 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:38:47 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:39:01 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:39:06 PM
+
+-----------------------------------------------------------------------------
+
+Message :Timeout in IO operation<br/>
+StackTrace :   at MySql.Data.MySqlClient.TimedStream.StopTimer()
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.NativeDriver.SetDatabase(String dbName)
+   at MySql.Data.MySqlClient.Driver.SetDatabase(String dbName)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.ParseRecentFollowers(String fromChannel, TwitchApi twitchApi) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1258
+Date :4/20/2016 6:39:27 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:39:27 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:39:27 PM
+
+-----------------------------------------------------------------------------
+
+Message :Timeout in IO operation<br/>
+StackTrace :   at MySql.Data.MySqlClient.TimedStream.StopTimer()
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.NativeDriver.SetDatabase(String dbName)
+   at MySql.Data.MySqlClient.Driver.SetDatabase(String dbName)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetListOfChannels() in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1318
+Date :4/20/2016 6:40:08 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:40:08 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:40:11 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:40:26 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:41:50 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:41:56 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:42:03 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:42:09 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:42:16 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (403) Forbidden.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:42:17 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:42:24 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:42:30 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:44:59 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:45:03 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:45:25 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (500) Internal Server Error.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:45:25 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:45:52 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:45:56 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:46:12 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:46:34 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:46:52 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:46:56 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:47:13 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url)
+Date :4/20/2016 6:47:45 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:47:54 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/20/2016 6:47:56 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:48:37 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:48:47 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:49:16 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 28
+Date :4/20/2016 6:49:28 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/20/2016 6:50:16 PM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetListOfChannels() in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1319
+Date :4/21/2016 12:43:44 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.ParseRecentFollowers(String fromChannel, TwitchApi twitchApi) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1259
+Date :4/21/2016 12:54:51 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/21/2016 3:49:17 AM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (504) Gateway Timeout.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/21/2016 4:20:07 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.ParseRecentFollowers(String fromChannel, TwitchApi twitchApi) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1259
+Date :4/21/2016 4:37:19 AM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (504) Gateway Timeout.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/21/2016 11:57:17 AM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/21/2016 3:07:54 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (500) Internal Server Error.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/22/2016 1:02:53 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 2:25:45 AM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (504) Gateway Timeout.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/22/2016 2:54:21 AM
+
+-----------------------------------------------------------------------------
+
+Message :Fatal error encountered during command execution.<br/>
+StackTrace :   at MySql.Data.MySqlClient.MySqlCommand.ExecuteReader(CommandBehavior behavior)
+   at twitch_irc_bot.DatabaseFunctions.ParseRecentFollowers(String fromChannel, TwitchApi twitchApi) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1269
+Date :4/22/2016 3:58:08 AM
+
+-----------------------------------------------------------------------------
+
+Message :Reading from the stream has failed.<br/>
+StackTrace :   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:08 AM
+
+-----------------------------------------------------------------------------
+
+Message :Reading from the stream has failed.<br/>
+StackTrace :   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:09 AM
+
+-----------------------------------------------------------------------------
+
+Message :Reading from the stream has failed.<br/>
+StackTrace :   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:09 AM
+
+-----------------------------------------------------------------------------
+
+Message :Reading from the stream has failed.<br/>
+StackTrace :   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:09 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:10 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:11 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:12 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:13 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:14 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:15 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:16 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:17 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:18 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:19 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:20 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:22 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:23 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:24 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:25 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:26 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:27 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:28 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:29 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:30 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to connect to any of the specified MySQL hosts.<br/>
+StackTrace :   at MySql.Data.MySqlClient.NativeDriver.Open()
+   at MySql.Data.MySqlClient.Driver.Open()
+   at MySql.Data.MySqlClient.Driver.Create(MySqlConnectionStringBuilder settings)
+   at MySql.Data.MySqlClient.MySqlPool.GetPooledConnection()
+   at MySql.Data.MySqlClient.MySqlPool.TryToGetDriver()
+   at MySql.Data.MySqlClient.MySqlPool.GetConnection()
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/22/2016 3:58:31 AM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (408) Request Timeout.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/22/2016 7:23:42 AM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (408) Request Timeout.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/22/2016 3:41:49 PM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/23/2016 1:35:15 AM
+
+-----------------------------------------------------------------------------
+
+Message :The remote server returned an error: (404) Not Found.<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/23/2016 1:35:48 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.ParseRecentFollowers(String fromChannel, TwitchApi twitchApi) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1259
+Date :4/23/2016 11:16:41 PM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/23/2016 11:41:44 PM
+
+-----------------------------------------------------------------------------
+
+Message :Invalid attempt to access a field before calling Read()<br/>
+StackTrace :   at MySql.Data.MySqlClient.ResultSet.get_Item(Int32 index)
+   at MySql.Data.MySqlClient.MySqlDataReader.GetFieldValue(Int32 index, Boolean checkNull)
+   at MySql.Data.MySqlClient.MySqlDataReader.GetString(Int32 i)
+   at twitch_irc_bot.DatabaseFunctions.RemoveUserLastSong(String fromChannel, String userToRemove) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1794
+Date :4/24/2016 4:23:08 AM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/24/2016 3:56:30 PM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.ParseRecentFollowers(String fromChannel, TwitchApi twitchApi) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1259
+Date :4/24/2016 7:06:48 PM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/24/2016 9:53:27 PM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/24/2016 9:53:40 PM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.ParseRecentFollowers(String fromChannel, TwitchApi twitchApi) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1259
+Date :4/24/2016 10:19:18 PM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetListOfActiveChannels() in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1830
+Date :4/24/2016 10:19:48 PM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetListOfChannels() in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 1319
+Date :4/24/2016 10:19:48 PM
+
+-----------------------------------------------------------------------------
+
+Message :Unable to read data from the transport connection: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.<br/>
+StackTrace :   at MySql.Data.Common.MyNetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.TimedStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at System.IO.BufferedStream.Read(Byte[] array, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.ReadFully(Stream stream, Byte[] buffer, Int32 offset, Int32 count)
+   at MySql.Data.MySqlClient.MySqlStream.LoadPacket()
+   at MySql.Data.MySqlClient.MySqlStream.ReadPacket()
+   at MySql.Data.MySqlClient.NativeDriver.ReadOk(Boolean read)
+   at MySql.Data.MySqlClient.MySqlConnection.ChangeDatabase(String databaseName)
+   at MySql.Data.MySqlClient.MySqlConnection.Open()
+   at twitch_irc_bot.DatabaseFunctions.GetAnnounceFollowerStatus(String fromChannel) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\DatabaseFunctions.cs:line 2030
+Date :4/24/2016 10:20:18 PM
+
+-----------------------------------------------------------------------------
+
+Message :The operation has timed out<br/>
+StackTrace :   at System.Net.HttpWebRequest.GetResponse()
+   at twitch_irc_bot.WebFunctions.RequestJson(String url) in c:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\WebFunctions.cs:line 27
+Date :4/24/2016 10:28:10 PM
+
+-----------------------------------------------------------------------------
+

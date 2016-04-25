@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using MySql.Data.MySqlClient;
 
@@ -15,7 +16,20 @@ namespace twitch_irc_bot
             "Port=3306;" +
             "Database=chinnbot;" +
             "Uid=me;" +
-            "Pwd=GUM5fLtzuHPq;";
+            "Pwd=GUM5fLtzuHPq;" +
+            "Charset=utf8;";
+
+        public void WriteError(Exception e)
+        {
+            const string filePath = @"C:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\errors.txt";
+
+            using (var writer = new StreamWriter(filePath, true))
+            {
+                writer.WriteLine("Message :" + e.Message + "<br/>" + Environment.NewLine + "StackTrace :" + e.StackTrace +
+                   "" + Environment.NewLine + "Date :" + DateTime.Now.ToString());
+                writer.WriteLine(Environment.NewLine + "-----------------------------------------------------------------------------" + Environment.NewLine);
+            }
+        }
 
         public string DateTimeSqLite(DateTime datetime)
         {
@@ -33,7 +47,7 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                            var command = new MySqlCommand("SELECT * FROM Channels GROUP BY channel_name",
+                            var command = new MySqlCommand("SELECT * FROM Channels WHERE join_status=1",
                                 dbConnection))
                     {
                         using (MySqlDataReader dr = command.ExecuteReader())
@@ -49,7 +63,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return channelsToJoin;
             }
         }
@@ -107,7 +121,7 @@ namespace twitch_irc_bot
                         cmd.Parameters.AddWithValue("@summoner_id", null);
                         cmd.ExecuteNonQuery();
                     }
-                    using (var cmd =new MySqlCommand("INSERT INTO FollowerNotifications(channel_name)VALUES(@channel)",dbConnection))
+                    using (var cmd = new MySqlCommand("INSERT INTO FollowerNotifications(channel_name)VALUES(@channel)", dbConnection))
                     {
                         cmd.Parameters.AddWithValue("@channel", channel);
                         cmd.ExecuteNonQuery();
@@ -117,7 +131,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -167,7 +181,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -206,7 +220,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -238,7 +252,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -283,7 +297,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -336,12 +350,12 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
             catch (Exception e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -388,12 +402,12 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
             catch (Exception e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -418,7 +432,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -446,7 +460,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -473,7 +487,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -502,7 +516,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -537,7 +551,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -570,7 +584,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -604,7 +618,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -628,10 +642,10 @@ namespace twitch_irc_bot
                             if (reader.Read())
                             {
                                 var result = false;
-                                result =  reader.GetBoolean(5);
+                                result = reader.GetBoolean(5);
                                 return result;
                             }
-                            
+
                         }
                         GC.Collect();
                         return false;
@@ -641,7 +655,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -676,7 +690,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -702,7 +716,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -738,7 +752,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -763,7 +777,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -792,7 +806,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return 0;
             }
         }
@@ -819,7 +833,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return 0;
             }
         }
@@ -846,7 +860,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -870,7 +884,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -897,7 +911,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -923,7 +937,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -965,7 +979,7 @@ namespace twitch_irc_bot
                                 }
                         }
                         GC.Collect();
-        
+
                         int randOne = randRange.Next(1, listOfResponses.Count);
                         Console.Write(listOfResponses[randOne] + "\r\n");
                         return listOfResponses[randOne];
@@ -975,7 +989,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -1014,7 +1028,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
             DateTime permitedAt;
@@ -1066,7 +1080,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -1097,7 +1111,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -1122,7 +1136,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
             }
         }
 
@@ -1162,7 +1176,7 @@ namespace twitch_irc_bot
             }
             catch (Exception e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -1219,12 +1233,12 @@ namespace twitch_irc_bot
                 catch
                     (MySqlException e)
                 {
-                    Console.Write(e + "\r\n");
+                    WriteError(e);
                     return null;
                 }
                 catch (TimeoutException e)
                 {
-                    Console.Write(e + "\r\n");
+                    WriteError(e);
                     return null;
                 }
             }
@@ -1282,20 +1296,12 @@ namespace twitch_irc_bot
                 catch
                     (MySqlException e)
                 {
-                    var st = new StackTrace(e, true);
-                    var frame = st.GetFrame(0);
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.WriteLine("Error in recent followers\r\n");
-                    Console.Write("Error in ParseRecentFollowers \r\n" + "Line number: " + frame.GetFileLineNumber());
-                    Console.ForegroundColor = ConsoleColor.White;
+                    WriteError(e);
                     return null;
                 }
                 catch (TimeoutException e)
                 {
-                    var st = new StackTrace(e, true);
-                    var frame = st.GetFrame(0);
-                    Console.Write(e + "\r\n");
-                    Console.Write("Error in ParseRecentFollowers \r\n" + "Line number: " + frame.GetFileLineNumber());
+                    WriteError(e);
                     return null;
                 }
             }
@@ -1330,16 +1336,13 @@ namespace twitch_irc_bot
             }
             catch (TimeoutException e)
             {
-                var st = new StackTrace(e, true);
-                var frame = st.GetFrame(0);
-                Console.Write(e + "\r\n");
-                Console.Write("Error in Get List Of Channels \r\n" + "Line number: " + frame.GetFileLineNumber());
+                WriteError(e);
                 return null;
             }
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -1414,7 +1417,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
             }
         }
 
@@ -1428,11 +1431,12 @@ namespace twitch_irc_bot
                     using (
                             var command =
                             new MySqlCommand(
-                                "INSERT INTO TimedMessages(channel_name,message)VALUES(@channel, @msg)",
+                                "INSERT INTO Timers(channel_name,message, time_interval)VALUES(@channel, @msg, @time)",
                                 dbConnection))
                     {
-                        command.Parameters.AddWithValue("@channel", fromChannel);
-                        command.Parameters.AddWithValue("@msg", message);
+                        command.Parameters.AddWithValue("@channel", "jchinn");
+                        command.Parameters.AddWithValue("@msg", message + " SHAME " + message);
+                        command.Parameters.AddWithValue("@time", 15);
                         command.ExecuteNonQuery();
                     }
                 }
@@ -1441,7 +1445,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -1473,7 +1477,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -1502,7 +1506,7 @@ namespace twitch_irc_bot
                     }
                     catch (MySqlException e)
                     {
-                        Console.Write(e + "\r\n");
+                        WriteError(e);
                         return false;
                     }
                 }
@@ -1555,12 +1559,12 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
 
             }
         }
-        
+
 
         public bool RemoveRegular(string fromChannel, string userToRemove)
         {
@@ -1598,7 +1602,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -1606,7 +1610,6 @@ namespace twitch_irc_bot
 
         public bool RegularExist(string channelName, string userToAdd)
         {
-            var exists = false;
             try
             {
                 using (var dbConnection = new MySqlConnection(ConnectionString))
@@ -1634,7 +1637,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
 
             }
@@ -1673,7 +1676,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return 100;
 
             }
@@ -1735,7 +1738,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
 
             }
@@ -1766,7 +1769,7 @@ namespace twitch_irc_bot
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return song;
             }
         }
@@ -1785,16 +1788,17 @@ namespace twitch_irc_bot
                         inDb.Parameters.AddWithValue("@r", userToRemove);
                         using (var reader = inDb.ExecuteReader())
                         {
-                            if(reader.Read())
+                            if (reader.Read())
                                 songName = reader.GetString(6);
-                                songName += " by ";
-                                songName += reader.GetString(5);
-                                songName += " was removed from the playlist";
+                            songName += " by ";
+                            songName += reader.GetString(5);
+                            songName += " was removed from the playlist";
                         }
                     }
                     GC.Collect();
                 }
-                using (var dbConnection = new MySqlConnection(ConnectionString)){
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
                     dbConnection.Open();
                     using (var inDb = new MySqlCommand("delete from Songs where channel_name=@c and requested_by=@r ORDER BY id DESC LIMIT 1;", dbConnection))
                     {
@@ -1808,7 +1812,7 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -1823,7 +1827,7 @@ namespace twitch_irc_bot
                 {
                     dbConnection.Open();
                     using (
-                        var command = new MySqlCommand("SELECT * FROM Channels",
+                        var command = new MySqlCommand("SELECT * FROM Channels WHERE join_status=1",
                             dbConnection))
                     {
                         using (MySqlDataReader dr = command.ExecuteReader())
@@ -1839,16 +1843,13 @@ namespace twitch_irc_bot
             }
             catch (TimeoutException e)
             {
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.WriteLine("Error in list of Active Channels \r\n");
-                    Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine(e +"\r\n");
+                WriteError(e);
                 return null;
             }
             catch
                 (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
             return listOfActiveChannels;
@@ -1924,7 +1925,7 @@ namespace twitch_irc_bot
 
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -1958,7 +1959,7 @@ namespace twitch_irc_bot
 
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return null;
             }
         }
@@ -2006,12 +2007,12 @@ namespace twitch_irc_bot
             }
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
             catch (Exception e)
             {
-                Console.Write(e + "\r\n");
+                WriteError(e);
                 return false;
             }
         }
@@ -2046,15 +2047,13 @@ namespace twitch_irc_bot
 
             catch (TimeoutException e)
             {
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("Connection Timeout in Recent Followers");
-                    Console.ForegroundColor = ConsoleColor.White;
+                WriteError(e);
                 return false;
             }
 
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n Error in Get Regular Status");
+                WriteError(e);
                 return false;
             }
         }
@@ -2090,7 +2089,7 @@ namespace twitch_irc_bot
 
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n Error in Get Regular Status");
+                WriteError(e);
                 return false;
             }
 
@@ -2118,7 +2117,7 @@ namespace twitch_irc_bot
 
             catch (MySqlException e)
             {
-                Console.Write(e + "\r\n Error in Get Toggling Regular On Off");
+                WriteError(e);
                 return false;
             }
 

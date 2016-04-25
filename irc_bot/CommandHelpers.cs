@@ -66,7 +66,7 @@ namespace twitch_irc_bot
         public string CheckSummonerName (string fromChannel, DatabaseFunctions db, RiotApi riotApi)
         {
             string summonerName = db.SummonerStatus (fromChannel);
-            if (summonerName == "")
+            if (string.IsNullOrEmpty(summonerName))
                 return "No Summoner Name";
             string summonerId = riotApi.GetSummonerId (summonerName);
             //GetRunes(summonerId);
@@ -101,12 +101,16 @@ namespace twitch_irc_bot
             }
         }
 
-        public string GetMasteries (string fromChannel, RiotApi riotApi)
+        public string GetMasteries (TwitchMessage msg, string definedUser, RiotApi riotApi)
         {
-            Dictionary<string, int> masteriesDictionary = riotApi.GetMasteries (fromChannel);
+            Dictionary<string, int> masteriesDictionary = riotApi.GetMasteries (msg, definedUser);
             if (masteriesDictionary == null) {
                 return
                     "No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]";
+            }
+            if (masteriesDictionary.Count() == 1)
+            {
+                return "Invalid summoner name.";
             }
             var message = new StringBuilder ();
             foreach (var tree in masteriesDictionary) {

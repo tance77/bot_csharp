@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Newtonsoft.Json.Linq;
 
 namespace twitch_irc_bot
@@ -10,19 +12,23 @@ namespace twitch_irc_bot
 
         public RiotApi(DatabaseFunctions db)
         {
-            _apiKey = "59b21249-afb2-4484-ad4f-842536d31437";
+            var jObj = JObject.Parse(File.ReadAllText(@"login.json"));
+            _apiKey = jObj.SelectToken("riot_api_key").ToString(); ;
             _db = db;
         }
 
-        public Dictionary<string, int> GetMasteries(string fromChannel)
+        public Dictionary<string, int> GetMasteries(TwitchMessage msg, string definedUser)
         {
-            string summonerId = _db.GetSummonerId(fromChannel);
             var masteriesList = new Dictionary<string, int>();
-
-            string url = "https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId + "/masteries?api_key=" +
-                _apiKey;
-            string jsonString = RequestJson(url);
-            if (jsonString == null)
+            var summonerId = msg.FromChannel == definedUser ? _db.GetSummonerId(definedUser) : GetSummonerId(definedUser);
+            if (summonerId.Length == 3)
+            {
+                masteriesList.Add("Invalid Summoner Name", 0);
+                return masteriesList;
+            }
+            var url = "https://na.api.pvp.net/api/lol/na/v1.4/summoner/" + summonerId + "/masteries?api_key=" + _apiKey;
+            var jsonString = RequestJson(url);
+            if (jsonString == null || jsonString.Length == 3)
             {
                 return null;
             }
@@ -45,7 +51,7 @@ namespace twitch_irc_bot
                 }
             }
 
-            var masterDictionary = new Dictionary<string, int> {{"Ferocity", 0}, {"Cunning", 0}, {"Resolve", 0}};
+            var masterDictionary = new Dictionary<string, int> { { "Ferocity", 0 }, { "Cunning", 0 }, { "Resolve", 0 } };
 
             foreach (var masteryId in masteriesList)
             {
@@ -56,7 +62,7 @@ namespace twitch_irc_bot
                 if (masteryTree == "Ferocity")
                 {
                     masterDictionary["Ferocity"] += masteryId.Value;
-                    
+
                 }
                 if (masteryTree == "Resolve")
                 {
