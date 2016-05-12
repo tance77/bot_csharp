@@ -26,6 +26,8 @@ namespace twitch_irc_bot
 
         public List<string> EmoteList { get; set; }
 
+        public List<string> PornLinks { get; set; }
+
         public BlockingCollection<string> BlockingMessageQueue { get; set; }
 
         public BlockingCollection<string> BlockingWhisperQueue { get; set; }
@@ -54,6 +56,16 @@ namespace twitch_irc_bot
             WhisperServer = whisperServer;
             Running = true;
             EmoteList = GetGlobalEmotes();
+            PornLinks = new List<string>();
+            const string f = "./pornlinks.txt";
+            using (StreamReader r = new StreamReader(f))
+            {               
+                string line;
+                while ((line = r.ReadLine()) != null)
+                {
+                    PornLinks.Add(line);
+                }
+            }
             _listOfActiveChannels = new List<string>();
             BotUserName = userName;
             var tcpClient = new TcpClient(ip, port);
@@ -155,14 +167,14 @@ namespace twitch_irc_bot
         {
             if (WhisperServer)
             {
-                while (RateLimit < 100 && BlockingWhisperQueue.Count > 0)
+                while (RateLimit < 80 && BlockingWhisperQueue.Count > 0)
                 {
                     SendIrcMessage(BlockingWhisperQueue.Take());
                 }
             }
             else
             {
-                while (RateLimit < 100 && BlockingMessageQueue.Count > 0)
+                while (RateLimit < 80 && BlockingMessageQueue.Count > 0)
                 {
                     SendIrcMessage(BlockingMessageQueue.Take());
                 }

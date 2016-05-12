@@ -21,7 +21,7 @@ namespace twitch_irc_bot
 
         public void WriteError(Exception e)
         {
-            const string filePath = @"C:\Users\Lance\Documents\GitHub\bot_csharp\irc_bot\errors.txt";
+            const string filePath = @"C:\Users\starr\Documents\GitHub\bot_csharp\irc_bot\errors.txt";
 
             using (var writer = new StreamWriter(filePath, true))
             {
@@ -1856,10 +1856,11 @@ namespace twitch_irc_bot
         }
 
 
-        public List<string> AddToQueue(TwitchMessage msg, string leagueName)
+        public List<string> AddToQueue(TwitchMessage msg, bool regular, string leagueName, string summonerId, string rank)
         {
             var leagueQueue = new List<string>();
             var update = false;
+            var dbId = 0;
             try
             {
                 using (var dbConnection = new MySqlConnection(ConnectionString))
@@ -1874,17 +1875,23 @@ namespace twitch_irc_bot
                             if (reader.Read())
                             {
                                 update = true;
+                                dbId= reader.GetInt32(0);
                             }
                         }
                     }
                     GC.Collect();
-                    if (update)
+                    Console.WriteLine(dbId);
+                    //Console.WriteLine(summ)
+                    if (dbId != 0)
                     {
-                        using (var command = new MySqlCommand("UPDATE LeagueQueue SET leagueName=@l WHERE channelName=@c and twitchName=@t", dbConnection))
+                        using (var command = new MySqlCommand("UPDATE LeagueQueue SET leagueName=@l, summonerId=@i, rank=@r, sub=@sub, regular=@reg WHERE id=@id", dbConnection))
                         {
-                            command.Parameters.AddWithValue("@c", msg.FromChannel);
                             command.Parameters.AddWithValue("@l", leagueName);
-                            command.Parameters.AddWithValue("@t", msg.MsgSender);
+                            command.Parameters.AddWithValue("@i", summonerId);
+                            command.Parameters.AddWithValue("@id", dbId);
+                            command.Parameters.AddWithValue("@r", rank);
+                            command.Parameters.AddWithValue("@reg", msg.Subscriber);
+                            command.Parameters.AddWithValue("@sub", regular);
                             command.ExecuteNonQuery();
                         }
                         GC.Collect();
@@ -1894,12 +1901,17 @@ namespace twitch_irc_bot
                         using (
                                 var command =
                                 new MySqlCommand(
-                                    "INSERT INTO LeagueQueue(channelName,twitchName, leagueName)VALUES(@c, @t, @l);",
+                                    "INSERT INTO LeagueQueue(channelName,twitchName, leagueName, regular, sub, summonerId, rank)VALUES(@c, @t, @l, @reg, @sub, @i, @r);",
                                     dbConnection))
                         {
                             command.Parameters.AddWithValue("@c", msg.FromChannel);
                             command.Parameters.AddWithValue("@t", msg.MsgSender);
                             command.Parameters.AddWithValue("@l", leagueName);
+                            command.Parameters.AddWithValue("@i", summonerId);
+                            command.Parameters.AddWithValue("@r", rank);
+                            command.Parameters.AddWithValue("@reg", msg.Subscriber);
+                            command.Parameters.AddWithValue("@sub", regular);
+                            
                             command.ExecuteNonQuery();
                         }
 

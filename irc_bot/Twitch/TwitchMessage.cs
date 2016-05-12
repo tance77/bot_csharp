@@ -214,29 +214,30 @@ namespace twitch_irc_bot
                 }
                 Msg = Msg.TrimStart(':');
                 string[] prefix = msgArray[0].Split(';');
-                Color = prefix[0].Split('=')[1].Split('"')[0];
-                DisplayName = prefix[1].Split('=')[1].Split('"')[0];
+                Color = prefix[1].Split('=')[1].Split('"')[0];
+                DisplayName = prefix[2].Split('=')[1].Split('"')[0];
                 try
                 {
-                    Emotes = prefix[2].Split('=')[1].Split('"')[0];
+                    Emotes = prefix[3].Split('=')[1].Split('"')[0];
                 }
                 catch (IndexOutOfRangeException)
                 {
                     Emotes = "";
                 }
 
-                Subscriber = prefix[3].Split('=')[1].Split('"')[0] != "0";
-                Turbo = prefix[4].Split('=')[1].Split('"')[0] != "0";
+                Subscriber = prefix[6].Split('=')[1].Split('"')[0] != "0";
+                Turbo = prefix[7].Split('=')[1].Split('"')[0] != "0";
                 var tmp = 0;
                 if(!Int32.TryParse(prefix[5].Split('=')[1].Split('"')[0], out tmp))
                 {
                     UserId = tmp;
                 }
-                UserType = prefix[3].Split('=')[1].Split('"')[0].Split(' ')[0];
+                UserType = prefix[9].Split('=')[1].Split('"')[0].Split(' ')[0];
                 if (MsgSender.ToLower() == FromChannel.ToLower())
                 {
                     UserType = "mod";
                 }
+                OperatingUser = prefix[4].Split('=')[1].Split('"')[0].Split(' ')[0];
                 Command = "PRIVMSG";
             }
             return Command;

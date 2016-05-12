@@ -440,9 +440,20 @@ namespace twitch_irc_bot
         {
             var summonerName = msg.Msg.Substring (msg.Msg.IndexOf (' ') + 1);
             var postion = 1;
-            if (riotApi.GetSummonerId (summonerName) == null)
+            var summonerId = riotApi.GetSummonerId(summonerName);
+            if (summonerId == null)
                 return null;
-            var leagueQueue = db.AddToQueue (msg, summonerName);
+            var rank = riotApi.GetRank(summonerId);
+            if (rank == "404")
+            {
+                rank = "";
+            }
+            if (summonerId.Length == 3 || summonerId == null)
+            {
+                return null;
+            }
+            var regular = db.GetRegularStatus(msg);
+            var leagueQueue = db.AddToQueue (msg, regular, summonerName, summonerId, rank);
             if (leagueQueue != null) {
                 var currentCount = leagueQueue.Count;
                 foreach (var person in leagueQueue) {

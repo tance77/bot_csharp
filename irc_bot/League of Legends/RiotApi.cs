@@ -51,6 +51,9 @@ namespace twitch_irc_bot
                 }
             }
 
+
+        
+
             var masterDictionary = new Dictionary<string, int> { { "Ferocity", 0 }, { "Cunning", 0 }, { "Resolve", 0 } };
 
             foreach (var masteryId in masteriesList)

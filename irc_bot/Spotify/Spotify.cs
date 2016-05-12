@@ -43,7 +43,9 @@ namespace twitch_irc_bot
             }
 
 
-            songAlbumUrl = jsonArr.SelectToken ("album").SelectToken ("images") [0].SelectToken ("url").ToString ();
+            songAlbumUrl = (jsonArr.SelectToken("album").SelectToken("images").HasValues)
+                ? jsonArr.SelectToken("album").SelectToken("images")[0].SelectToken("url").ToString()
+                : "http://shaimaestro.com/wp-content/themes/shaimaestro/images/default-artwork.png";
             var artistAry = jsonArr.SelectToken ("artists").ToArray ();
             songArtists = "";
             for (var i = 0; i < artistAry.Length; i++) {
@@ -157,7 +159,7 @@ namespace twitch_irc_bot
 
                 songUrl = jsonArr [0].SelectToken ("external_urls").SelectToken ("spotify").ToString ();
                 songId = jsonArr [0].SelectToken ("id").ToString ();
-                songTitle = jsonArr [0].SelectToken ("name").ToString ();
+                 songTitle = jsonArr [0].SelectToken ("name").ToString ();
 
 //                var foundSong = songTitle + " by " + songArtists + " was added to the playlist";
                 return AddSongById (songId, db, msg.FromChannel, msg.MsgSender);

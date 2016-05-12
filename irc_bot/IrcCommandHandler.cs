@@ -345,9 +345,28 @@ namespace twitch_irc_bot
             {
                 return true;
             }
+            if (CheckPornLinks(Message))
+            {
+                return true;
+            }
             return false;
         }
 
+        public bool CheckPornLinks(TwitchMessage Message)
+        {
+            if (Message.UserType == "mod") return false;
+            foreach (var link in Irc.PornLinks)
+            {
+                if (Message.Msg.Contains(link))
+                {
+                    Irc.AddPrivMsgToQueue("/timeout " + Message.MsgSender + " 120", Message.FromChannel);
+                    Irc.AddWhisperToQueue("You have been timed out for 2 minutes. please do not post porn links. If this is a mistake please message a mod.", Message.MsgSender);
+                    return true;
+                }
+            }
+            return false;
+
+        }
         public string CheckCommands()
         {
             #region Chinnbot Only Commands
@@ -408,6 +427,16 @@ namespace twitch_irc_bot
                 #endregion
 
                 #region Mod Commands
+
+                if ((Message.MsgSender == "blackmarmalade" && Regex.Match(Message.Msg, @"^!maintenance$").Success))
+                {
+                    var listOfActiveChannels = _db.GetListOfActiveChannels();
+                    foreach (var c in listOfActiveChannels)
+                    {
+                        Irc.AddPrivMsgToQueue("/me is going down for maintenance be back soon sorry for the inconvenience.", c);
+                    }
+                    return "";
+                }
                 if ((Message.UserType == "mod" || Message.UserType == "1") && Message.FromChannel != "sophiabot")
                 {
                     if (Regex.Match(Message.Msg, @"^!dicksize\son$").Success)
@@ -511,11 +540,13 @@ namespace twitch_irc_bot
                     {
                         Irc.AddPrivMsgToQueue(
                             _commandHelpers.SongRequestToggle(Message.FromChannel, true, _db), Message.FromChannel);
+                        return "";
                     }
                     else if (Regex.Match(Message.Msg, @"^!sr\soff$").Success)
                     {
                         Irc.AddPrivMsgToQueue(
                             _commandHelpers.SongRequestToggle(Message.FromChannel, false, _db), Message.FromChannel);
+                        return "";
                     }
                     else if (Regex.Match(Message.Msg, @"^!ascii\son$").Success)
                     {
@@ -601,7 +632,7 @@ namespace twitch_irc_bot
                     {
                         Irc.AddPrivMsgToQueue("/timeout " + Message.MsgSender + " 300", Message.FromChannel);
                         Irc.AddWhisperToQueue(
-                            " You have been killed. You can not speak for 5 minutes. To better simulate death the timeout has been increased from one minute to five minutes",
+                            " You have blew your brains out. Rest in peace for 5 minutes.",
                             Message.MsgSender);
                         Irc.AddPrivMsgToQueue(Message.MsgSender + ", took a bullet to the head.",
                             Message.FromChannel);
@@ -713,9 +744,9 @@ namespace twitch_irc_bot
                 else if (Regex.Match(Message.Msg, @"^!sr\s+").Success &&
                          _db.CheckSongRequestStatus(Message.FromChannel))
                 {
-                    if (_db.GetUsersSongCount(Message) >= 8)
+                    if (_db.GetUsersSongCount(Message) >= 4)
                     {
-                        var x = 8;
+                        var x = 4;
                         Irc.AddPrivMsgToQueue(Message.MsgSender + ", you already have " + x + " songs in the queue.", Message.FromChannel);
                     }
                     else

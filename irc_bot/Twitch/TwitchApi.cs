@@ -12,7 +12,7 @@ namespace twitch_irc_bot
         public string GetStreamUptime(string fromChannel)
         {
             string url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
-            string jsonString = RequestJson(url);
+            string jsonString = RequestJsonTwitch(url);
             if (jsonString == null) return "Stream is offline.";
             if (!JObject.Parse(jsonString).SelectToken("stream").HasValues)
             {
@@ -40,7 +40,7 @@ namespace twitch_irc_bot
             try
             {
                 var url = "https://api.twitch.tv/kraken/streams/" + fromChannel;
-                var jsonString = RequestJson(url);
+                var jsonString = RequestJsonTwitch(url);
                 if (jsonString == null)
                 {
                     return false;
@@ -65,7 +65,7 @@ namespace twitch_irc_bot
                 var r = new Random();
                 int limit = r.Next(25, 100);
                 string url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=" + limit;
-                string jsonString = RequestJson(url);
+                string jsonString = RequestJsonTwitch(url);
                 var followsDictionary = new Dictionary<string, DateTime>();
                 if (jsonString.Count() == 3) return null;
                 if (!JObject.Parse(jsonString).HasValues ||
@@ -99,7 +99,7 @@ namespace twitch_irc_bot
             try
             {
                 string url = "https://api.twitch.tv/kraken/channels/" + fromChannel + "/follows?limit=100";
-                string jsonString = RequestJson(url);
+                string jsonString = RequestJsonTwitch(url);
                 var followsDictionary = new Dictionary<string, DateTime>();
                 if (jsonString == null) return null;
                 if (!JObject.Parse(jsonString).HasValues ||
@@ -134,7 +134,7 @@ namespace twitch_irc_bot
             try
             {
                 var url = "https://api.twitch.tv/kraken/users/" + user + "/follows/channels/" + fromChannel;
-                string jsonString = RequestJson(url);
+                string jsonString = RequestJsonTwitch(url);
                 if (jsonString == null) return null;
                 if (jsonString == "404" || JObject.Parse(jsonString).SelectToken("status") != null)
                 {
@@ -178,7 +178,7 @@ namespace twitch_irc_bot
         {
             var userList = new List<string>();
             string url = "http://tmi.twitch.tv/group/user/" + fromChannel + "/chatters";
-            string jsonString = RequestJson(url);
+            string jsonString = RequestJsonTwitch(url);
             if (jsonString == null) return null;
 
             //Line  87 is equivalent to line 89
@@ -202,7 +202,7 @@ namespace twitch_irc_bot
             try
             {
                 string url = "https://api.twitch.tv/kraken/users/" + user;
-                string jsonString = RequestJson(url);
+                string jsonString = RequestJsonTwitch(url);
                 //know way of telling if the account was created today so just return false
                 if (jsonString.Length == 3) return false;
                 var creation_date = JObject.Parse(jsonString).SelectToken("created_at").ToString();
