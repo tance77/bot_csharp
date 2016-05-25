@@ -167,14 +167,14 @@ namespace twitch_irc_bot
         {
             if (WhisperServer)
             {
-                while (RateLimit < 80 && BlockingWhisperQueue.Count > 0)
+                while (RateLimit < 18 && BlockingWhisperQueue.Count > 0)
                 {
                     SendIrcMessage(BlockingWhisperQueue.Take());
                 }
             }
             else
             {
-                while (RateLimit < 80 && BlockingMessageQueue.Count > 0)
+                while (RateLimit < 18 && BlockingMessageQueue.Count > 0)
                 {
                     SendIrcMessage(BlockingMessageQueue.Take());
                 }
@@ -404,8 +404,8 @@ namespace twitch_irc_bot
                 };
             var randRange = new Random((int)DateTime.Now.Ticks & (0x0000FFFF));
             var randOne = randRange.Next(1, colorList.Count);
-            BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
-            + BotUserName + ".tmi.twitch.tv PRIVMSG #" + "chinnbot" + " :" + "/color " + colorList[randOne]);
+            //BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
+            //+ BotUserName + ".tmi.twitch.tv PRIVMSG #" + "chinnbot" + " :" + "/color " + colorList[randOne]);
             BlockingMessageQueue.Add(":" + BotUserName + "!" + BotUserName + "@"
             + BotUserName + ".tmi.twitch.tv PRIVMSG #" + fromChannel + " :" + message + "\r\n");
         }
@@ -462,6 +462,7 @@ namespace twitch_irc_bot
         private void SendIrcMessage(string message)
         {
             RateLimit += 1;
+            Console.WriteLine(RateLimit);
             try
             {
                 _outputStream.WriteLine(message);
@@ -515,7 +516,7 @@ namespace twitch_irc_bot
                             Console.ForegroundColor = ConsoleColor.White;
                         }
                         continue;
-
+                        
                     }
                     if (WhisperServer)
                     {

@@ -207,17 +207,18 @@ namespace twitch_irc_bot
                 if (jsonString.Length == 3) return false;
                 var creation_date = JObject.Parse(jsonString).SelectToken("created_at").ToString();
                 //Was the account created before today
-                var a = DateTime.Compare(DateTime.Parse(creation_date).Date.AddDays(-7), DateTime.UtcNow.Date);
+                var a = DateTime.Compare(DateTime.Parse(creation_date).Date, DateTime.UtcNow.Date.AddDays(-7));
                 //.Date just compares the date
                 //returns true if creation is > = 0 else false
                 //you're to young for links
                 if (Convert.ToInt32(a) <= 0)
                 {
                     return true;
+                    //You're an adult please continue
                 }
                 return false;
 
-                //You're an adult please continue
+                
             }
             catch (Exception e)
             {

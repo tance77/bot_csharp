@@ -255,10 +255,28 @@ namespace twitch_irc_bot
             }
         }
 
+        public string Caster(TwitchMessage Message){
+
+            var twitchStreamer = Message.Msg.Split(' ')[1];
+            return "Make sure to check out " + char.ToUpper(twitchStreamer[0]) + twitchStreamer.Substring(1) +
+                " they are a great streamer!!! http://twitch.tv/" + twitchStreamer.ToLower() + "/profile";          
+
+        }
+
         public string DickSize (string channel, string sender, DatabaseFunctions db)
         {
             string response = db.DickSize (channel);
             if (response == null) {
+                return null;
+            }
+            return sender + ", " + response;
+        }
+
+        public string KneeDarkness(string channel, string sender, DatabaseFunctions db)
+        {
+            string response = db.KneeDarkness(channel);
+            if (response == null)
+            {
                 return null;
             }
             return sender + ", " + response;
@@ -269,6 +287,16 @@ namespace twitch_irc_bot
             bool success = db.DickSizeToggle (channel, toggle);
             if (success) {
                 return toggle ? "Dicksize is now on." : "Dicksize is now off.";
+            }
+            return "Something went wrong on my end.";
+        }
+
+        public string KneeDarknessToggle(string channel, bool toggle, DatabaseFunctions db)
+        {
+            bool success = db.KneeDarknessToggle(channel, toggle);
+            if (success)
+            {
+                return toggle ? "Knee darkness is now on." : "Knee darkness is now off.";
             }
             return "Something went wrong on my end.";
         }
@@ -343,6 +371,24 @@ namespace twitch_irc_bot
             return db.GgStatus (fromChannel);
         }
 
+
+        public string SetMaxSongs(TwitchMessage Message, DatabaseFunctions db)
+        {
+            int numberOfSongs;
+            if (Int32.TryParse(Message.Msg.Split(' ')[1], out numberOfSongs))
+            {
+                if (db.SetNumberOfMaxSongs(Message, numberOfSongs))
+                {
+                    return "Max songs have been set to  " + numberOfSongs;
+                }
+                return "Max songs failed to set. Database unreachable please try again later.";
+            }
+            else //not a number 
+            {
+                return "Failed to set max songs.";
+            }         
+            
+        }
         public string PermitUser (string fromChannel, string msgSender, string message, string userType,
                                   DatabaseFunctions db)
         {

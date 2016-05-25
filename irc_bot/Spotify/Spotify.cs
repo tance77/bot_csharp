@@ -270,7 +270,7 @@ namespace twitch_irc_bot
                 var youtubeBasicMatch = youTubeBasicRegix.Match(msg.Msg);
                 var youtubeMatch = youtubeRegex.Match(msg.Msg);
 
-                if (youtubeMatch.Success || queryString.Length == 11 || youtubeBasicMatch.Success)
+                if (youtubeMatch.Success || youtubeBasicMatch.Success)
                 {
                     var videoId = "";
                     if (queryString.Length == 11)

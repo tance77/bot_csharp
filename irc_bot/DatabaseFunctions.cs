@@ -21,7 +21,7 @@ namespace twitch_irc_bot
 
         public void WriteError(Exception e)
         {
-            const string filePath = @"C:\Users\starr\Documents\GitHub\bot_csharp\irc_bot\errors.txt";
+            const string filePath = @"C:\Users\starr\OneDrive\Documents\bot_csharp\irc_bot\errors.txt";
 
             using (var writer = new StreamWriter(filePath, true))
             {
@@ -426,6 +426,33 @@ namespace twitch_irc_bot
                     {
                         command.Parameters.AddWithValue("@channel", channel);
                         command.Parameters.AddWithValue("@dick_size", toggle);
+                        command.ExecuteNonQuery();
+
+                        return true;
+                    }
+                    catch (MySqlException e)
+                    {
+                        WriteError(e);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        public bool KneeDarknessToggle(string channel, bool toggle)
+        {
+            using (var dbConnection = new MySqlConnection(ConnectionString))
+            {
+                dbConnection.Open();
+                using (
+                        var command =
+                        new MySqlCommand("UPDATE Channels SET knee_darkness=@k WHERE channel_name=@channel",
+                            dbConnection))
+                {
+                    try
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        command.Parameters.AddWithValue("@k", toggle);
                         command.ExecuteNonQuery();
 
                         return true;
@@ -918,6 +945,62 @@ namespace twitch_irc_bot
             }
         }
 
+
+        public bool SetNumberOfMaxSongs(TwitchMessage Message, int numberOfMaxSongs)
+        {
+             using (var dbConnection = new MySqlConnection(ConnectionString))
+            {
+                dbConnection.Open();
+                using (
+                        var command = new MySqlCommand("UPDATE Channels SET song_limit=@l WHERE channel_name=@channel",
+                            dbConnection))
+                {
+                    try
+                    {
+                        command.Parameters.AddWithValue("@channel", Message.FromChannel);
+                        command.Parameters.AddWithValue("@l", numberOfMaxSongs);
+                        command.ExecuteNonQuery();
+
+                        return true;
+                    }
+                    catch (MySqlException e)
+                    {
+                        WriteError(e);
+                        return false;
+                    }
+                }
+            }
+        }
+        public int GetNumberOfSongsPerUser(TwitchMessage Message)
+        {
+            using (var dbConnection = new MySqlConnection(ConnectionString))
+            {
+                dbConnection.Open();
+                using (var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@c", dbConnection))
+                {
+                    try
+                    {
+                        command.Parameters.AddWithValue("@c", Message.FromChannel);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read() == false)
+                            {
+                                return -1;
+                            }
+                            Console.WriteLine(reader.GetInt32(12));
+                            return reader.GetInt32(12);
+                        }
+
+                    }
+                    catch (MySqlException e)
+                    {
+                        WriteError(e);
+                        return -1;
+                    }
+                }
+            }
+        }
+
         public bool SongRequestToggle(string channel, bool toggle)
         {
             using (var dbConnection = new MySqlConnection(ConnectionString))
@@ -980,7 +1063,59 @@ namespace twitch_irc_bot
                         }
                         GC.Collect();
 
-                        int randOne = randRange.Next(1, listOfResponses.Count);
+                        int randOne = randRange.Next(0, listOfResponses.Count);
+                        Console.Write(listOfResponses[randOne] + "\r\n");
+                        return listOfResponses[randOne];
+                    }
+                }
+            }
+            catch
+                (MySqlException e)
+            {
+                WriteError(e);
+                return null;
+            }
+        }
+
+        public string KneeDarkness(string channel)
+        {
+            var randRange = new Random((int)DateTime.Now.Ticks & (0x0000FFFF));
+            try
+            {
+                using (var dbConnection = new MySqlConnection(ConnectionString))
+                {
+                    dbConnection.Open();
+                    using (
+                            var command = new MySqlCommand("SELECT * FROM Channels WHERE channel_name=@channel",
+                                dbConnection))
+                    {
+                        command.Parameters.AddWithValue("@channel", channel);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read() && reader.GetBoolean(17) == false)
+                            {
+                                return null;
+                            }
+                        }
+                        GC.Collect();
+                    }
+                    var listOfResponses = new List<String>();
+                    using (
+                            var command = new MySqlCommand("SELECT * FROM Knees", dbConnection))
+                    {
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                if (reader.Read())
+                                {
+                                    listOfResponses.Add(reader.GetString(1));
+                                }
+                            }
+                        }
+                        GC.Collect();
+
+                        int randOne = randRange.Next(0, listOfResponses.Count);
                         Console.Write(listOfResponses[randOne] + "\r\n");
                         return listOfResponses[randOne];
                     }
