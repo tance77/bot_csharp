@@ -1538,11 +1538,13 @@ namespace twitch_irc_bot
                         inDb.Parameters.AddWithValue ("@c", fromChannel);
                         inDb.Parameters.AddWithValue ("@r", userToRemove);
                         using (var reader = inDb.ExecuteReader ()) {
-                            if (reader.Read ())
-                                songName = reader.GetString (6);
-                            songName += " by ";
-                            songName += reader.GetString (5);
-                            songName += " was removed from the playlist";
+                            if (reader.Read())
+                            {
+                                songName = reader.GetString(6);
+                                songName += " by ";
+                                songName += reader.GetString(5);
+                                songName += " was removed from the playlist";
+                            }
                         }
                     }
                     GC.Collect ();

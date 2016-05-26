@@ -506,6 +506,7 @@ namespace twitch_irc_bot
                     Running = false;
                     Console.WriteLine("************ Failed to Recieve Messages. Possible connection loss attempting to reconnect. ************");
                     Console.ForegroundColor = ConsoleColor.White;
+                    return "restart";
                 }
             }
             return "restart";

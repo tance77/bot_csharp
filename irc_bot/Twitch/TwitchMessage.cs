@@ -10,7 +10,7 @@ namespace twitch_irc_bot
         #region Constructors
 
 
-        public TwitchMessage (string data)
+        public TwitchMessage(string data)
         {
             Command = null;
             FromChannel = null;
@@ -30,7 +30,7 @@ namespace twitch_irc_bot
             TargetChannel = null;
             HostViewerCount = null;
             UserId = 0;
-            MessageHandler (data);
+            MessageHandler(data);
 
         }
 
@@ -79,7 +79,7 @@ namespace twitch_irc_bot
 
         #region Methods
 
-        public string MessageHandler (string m)
+        public string MessageHandler(string m)
         {
             //var colenCount = 0;
             //var shit = m.Split(' ');
@@ -98,7 +98,7 @@ namespace twitch_irc_bot
             //    {
             //Console.WriteLine(a);
             //    }
-                
+
             //}
             //totalM = totalM.Trim();
             //if (totalM != "")
@@ -108,108 +108,151 @@ namespace twitch_irc_bot
             //Console.WriteLine(totalM);
             //}
             /*------- Successfull Twitch Connection -----------*/
-            if (Regex.Match (m, @":tmi.twitch.tv").Success) {
-                string[] messageArray = m.Split (' ');
-                if (messageArray.Length != 2) {
-                    MsgSender = messageArray [0];
-                    Command = messageArray [1];
-                    MsgRecipient = messageArray [2];
-                    Msg = "";
-                    for (int i = 3; i < messageArray.Length; i++) {
-                        if (i == messageArray.Length - 1) {
-                            Msg += messageArray [i];
-                        } else {
-                            Msg += messageArray [i] + " ";
-                        }
+            
+            if (Regex.Match(m, @"tmi.twitch.tv").Success && !Regex.Match(m, @"tmi.twitch.tv PRIVMSG").Success)
+            {
+                string[] messageArray = m.Split(' ');
+                if (messageArray.Length != 2)
+                {
+                    MsgSender = messageArray[0];
+                    Command = messageArray[1];
+                    switch (Command)
+                    {
+                        case "HOSTTARGET":
+                            HostingChannel = m.Split(' ')[2].Split('#')[1];
+                            TargetChannel = m.Split(' ')[3].Split(':')[1];                    
+                            HostViewerCount = m.Split(' ')[4];
+                            if (HostViewerCount == "-")
+                            {
+                                HostViewerCount = "0";
+                            }
+              
+                            break;
+                        case "JOIN":
+                            FromChannel = m.Split('#')[1];
+                            Joiner = m.Split('!')[0].Split(':')[1].ToLower();
+                            break;
+                        case "PART":
+                            break;
+                        case "353":
+                            break;
+                        case "366":
+                            break;
+                        case "USERSTATE":
+                            break;
+                        case "CLEARCHAT":
+                            File.WriteAllText("./bad.txt", m);
+                            break;
+                        default:
+                            MsgRecipient = messageArray[2];
+                            Msg = "";
+                            for (int i = 3; i < messageArray.Length; i++)
+                            {
+                                if (i == messageArray.Length - 1)
+                                {
+                                    Msg += messageArray[i];
+                                }
+                                else
+                                {
+                                    Msg += messageArray[i] + " ";
+                                }
+                            }
+                            break;
                     }
                 }
-            } else if (Regex.Match (m, @"tmi.twitch.tv JOIN").Success) {
-                FromChannel = m.Split ('#') [1];
-                Joiner = m.Split ('!') [0].Split (':') [1];
-                Joiner = Joiner.ToLower ();
-                Command = "JOIN";
+            }
 
-            } else if (Regex.Match (m, @":tmi.twitch.tv HOSTTARGET").Success) {
-                HostingChannel = m.Split (' ') [1];
-                TargetChannel = m.Split (' ') [2];
-                if (TargetChannel == ":-") {
-                    //Target Channel is offline
-                } else {
-                    HostViewerCount = m.Split (' ') [3];
-                    //Channel is offline
-                }
-                Console.WriteLine ("something happened");
-                Command = "HOSTTARGET";
-  
-            } else if (Regex.Match (m, @":tmi.twitch.tv PART").Success) {
-                Command = "PART";
-            } else if (Regex.Match (m, @":tmi.twitch.tv 353").Success || Regex.Match (m, @"tmi.twitch.tv 366").Success) {
-            } else if (Regex.Match (m, @":jtv MODE").Success) {
+            else if (Regex.Match(m, @":jtv MODE").Success)
+            {
                 //:jtv MODE #channel +o operator_user
                 //:jtv MODE #channel -o operator_user
-                string[] messageParts = m.Split (' ');
-                FromChannel = messageParts [2].Split ('#') [1];
-                Privlages = messageParts [3];
-                OperatingUser = messageParts [4];
-            } else if (Regex.Match (m, @"msg-id=subs_on").Success) {
-            } else if (Regex.Match (m, @"msg-id=subs_off").Success) {
-            } else if (Regex.Match (m, @"msg-id=slow_on").Success) {
-            } else if (Regex.Match (m, @"msg-id=slow_off").Success) {
-            } else if (Regex.Match (m, @"msg-id=r9k_on").Success) {
-            } else if (Regex.Match (m, @"msg-id=r9k_off").Success) {
-            } else if (Regex.Match (m, @"msg-id=host_on").Success) {
+                string[] messageParts = m.Split(' ');
+                FromChannel = messageParts[2].Split('#')[1];
+                Privlages = messageParts[3];
+                OperatingUser = messageParts[4];
+            }
+            else if (Regex.Match(m, @"msg-id=subs_on").Success)
+            {
+            }
+            else if (Regex.Match(m, @"msg-id=subs_off").Success)
+            {
+            }
+            else if (Regex.Match(m, @"msg-id=slow_on").Success)
+            {
+            }
+            else if (Regex.Match(m, @"msg-id=slow_off").Success)
+            {
+            }
+            else if (Regex.Match(m, @"msg-id=r9k_on").Success)
+            {
+            }
+            else if (Regex.Match(m, @"msg-id=r9k_off").Success)
+            {
+            }
+            else if (Regex.Match(m, @"msg-id=host_on").Success)
+            {
                 //:tmi.twitch.tv HOSTTARGET #hosting_channel :target_channel [number]
-                Console.WriteLine ("Go Check out _______");
-            } else if (Regex.Match (m, @"msg-id=host_off").Success) {
-//                Console.WriteLine ("unhosting");
+                Console.WriteLine("Go Check out _______");
+            }
+            else if (Regex.Match(m, @"msg-id=host_off").Success)
+            {
+                //                Console.WriteLine ("unhosting");
                 //> :tmi.twitch.tv HOSTTARGET #hosting_channel :- [number]
-            } else if (Regex.Match (m, @":tmi\.twitch\.tv CLEARCHAT").Success) { //see if this regex matches
-                Command = "CLEARCHAT";
-                File.WriteAllText ("./bad.txt", m);
-            } else if (Regex.Match (m, @":tmi.twitch.tv USERSTATE").Success) {
-            } else if (Regex.Match (m, @":twitchnotify!twitchnotify@twitchnotify.tmi.twitch.tv").Success) {
-                Console.WriteLine ("something happened");
-            } else if (Regex.Match (m, @"tmi.twitch.tv PRIVMSG").Success) {
+            }
+       
+            else if (Regex.Match(m, @":twitchnotify!twitchnotify@twitchnotify.tmi.twitch.tv").Success)
+            {
+                Console.WriteLine("something happened");
+            }
+            else if (Regex.Match(m, @"tmi.twitch.tv PRIVMSG").Success)
+            {
                 /*
                  * @color=#FFFFFF;display-name=TWITCHNAME;emotes=;subscriber=0;turbo=0;user-id=0000000;user-type=mod
                  * :CHANNEL!CHANNEL@CHANNEL.tmi.twitch.tv PRIVMSG #RECIPIENT :asd
                  */
-                string[] msgArray = m.Split (' ');
+                string[] msgArray = m.Split(' ');
                 //Msg = "";
-                FromChannel = msgArray [3].Split ('#') [1];
-                MsgSender = msgArray [1].Split (':') [1].Split ('!') [0];
-                Command = msgArray [2];
+                FromChannel = msgArray[3].Split('#')[1];
+                MsgSender = msgArray[1].Split(':')[1].Split('!')[0];
+                Command = msgArray[2];
                 //form the message since we split on space
-                for (var s = 4; s < msgArray.Length; s++) {
+                for (var s = 4; s < msgArray.Length; s++)
+                {
                     if (s == msgArray.Length - 1)
-                        Msg += msgArray [s];
+                        Msg += msgArray[s];
                     else
-                        Msg += msgArray [s] + " ";
+                        Msg += msgArray[s] + " ";
                 }
-                Msg = Msg.TrimStart (':');
-                string[] prefix = msgArray [0].Split (';');
-                Color = prefix [1].Split ('=') [1].Split ('"') [0];
-                DisplayName = prefix [2].Split ('=') [1].Split ('"') [0];
-                try {
-                    Emotes = prefix [3].Split ('=') [1].Split ('"') [0];
-                } catch (IndexOutOfRangeException) {
+                Msg = Msg.TrimStart(':');
+                string[] prefix = msgArray[0].Split(';');
+                Color = prefix[1].Split('=')[1].Split('"')[0];
+                DisplayName = prefix[2].Split('=')[1].Split('"')[0];
+                try
+                {
+                    Emotes = prefix[3].Split('=')[1].Split('"')[0];
+                }
+                catch (IndexOutOfRangeException)
+                {
                     Emotes = "";
                 }
 
-                Subscriber = prefix [6].Split ('=') [1].Split ('"') [0] != "0";
-                Turbo = prefix [7].Split ('=') [1].Split ('"') [0] != "0";
+                Subscriber = prefix[6].Split('=')[1].Split('"')[0] != "0";
+                Turbo = prefix[7].Split('=')[1].Split('"')[0] != "0";
                 var tmp = 0;
-                if (!Int32.TryParse (prefix [5].Split ('=') [1].Split ('"') [0], out tmp)) {
+                if (!Int32.TryParse(prefix[5].Split('=')[1].Split('"')[0], out tmp))
+                {
                     UserId = tmp;
                 }
-                UserType = prefix [9].Split ('=') [1].Split ('"') [0].Split (' ') [0];
-                if (MsgSender.ToLower () == FromChannel.ToLower ()) {
+                UserType = prefix[9].Split('=')[1].Split('"')[0].Split(' ')[0];
+                if (MsgSender.ToLower() == FromChannel.ToLower())
+                {
                     UserType = "mod";
                 }
-                OperatingUser = prefix [4].Split ('=') [1].Split ('"') [0].Split (' ') [0];
+                OperatingUser = prefix[4].Split('=')[1].Split('"')[0].Split(' ')[0];
                 Command = "PRIVMSG";
             }
             return Command;
+            //http://tmi.twitch.tv/hosts?include_logins=1&target=39117236 CHECK FOR HOSTS
         }
 
         #endregion
