@@ -42,7 +42,9 @@ namespace twitch_irc_bot
         public string HostingChannel { get; set; }
 
         public string HostViewerCount { get; set; }
+
         public string TargetChannel { get; set; }
+
         public string Command { get; set; }
 
         public string FromChannel { get; set; }
@@ -106,7 +108,7 @@ namespace twitch_irc_bot
             //Console.WriteLine(totalM);
             //}
             /*------- Successfull Twitch Connection -----------*/
-            if (Regex.Match (m, @"tmi.twitch.tv").Success) {
+            if (Regex.Match (m, @":tmi.twitch.tv").Success) {
                 string[] messageArray = m.Split (' ');
                 if (messageArray.Length != 2) {
                     MsgSender = messageArray [0];
@@ -128,15 +130,12 @@ namespace twitch_irc_bot
                 Command = "JOIN";
 
             } else if (Regex.Match (m, @":tmi.twitch.tv HOSTTARGET").Success) {
-                HostingChannel = m.Split(' ')[1];
-                TargetChannel = m.Split(' ')[2];
-                if (TargetChannel == ":-")
-                {
+                HostingChannel = m.Split (' ') [1];
+                TargetChannel = m.Split (' ') [2];
+                if (TargetChannel == ":-") {
                     //Target Channel is offline
-                }
-                else
-                {
-                    HostViewerCount = m.Split(' ')[3];
+                } else {
+                    HostViewerCount = m.Split (' ') [3];
                     //Channel is offline
                 }
                 Console.WriteLine ("something happened");
