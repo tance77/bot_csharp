@@ -68,6 +68,19 @@ namespace twitch_irc_bot
                 {
                     Irc.AddPrivMsgToQueue("Luminexi... you mean Lumisexi DatSheffy", Message.FromChannel);
                 }
+                if (Message.Joiner.ToLower() == "WEAREGROOOOT".ToLower())
+                {
+                    Irc.AddPrivMsgToQueue("I am Groot!!!! https://www.youtube.com/watch?v=3YiIxopZKpY", Message.FromChannel);
+                }
+                if (Message.Joiner == "dongerinouserino")
+                {
+                    Irc.AddPrivMsgToQueue("ᕙ༼ຈل͜ຈ༽ᕗ flex your dongers ᕙ༼ຈل͜ຈ༽ᕗᕙ༼ຈل͜ຈ༽ᕗ DongerinoUserino is here ᕙ༼ຈل͜ຈ༽ᕗ", Message.FromChannel);
+                }
+            }
+
+            if (Message.Command == "HOSTTARGET")
+            {
+
             }
             return false;
         }

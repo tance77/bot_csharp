@@ -25,7 +25,7 @@ namespace twitch_irc_bot
 
             var q = new BlockingCollection<string> ();
             var wq = new BlockingCollection<string> ();
-            var ircServer = new IrcClient ("irc.twitch.tv", 80, username, oAuth, ref q, ref wq, false, debug, youTubeApiKey);
+            var ircServer = new IrcClient ("irc.twitch.tv", 80, username, oAuth, ref q, ref wq, debug, youTubeApiKey);
             if (debug) {
                 ircServer.JoinChannel ("blackmarmalade");
             } else {
@@ -49,7 +49,7 @@ namespace twitch_irc_bot
 //                    ircServer.JoinChannelStartup ();
 //                }
                 if (ircServer.ReadMessage () == "restart") {
-                    ircServer = new IrcClient ("irc.twitch.tv", 80, username, oAuth, ref q, ref wq, false, debug, youTubeApiKey); 
+                    ircServer = new IrcClient ("irc.twitch.tv", 80, username, oAuth, ref q, ref wq, debug, youTubeApiKey); 
                 }
 //                    ircThread = new Thread (() => ircServer.ReadMessage ());
 //                    ircThread.Start ();

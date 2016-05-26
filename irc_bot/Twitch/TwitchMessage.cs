@@ -26,6 +26,9 @@ namespace twitch_irc_bot
             UserType = null;
             Subscriber = false;
             Turbo = false;
+            HostingChannel = null;
+            TargetChannel = null;
+            HostViewerCount = null;
             UserId = 0;
             MessageHandler (data);
 
@@ -35,6 +38,11 @@ namespace twitch_irc_bot
 
         #region Geters/Setters
 
+
+        public string HostingChannel { get; set; }
+
+        public string HostViewerCount { get; set; }
+        public string TargetChannel { get; set; }
         public string Command { get; set; }
 
         public string FromChannel { get; set; }
@@ -98,7 +106,7 @@ namespace twitch_irc_bot
             //Console.WriteLine(totalM);
             //}
             /*------- Successfull Twitch Connection -----------*/
-            if (Regex.Match (m, @":tmi.twitch.tv 001").Success || Regex.Match (m, @":tmi.twitch.tv 002").Success || Regex.Match (m, @":tmi.twitch.tv 003").Success || Regex.Match (m, @":tmi.twitch.tv 004").Success || Regex.Match (m, @":tmi.twitch.tv 375").Success || Regex.Match (m, @":tmi.twitch.tv 372").Success || Regex.Match (m, @":tmi.twitch.tv 376").Success) {
+            if (Regex.Match (m, @"tmi.twitch.tv").Success) {
                 string[] messageArray = m.Split (' ');
                 if (messageArray.Length != 2) {
                     MsgSender = messageArray [0];
@@ -118,16 +126,24 @@ namespace twitch_irc_bot
                 Joiner = m.Split ('!') [0].Split (':') [1];
                 Joiner = Joiner.ToLower ();
                 Command = "JOIN";
-                if (Joiner.ToLower () == "WEAREGROOOOT".ToLower ()) {
-                    Msg = "I am Groot!!!! https://www.youtube.com/watch?v=3YiIxopZKpY";
-                }
-                if (Joiner == "dongerinouserino") {
-                    Msg = "ᕙ༼ຈل͜ຈ༽ᕗ flex your dongers ᕙ༼ຈل͜ຈ༽ᕗᕙ༼ຈل͜ຈ༽ᕗ DongerinoUserino is here ᕙ༼ຈل͜ຈ༽ᕗ ";
-                }
 
             } else if (Regex.Match (m, @":tmi.twitch.tv HOSTTARGET").Success) {
+                HostingChannel = m.Split(' ')[1];
+                TargetChannel = m.Split(' ')[2];
+                if (TargetChannel == ":-")
+                {
+                    //Target Channel is offline
+                }
+                else
+                {
+                    HostViewerCount = m.Split(' ')[3];
+                    //Channel is offline
+                }
                 Console.WriteLine ("something happened");
+                Command = "HOSTTARGET";
+  
             } else if (Regex.Match (m, @":tmi.twitch.tv PART").Success) {
+                Command = "PART";
             } else if (Regex.Match (m, @":tmi.twitch.tv 353").Success || Regex.Match (m, @"tmi.twitch.tv 366").Success) {
             } else if (Regex.Match (m, @":jtv MODE").Success) {
                 //:jtv MODE #channel +o operator_user

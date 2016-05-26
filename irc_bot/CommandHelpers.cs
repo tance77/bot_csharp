@@ -460,8 +460,6 @@ namespace twitch_irc_bot
 
         public void AddRegular (TwitchMessage Message, DatabaseFunctions db, IrcClient irc)
         {
-            if (irc.WhisperServer)
-                return;
             var userToAdd = Message.Msg.Split (' ') [2];
             var success = db.AddRegular (Message.FromChannel, userToAdd);
             if (success) {
@@ -471,8 +469,6 @@ namespace twitch_irc_bot
 
         public void RemoveRegular (TwitchMessage message, DatabaseFunctions db, IrcClient irc)
         {
-            if (irc.WhisperServer)
-                return;
             var userToRemove = message.Msg.Split (' ') [2];
             var success = db.RemoveRegular (message.FromChannel, userToRemove);
             if (success) {
