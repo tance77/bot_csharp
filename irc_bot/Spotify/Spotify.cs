@@ -43,8 +43,8 @@ namespace twitch_irc_bot
             }
 
 
-            songAlbumUrl = (jsonArr.SelectToken("album").SelectToken("images").HasValues)
-                ? jsonArr.SelectToken("album").SelectToken("images")[0].SelectToken("url").ToString()
+            songAlbumUrl = (jsonArr.SelectToken ("album").SelectToken ("images").HasValues)
+                ? jsonArr.SelectToken ("album").SelectToken ("images") [0].SelectToken ("url").ToString ()
                 : "http://shaimaestro.com/wp-content/themes/shaimaestro/images/default-artwork.png";
             var artistAry = jsonArr.SelectToken ("artists").ToArray ();
             songArtists = "";
@@ -86,9 +86,9 @@ namespace twitch_irc_bot
         public string ImFeelingLuckySongSearch (TwitchMessage msg, DatabaseFunctions db)
         {
             const string baseUrl = "https://api.spotify.com/v1";
-            var songUrl = "";
+            //var songUrl = "";
             var songId = "";
-            var songTitle = "";
+            //var songTitle = "";
             if (msg.Msg.StartsWith ("!sr")) {
                 if (msg.UserType != "mod") {
                     if (db.GetRegularStatus (msg)) {
@@ -132,7 +132,7 @@ namespace twitch_irc_bot
                 Console.WriteLine (jsonArr [0].SelectToken ("artists").ToString ());
                 Console.WriteLine (jsonArr [0].SelectToken ("name").ToString ());
 
-//                var songAlbumUrl = (jsonArr [0].SelectToken ("album").SelectToken ("images") [0].SelectToken ("url")).ToString ();
+                //                var songAlbumUrl = (jsonArr [0].SelectToken ("album").SelectToken ("images") [0].SelectToken ("url")).ToString ();
                 var artistAry = jsonArr [0].SelectToken ("artists").ToArray ();
                 var songArtists = "";
 
@@ -146,22 +146,22 @@ namespace twitch_irc_bot
                 var miliseconds = Int32.Parse (jsonArr [0].SelectToken ("duration_ms").ToString ());
 
                 var a = miliseconds / 1000;
-                var minutes = a / 60;
+                //var minutes = a / 60;
                 a = a % 60;
 
-                var seconds = a.ToString ();
+                //var seconds = a.ToString ();
 
-                if (a < 10) {
-                    seconds = "0" + a;
-                }
+                //if (a < 10) {
+                //seconds = "0" + a;
+                //}
 
-//                var songDuration = minutes + ":" + seconds;
+                //                var songDuration = minutes + ":" + seconds;
 
-                songUrl = jsonArr [0].SelectToken ("external_urls").SelectToken ("spotify").ToString ();
+                //var songUrl = jsonArr [0].SelectToken ("external_urls").SelectToken ("spotify").ToString ();
                 songId = jsonArr [0].SelectToken ("id").ToString ();
-                 songTitle = jsonArr [0].SelectToken ("name").ToString ();
+                //var songTitle = jsonArr [0].SelectToken ("name").ToString ();
 
-//                var foundSong = songTitle + " by " + songArtists + " was added to the playlist";
+                //                var foundSong = songTitle + " by " + songArtists + " was added to the playlist";
                 return AddSongById (songId, db, msg.FromChannel, msg.MsgSender);
 
 
@@ -170,9 +170,9 @@ namespace twitch_irc_bot
             return null;
         }
 
-        public Dictionary<string, KeyValuePair<string,string>> SearchSongByName (string queryString, TwitchMessage message, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue)
+        public Dictionary<string, KeyValuePair<string, string>> SearchSongByName (string queryString, TwitchMessage message, BlockingCollection<string> BlockingMessageQueue, BlockingCollection<string> BlockingWhisperQueue)
         {
-            var foundSongs = new Dictionary<string, KeyValuePair<string,string>> ();
+            var foundSongs = new Dictionary<string, KeyValuePair<string, string>> ();
 
             //Console.WriteLine(queryString);
 
@@ -262,41 +262,35 @@ namespace twitch_irc_bot
                 //don't allow youtube requests
                 //var youtubeRegex = new Regex(@"youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)");
                 var youtubeRegex =
-                    new Regex(
+                    new Regex (
                         @"(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&amp;]v=)|youtu\.be\/)([^""&amp;?\/ ]{11})");
 
-                var youTubeBasicRegix = new Regex(@"\?*v=([a-zA-Z0-9_-]{11})");
+                var youTubeBasicRegix = new Regex (@"\?*v=([a-zA-Z0-9_-]{11})");
 
-                var youtubeBasicMatch = youTubeBasicRegix.Match(msg.Msg);
-                var youtubeMatch = youtubeRegex.Match(msg.Msg);
+                var youtubeBasicMatch = youTubeBasicRegix.Match (msg.Msg);
+                var youtubeMatch = youtubeRegex.Match (msg.Msg);
 
-                if (youtubeMatch.Success || youtubeBasicMatch.Success)
-                {
+                if (youtubeMatch.Success || youtubeBasicMatch.Success) {
                     var videoId = "";
-                    if (queryString.Length == 11)
-                    {
+                    if (queryString.Length == 11) {
                         videoId = queryString;
+                    } else if (youtubeMatch.Success) {
+                        videoId = youtubeMatch.Groups [1].Value;
+                    } else if (youtubeBasicMatch.Success) {
+                        videoId = youtubeBasicMatch.Groups [1].Value;
                     }
-                    else if (youtubeMatch.Success)
-                    {
-                        videoId = youtubeMatch.Groups[1].Value;
-                    }
-                    else if (youtubeBasicMatch.Success)
-                    {
-                        videoId = youtubeBasicMatch.Groups[1].Value;
-                    }
-                    var youtubeSong = new Youtube(youtubeApiKey);
-                    youtubeSong.GetYoutubeInfo(videoId);
-                    youtubeSong.SanatizeTitle();
+                    var youtubeSong = new Youtube (youtubeApiKey);
+                    youtubeSong.GetYoutubeInfo (videoId);
+                    youtubeSong.SanatizeTitle ();
 
 
                     msg.Msg = "!sr " + youtubeSong.Title;
 
-                    var result = ImFeelingLuckySongSearch(msg, db);
+                    var result = ImFeelingLuckySongSearch (msg, db);
 
-                    Console.WriteLine(youtubeSong.Title);
+                    Console.WriteLine (youtubeSong.Title);
 
-                    songList.Add(msg.MsgSender + " " + result);
+                    songList.Add (msg.MsgSender + " " + result);
 
                     return songList;
                 }
@@ -313,7 +307,7 @@ namespace twitch_irc_bot
 
                 //don't allow request by album
                 else if (queryString.Length == 36 && queryString.Contains ("spotify:album:") ||
-                         Regex.Match (msg.Msg, @"https:\/\/.*com\/album\/").Success){
+                         Regex.Match (msg.Msg, @"https:\/\/.*com\/album\/").Success) {
                     songList.Add (msg.MsgSender + " Sorry you can't request a whole album.");
                     return songList;
                 }
@@ -321,7 +315,7 @@ namespace twitch_irc_bot
                 //don't allow request by artist
                 else if (queryString.Length == 37 && queryString.Contains ("spotify:artist:") ||
                          Regex.Match (msg.Msg, @"^https:\/\/.*com\/artist\/").Success) {
-                             songList.Add(msg.MsgSender + " Sorry you can't request an artist.");
+                    songList.Add (msg.MsgSender + " Sorry you can't request an artist.");
                     return songList;
                 }
 
@@ -338,7 +332,7 @@ namespace twitch_irc_bot
                 var multipleResults = SearchSongByName (requestUrl, msg, BlockingMessageQueue, BlockingWhisperQueue);
                 if (multipleResults == null || multipleResults.Count == 0) {
                     //songList.Add("Song not found.");
-                    return songList;    
+                    return songList;
                 }
 
                 if (multipleResults.Count > 1) {
@@ -352,14 +346,14 @@ namespace twitch_irc_bot
                     return songList;
                 }
                 songList.Add (AddSongById (multipleResults.First ().Key, db, msg.FromChannel, msg.MsgSender));
-                return songList;    
+                return songList;
             }
             var succuess = db.AddSong (msg.FromChannel, msg.MsgSender, songId, songDuration, songArtists, songTitle, songUrl, songAlbumUrl);
             if (succuess) {
-                songList.Add(msg.MsgSender + " " +foundSong);
+                songList.Add (msg.MsgSender + " " + foundSong);
                 return songList;
             }
-            songList.Add(msg.MsgSender + " song already exists.");
+            songList.Add (msg.MsgSender + " song already exists.");
             return songList;
         }
 

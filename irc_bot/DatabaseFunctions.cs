@@ -23,10 +23,14 @@ namespace twitch_irc_bot
         {
             const string filePath = @"errors.txt";
 
-            using (var writer = new StreamWriter (filePath, true)) {
-                writer.WriteLine ("Message :" + e.Message + "<br/>" + Environment.NewLine + "StackTrace :" + e.StackTrace +
-                "" + Environment.NewLine + "Date :" + DateTime.Now.ToString ());
-                writer.WriteLine (Environment.NewLine + "-----------------------------------------------------------------------------" + Environment.NewLine);
+            try {
+                using (var writer = new StreamWriter (filePath, true)) {
+                    writer.WriteLine ("Message :" + e.Message + "<br/>" + Environment.NewLine + "StackTrace :" + e.StackTrace +
+                    "" + Environment.NewLine + "Date :" + DateTime.Now.ToString ());
+                    writer.WriteLine (Environment.NewLine + "-----------------------------------------------------------------------------" + Environment.NewLine);
+                }
+            } catch (System.IO.IOException err) {
+                Console.WriteLine ("Error Writing to File" + err + "\r\n");
             }
         }
 
@@ -1278,7 +1282,7 @@ namespace twitch_irc_bot
                         command.Parameters.AddWithValue ("@channel", fromChannel);
                         using (MySqlDataReader reader = command.ExecuteReader ()) {
                             while (reader.Read ()) {
-                                string[] msgSample = reader.GetString (1).Split (' ');
+                                string [] msgSample = reader.GetString (1).Split (' ');
                                 channelTimersDict.Add (reader.GetInt32 (2), msgSample [0]);
                             }
                         }
@@ -1538,11 +1542,10 @@ namespace twitch_irc_bot
                         inDb.Parameters.AddWithValue ("@c", fromChannel);
                         inDb.Parameters.AddWithValue ("@r", userToRemove);
                         using (var reader = inDb.ExecuteReader ()) {
-                            if (reader.Read())
-                            {
-                                songName = reader.GetString(6);
+                            if (reader.Read ()) {
+                                songName = reader.GetString (6);
                                 songName += " by ";
-                                songName += reader.GetString(5);
+                                songName += reader.GetString (5);
                                 songName += " was removed from the playlist";
                             }
                         }
@@ -1597,7 +1600,6 @@ namespace twitch_irc_bot
         public List<string> AddToQueue (TwitchMessage msg, bool regular, string leagueName, string summonerId, string rank)
         {
             var leagueQueue = new List<string> ();
-            var update = false;
             var dbId = 0;
             try {
                 using (var dbConnection = new MySqlConnection (ConnectionString)) {
@@ -1607,7 +1609,6 @@ namespace twitch_irc_bot
                         command.Parameters.AddWithValue ("@t", msg.MsgSender);
                         using (MySqlDataReader reader = command.ExecuteReader ()) {
                             if (reader.Read ()) {
-                                update = true;
                                 dbId = reader.GetInt32 (0);
                             }
                         }
@@ -1639,7 +1640,7 @@ namespace twitch_irc_bot
                             command.Parameters.AddWithValue ("@r", rank);
                             command.Parameters.AddWithValue ("@reg", msg.Subscriber);
                             command.Parameters.AddWithValue ("@sub", regular);
-                            
+
                             command.ExecuteNonQuery ();
                         }
 

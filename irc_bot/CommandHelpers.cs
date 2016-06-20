@@ -12,7 +12,7 @@ namespace twitch_irc_bot
     {
         public bool AddTimer (DatabaseFunctions db, string msg, string channel)
         {
-            string[] msgArray = msg.Split (' ');
+            string [] msgArray = msg.Split (' ');
             msg = "";
             var actualMessage = new StringBuilder ();
             for (int i = 1; i < msgArray.Length; i++) {
@@ -66,7 +66,7 @@ namespace twitch_irc_bot
         public string CheckSummonerName (string fromChannel, DatabaseFunctions db, RiotApi riotApi)
         {
             string summonerName = db.SummonerStatus (fromChannel);
-            if (string.IsNullOrEmpty(summonerName))
+            if (string.IsNullOrEmpty (summonerName))
                 return "No Summoner Name";
             string summonerId = riotApi.GetSummonerId (summonerName);
             //GetRunes(summonerId);
@@ -108,8 +108,7 @@ namespace twitch_irc_bot
                 return
                     "No summoner name linked to this twitch channel. To enable this feature channel owner please type !setsummoner [summonername]";
             }
-            if (masteriesDictionary.Count() == 1)
-            {
+            if (masteriesDictionary.Count () == 1) {
                 return "Invalid summoner name.";
             }
             var message = new StringBuilder ();
@@ -133,7 +132,7 @@ namespace twitch_irc_bot
 
         public string SplitSummonerName (string message)
         {
-            string[] msgParts = message.Split (' ');
+            string [] msgParts = message.Split (' ');
             var summonerName = new StringBuilder ();
             for (int i = 1; i < msgParts.Length; i++) {
                 if (i == msgParts.Length) {
@@ -181,7 +180,7 @@ namespace twitch_irc_bot
                 return null;
             }
             try {
-                string[] messageArray = message.Split (' ');
+                string [] messageArray = message.Split (' ');
                 string command = messageArray [1].Split ('!') [1];
                 string commandDescription = "";
                 for (int i = 2; i < messageArray.Length; i++) {
@@ -210,7 +209,7 @@ namespace twitch_irc_bot
             if (!message.StartsWith ("!"))
                 return null;
             try {
-                string[] splitMessage = message.Split (' ');
+                string [] splitMessage = message.Split (' ');
                 string command = splitMessage [1].Split ('!') [1];
                 bool succes = db.RemoveCommand (command, fromChannel);
                 command = "!" + command;
@@ -232,7 +231,7 @@ namespace twitch_irc_bot
                 return null;
             }
             try {
-                string[] splitMessage = message.Split (' ');
+                string [] splitMessage = message.Split (' ');
                 string command = splitMessage [1].Split ('!') [1];
                 string commandDescription = "";
                 for (int i = 2; i < splitMessage.Length; i++) {
@@ -255,11 +254,12 @@ namespace twitch_irc_bot
             }
         }
 
-        public string Caster(TwitchMessage Message){
+        public string Caster (TwitchMessage Message)
+        {
+            //            + char.ToUpper (twitchStreamer [0]) + twitchStreamer.Substring (1) +
 
-            var twitchStreamer = Message.Msg.Split(' ')[1];
-            return "Make sure to check out " + char.ToUpper(twitchStreamer[0]) + twitchStreamer.Substring(1) +
-                " they are a great streamer!!! http://twitch.tv/" + twitchStreamer.ToLower() + "/profile";          
+            var twitchStreamer = Message.Msg.Split (' ') [1];
+            return "Check out http://twitch.tv/" + twitchStreamer.ToLower () + "/profile";
 
         }
 
@@ -272,11 +272,10 @@ namespace twitch_irc_bot
             return sender + ", " + response;
         }
 
-        public string KneeDarkness(string channel, string sender, DatabaseFunctions db)
+        public string KneeDarkness (string channel, string sender, DatabaseFunctions db)
         {
-            string response = db.KneeDarkness(channel);
-            if (response == null)
-            {
+            string response = db.KneeDarkness (channel);
+            if (response == null) {
                 return null;
             }
             return sender + ", " + response;
@@ -291,11 +290,10 @@ namespace twitch_irc_bot
             return "Something went wrong on my end.";
         }
 
-        public string KneeDarknessToggle(string channel, bool toggle, DatabaseFunctions db)
+        public string KneeDarknessToggle (string channel, bool toggle, DatabaseFunctions db)
         {
-            bool success = db.KneeDarknessToggle(channel, toggle);
-            if (success)
-            {
+            bool success = db.KneeDarknessToggle (channel, toggle);
+            if (success) {
                 return toggle ? "Knee darkness is now on." : "Knee darkness is now off.";
             }
             return "Something went wrong on my end.";
@@ -372,29 +370,26 @@ namespace twitch_irc_bot
         }
 
 
-        public string SetMaxSongs(TwitchMessage Message, DatabaseFunctions db)
+        public string SetMaxSongs (TwitchMessage Message, DatabaseFunctions db)
         {
             int numberOfSongs;
-            if (Int32.TryParse(Message.Msg.Split(' ')[1], out numberOfSongs))
-            {
-                if (db.SetNumberOfMaxSongs(Message, numberOfSongs))
-                {
+            if (Int32.TryParse (Message.Msg.Split (' ') [1], out numberOfSongs)) {
+                if (db.SetNumberOfMaxSongs (Message, numberOfSongs)) {
                     return "Max songs have been set to  " + numberOfSongs;
                 }
                 return "Max songs failed to set. Database unreachable please try again later.";
-            }
-            else //not a number 
-            {
+            } else { //not a number 
                 return "Failed to set max songs.";
-            }         
-            
+            }
+
         }
+
         public string PermitUser (string fromChannel, string msgSender, string message, string userType,
                                   DatabaseFunctions db)
         {
             if (db.UrlStatus (fromChannel) || userType != "mod")
                 return null;
-            string[] msgArr = message.Split (' ');
+            string [] msgArr = message.Split (' ');
             var userToPermit = new StringBuilder ();
             for (int i = 1; i < msgArr.Length; i++) {
                 if (i == msgArr.Length) {
@@ -416,7 +411,7 @@ namespace twitch_irc_bot
 
         public void GetFollowers (string fromChannel, DatabaseFunctions db, TwitchApi twitchApi)
         {
-            List<string> followersList = db.ParseFirstHundredFollowers (fromChannel, twitchApi);
+            db.ParseFirstHundredFollowers (fromChannel, twitchApi);
         }
 
 
@@ -482,19 +477,17 @@ namespace twitch_irc_bot
         {
             var summonerName = msg.Msg.Substring (msg.Msg.IndexOf (' ') + 1);
             var postion = 1;
-            var summonerId = riotApi.GetSummonerId(summonerName);
+            var summonerId = riotApi.GetSummonerId (summonerName);
             if (summonerId == null)
                 return null;
-            var rank = riotApi.GetRank(summonerId);
-            if (rank == "404")
-            {
+            var rank = riotApi.GetRank (summonerId);
+            if (rank == "404") {
                 rank = "";
             }
-            if (summonerId.Length == 3 || summonerId == null)
-            {
+            if (summonerId.Length == 3 || summonerId == null) {
                 return null;
             }
-            var regular = db.GetRegularStatus(msg);
+            var regular = db.GetRegularStatus (msg);
             var leagueQueue = db.AddToQueue (msg, regular, summonerName, summonerId, rank);
             if (leagueQueue != null) {
                 var currentCount = leagueQueue.Count;
@@ -525,7 +518,7 @@ namespace twitch_irc_bot
                 if (exists) {
                     return msg.MsgSender + " you are number " + postion + " in queue.";
                 }
-                return msg.MsgSender + " you are not in the queue type \"!queue summonername\" to join the queue"; 
+                return msg.MsgSender + " you are not in the queue type \"!queue summonername\" to join the queue";
             }
             return null;
         }
