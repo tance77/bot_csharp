@@ -171,7 +171,7 @@ namespace twitch_irc_bot
 
 
             //var rateCheckTimer = new System.Threading.Timer ((e) => {
-            //    CheckRateAndSend ();
+            //kj`CheckRateAndSend ();
             //}, null, 0, 400);
 
             var rateCheckTimer = new Timer { Interval = 400 };
@@ -227,7 +227,7 @@ namespace twitch_irc_bot
             foreach (var item in timmedMessagesDict) {
                 var r = new Random ();
                 int randomMsg = r.Next (0, item.Value.Count);
-                if (_twitchApi.StreamStatus (item.Key) || item.Key == "blackmarmalade") {
+                if (_twitchApi.StreamStatus (item.Key)) {
                     AddPrivMsgToQueue (item.Value [randomMsg], item.Key);
                 }
             }
@@ -483,7 +483,8 @@ namespace twitch_irc_bot
                     if (!buf.StartsWith ("PING ")) { //If its not ping lets treat it as another message
                         var twitchMessage = new TwitchMessage (buf);
                         if (twitchMessage.Command == "PRIVMSG") {
-                            Console.WriteLine ("<" + twitchMessage.FromChannel + "> [" + twitchMessage.DisplayName + "]: " + twitchMessage.Msg);
+                            DateTime now = DateTime.Now;
+                            Console.WriteLine ("[" + now + "] <" + twitchMessage.FromChannel + "> [" + twitchMessage.DisplayName + "]: " + twitchMessage.Msg);
 
                         } else if (twitchMessage.Command == "JOINERWITHMSG") {
                             AddPrivMsgToQueue (twitchMessage.Msg, twitchMessage.FromChannel);

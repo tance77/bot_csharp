@@ -695,7 +695,9 @@ namespace twitch_irc_bot
                             }
                         }
                     }
-                } else if (Regex.Match (Message.Msg, @"^!currentsong$").Success && _db.CheckSongRequestStatus (Message.FromChannel)) {
+                } else if ((Regex.Match (Message.Msg, @"^!currentsong$").Success ||
+                            (Regex.Match (Message.Msg, @"^!song$").Success))
+                            && _db.CheckSongRequestStatus (Message.FromChannel)) {
                     var song = _db.GetCurrentSong (Message.FromChannel);
                     if (!string.IsNullOrEmpty (song)) {
                         Irc.AddPrivMsgToQueue (song, Message.FromChannel);

@@ -1515,12 +1515,12 @@ namespace twitch_irc_bot
                 using (var dbConnection = new MySqlConnection (ConnectionString)) {
                     dbConnection.Open ();
                     using (
-                        var command = new MySqlCommand ("SELECT * FROM Songs Where channel_name=@channel LIMIT 1",
+                        var command = new MySqlCommand ("SELECT * FROM CurrentSongs Where channel_name=@channel",
                                           dbConnection)) {
                         command.Parameters.AddWithValue ("@channel", channel);
                         using (MySqlDataReader dr = command.ExecuteReader ()) {
                             while (dr.Read ())
-                                song += dr.GetString (6) + " - " + dr.GetString (5);
+                                song += dr.GetString (2) + " - " + dr.GetString (3);
                         }
                         GC.Collect ();
                         return song;
